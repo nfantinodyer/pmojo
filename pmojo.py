@@ -125,11 +125,11 @@ for line in temp:
     if line[0:lastlength+3] in single:
         for li in liststring:
             if li[0:lastlength+3]==line[0:lastlength+3]:
-                if int(line[next6+1:next6+3])==12:
-                    if int(line[next6+1:next6+3]) > int(li[next6+1:next6+3]):
+                if line[next6+1:next6+3]<="12" and line[next6+1:next6+3]>="7":
+                    if line[next6+1:next6+3] > li[next6+1:next6+3]:
                         single = single[0:len(single)-len(li)]
                         alltext = alltext[0:len(alltext)-(len(li)-6)]
-                elif int(line[next6+1:next6+3]) < int(li[next6+1:next6+3]):
+                elif line[next6+1:next6+3] < li[next6+1:next6+3]:
                     single = single[0:len(single)-len(li)]
                     alltext = alltext[0:len(alltext)-(len(li)-6)]
                
@@ -199,11 +199,11 @@ for line in temp:
     if line[0:lastlength+3] in single:
         for li in liststring:
             if li[0:lastlength+3]==line[0:lastlength+3]:
-                if int(line[next6+1:next6+3])==12:
-                    if int(line[next6+1:next6+3]) > int(li[next6+1:next6+3]):
+                if line[next6+1:next6+3]<="12" and line[next6+1:next6+3]>="7":
+                    if line[next6+1:next6+3] > li[next6+1:next6+3]:
                         single = single[0:len(single)-len(li)]
                         alltext = alltext[0:len(alltext)-(len(li)-6)]
-                elif int(line[next6+1:next6+3]) < int(li[next6+1:next6+3]):
+                elif line[next6+1:next6+3] < li[next6+1:next6+3]:
                     single = single[0:len(single)-len(li)]
                     alltext = alltext[0:len(alltext)-(len(li)-6)]
                
@@ -271,11 +271,11 @@ for line in temp:
     if line[0:lastlength+3] in single:
         for li in liststring:
             if li[0:lastlength+3]==line[0:lastlength+3]:
-                if int(line[next6+1:next6+3])==12:
-                    if int(line[next6+1:next6+3]) > int(li[next6+1:next6+3]):
+                if line[next6+1:next6+3]<="12" and line[next6+1:next6+3]>="7":
+                    if line[next6+1:next6+3] > li[next6+1:next6+3]:
                         single = single[0:len(single)-len(li)]
                         alltext = alltext[0:len(alltext)-(len(li)-6)]
-                elif int(line[next6+1:next6+3]) < int(li[next6+1:next6+3]):
+                elif line[next6+1:next6+3] < li[next6+1:next6+3]:
                     single = single[0:len(single)-len(li)]
                     alltext = alltext[0:len(alltext)-(len(li)-6)]
                
