@@ -60,20 +60,30 @@ new_file = open("bdayletter.txt", "w+")
 
 temp = text
 skip5=0
+alltext=""
+single=""
+lastlength = 1
 
 for line in temp:
-    if re.search("Family", line):
-        continue
-    count=0
-    for letter in line:
-        count=count+1
-        if skip5>0:
-            skip5 -= 1
-        elif letter == " " and count==1:
-            skip5 = 5
-        else:
-            new_file.write(letter)
+    if line[0:lastlength+3] not in single:
+        single += line
+        if re.search("Family", line):
+            continue
+        count=0
+        for letter in line:
+            count=count+1
+            if skip5>0:
+                skip5 -= 1
+            elif letter == " " and count==1:
+                skip5 = 5
+            elif letter == ",":
+                lastlength = count
+                alltext += letter
+            else:
+                alltext += letter
     
+for line in alltext:
+    new_file.write(line)
 
 
 new_file.close()
@@ -106,20 +116,27 @@ new_file = open("ReminderText.txt", "w+")
 temp = text
 skip5=0
 alltext=""
+single=""
+lastlength = 1
 
 for line in temp:
-    if re.search("Family", line):
-        continue
-    if re.search("@", line):
-        count=0
-        for letter in line:
-            count=count+1
-            if skip5>0:
-                skip5 -= 1
-            elif letter == " " and count==1:
-                skip5 = 5
-            else:
-                alltext += letter
+    if line[0:lastlength+3] not in single:
+        single += line
+        if re.search("Family", line):
+            continue
+        if re.search("@", line):
+            count=0
+            for letter in line:
+                count=count+1
+                if skip5>0:
+                    skip5 -= 1
+                elif letter == " " and count==1:
+                    skip5 = 5
+                elif letter == ",":
+                    lastlength = count
+                    alltext += letter
+                else:
+                    alltext += letter
     
 for line in alltext:
     new_file.write(line)
@@ -155,20 +172,27 @@ new_file = open("ReminderE.txt", "w+")
 temp = text
 skip5=0
 alltext=""
+single=""
+lastlength = 1
 
 for line in temp:
-    if re.search("Family", line):
-        continue
-    if re.search("@", line):
-        count=0
-        for letter in line:
-            count=count+1
-            if skip5>0:
-                skip5 -= 1
-            elif letter == " " and count==1:
-                skip5 = 5
-            else:
-                alltext += letter
+    if line[0:lastlength+3] not in single:
+        single += line
+        if re.search("Family", line):
+            continue
+        if re.search("@", line):
+            count=0
+            for letter in line:
+                count=count+1
+                if skip5>0:
+                    skip5 -= 1
+                elif letter == " " and count==1:
+                    skip5 = 5
+                elif letter == ",":
+                    lastlength = count
+                    alltext += letter
+                else:
+                    alltext += letter
     
 for line in alltext:
     new_file.write(line)
@@ -202,20 +226,27 @@ new_file = open("UnconfirmedText.txt", "w+")
 temp = text
 skip5=0
 alltext=""
+single=""
+lastlength = 1
 
 for line in temp:
-    if re.search("Family", line):
-        continue
-    if re.search("@", line):
-        count=0
-        for letter in line:
-            count=count+1
-            if skip5>0:
-                skip5 -= 1
-            elif letter == " " and count==1:
-                skip5 = 5
-            else:
-                alltext += letter
+    if line[0:lastlength+3] not in single:
+        single += line
+        if re.search("Family", line):
+            continue
+        if re.search("@", line):
+            count=0
+            for letter in line:
+                count=count+1
+                if skip5>0:
+                    skip5 -= 1
+                elif letter == " " and count==1:
+                    skip5 = 5
+                elif letter == ",":
+                    lastlength = count
+                    alltext += letter
+                else:
+                    alltext += letter
     
 for line in alltext:
     new_file.write(line)
@@ -249,18 +280,30 @@ new_file = open("ebday.txt", "w+")
 temp = text
 skip5=0
 
+alltext=""
+single=""
+lastlength = 1
+
 for line in temp:
-    if re.search("Family", line):
-        continue
-    count=0
-    for letter in line:
-        count=count+1
-        if skip5>0:
-            skip5 -= 1
-        elif letter == " " and count==1:
-            skip5 = 5
-        else:
-            new_file.write(letter)
+    if line[0:lastlength+3] not in single:
+        single += line
+        if re.search("Family", line):
+            continue
+        count=0
+        for letter in line:
+            count=count+1
+            if skip5>0:
+                skip5 -= 1
+            elif letter == " " and count==1:
+                skip5 = 5
+            elif letter == ",":
+                lastlength = count
+                alltext += letter
+            else:
+                alltext += letter
+    
+for line in alltext:
+    new_file.write(line)
     
 
 new_file.close()
@@ -292,18 +335,30 @@ new_file = open("anniversary.txt", "w+")
 temp = text
 skip5=0
 
+alltext=""
+single=""
+lastlength = 1
+
 for line in temp:
-    if re.search("Family", line):
-        continue
-    count=0
-    for letter in line:
-        count=count+1
-        if skip5>0:
-            skip5 -= 1
-        elif letter == " " and count==1:
-            skip5 = 5
-        else:
-            new_file.write(letter)
+    if line[0:lastlength+3] not in single:
+        single += line
+        if re.search("Family", line):
+            continue
+        count=0
+        for letter in line:
+            count=count+1
+            if skip5>0:
+                skip5 -= 1
+            elif letter == " " and count==1:
+                skip5 = 5
+            elif letter == ",":
+                lastlength = count
+                alltext += letter
+            else:
+                alltext += letter
+    
+for line in alltext:
+    new_file.write(line)
     
 
 new_file.close()
@@ -335,18 +390,30 @@ new_file = open("reactivateE.txt", "w+")
 temp = text
 skip5=0
 
+alltext=""
+single=""
+lastlength = 1
+
 for line in temp:
-    if re.search("Family", line):
-        continue
-    count=0
-    for letter in line:
-        count=count+1
-        if skip5>0:
-            skip5 -= 1
-        elif letter == " " and count==1:
-            skip5 = 5
-        else:
-            new_file.write(letter)
+    if line[0:lastlength+3] not in single:
+        single += line
+        if re.search("Family", line):
+            continue
+        count=0
+        for letter in line:
+            count=count+1
+            if skip5>0:
+                skip5 -= 1
+            elif letter == " " and count==1:
+                skip5 = 5
+            elif letter == ",":
+                lastlength = count
+                alltext += letter
+            else:
+                alltext += letter
+    
+for line in alltext:
+    new_file.write(line)
     
 
 new_file.close()
@@ -376,18 +443,30 @@ new_file = open("reactivateL.txt", "w+")
 temp = text
 skip5=0
 
+alltext=""
+single=""
+lastlength = 1
+
 for line in temp:
-    if re.search("Family", line):
-        continue
-    count=0
-    for letter in line:
-        count=count+1
-        if skip5>0:
-            skip5 -= 1
-        elif letter == " " and count==1:
-            skip5 = 5
-        else:
-            new_file.write(letter)
+    if line[0:lastlength+3] not in single:
+        single += line
+        if re.search("Family", line):
+            continue
+        count=0
+        for letter in line:
+            count=count+1
+            if skip5>0:
+                skip5 -= 1
+            elif letter == " " and count==1:
+                skip5 = 5
+            elif letter == ",":
+                lastlength = count
+                alltext += letter
+            else:
+                alltext += letter
+    
+for line in alltext:
+    new_file.write(line)
     
 
 new_file.close()
@@ -417,18 +496,30 @@ new_file = open("recaredueE.txt", "w+")
 temp = text
 skip5=0
 
+alltext=""
+single=""
+lastlength = 1
+
 for line in temp:
-    if re.search("Family", line):
-        continue
-    count=0
-    for letter in line:
-        count=count+1
-        if skip5>0:
-            skip5 -= 1
-        elif letter == " " and count==1:
-            skip5 = 5
-        else:
-            new_file.write(letter)
+    if line[0:lastlength+3] not in single:
+        single += line
+        if re.search("Family", line):
+            continue
+        count=0
+        for letter in line:
+            count=count+1
+            if skip5>0:
+                skip5 -= 1
+            elif letter == " " and count==1:
+                skip5 = 5
+            elif letter == ",":
+                lastlength = count
+                alltext += letter
+            else:
+                alltext += letter
+    
+for line in alltext:
+    new_file.write(line)
     
 
 new_file.close()
@@ -458,18 +549,30 @@ new_file = open("recaredueT.txt", "w+")
 temp = text
 skip5=0
 
+alltext=""
+single=""
+lastlength = 1
+
 for line in temp:
-    if re.search("Family", line):
-        continue
-    count=0
-    for letter in line:
-        count=count+1
-        if skip5>0:
-            skip5 -= 1
-        elif letter == " " and count==1:
-            skip5 = 5
-        else:
-            new_file.write(letter)
+    if line[0:lastlength+3] not in single:
+        single += line
+        if re.search("Family", line):
+            continue
+        count=0
+        for letter in line:
+            count=count+1
+            if skip5>0:
+                skip5 -= 1
+            elif letter == " " and count==1:
+                skip5 = 5
+            elif letter == ",":
+                lastlength = count
+                alltext += letter
+            else:
+                alltext += letter
+    
+for line in alltext:
+    new_file.write(line)
     
 
 new_file.close()
@@ -499,18 +602,30 @@ new_file = open("recaredueL.txt", "w+")
 temp = text
 skip5=0
 
+alltext=""
+single=""
+lastlength = 1
+
 for line in temp:
-    if re.search("Family", line):
-        continue
-    count=0
-    for letter in line:
-        count=count+1
-        if skip5>0:
-            skip5 -= 1
-        elif letter == " " and count==1:
-            skip5 = 5
-        else:
-            new_file.write(letter)
+    if line[0:lastlength+3] not in single:
+        single += line
+        if re.search("Family", line):
+            continue
+        count=0
+        for letter in line:
+            count=count+1
+            if skip5>0:
+                skip5 -= 1
+            elif letter == " " and count==1:
+                skip5 = 5
+            elif letter == ",":
+                lastlength = count
+                alltext += letter
+            else:
+                alltext += letter
+    
+for line in alltext:
+    new_file.write(line)
     
 
 new_file.close()
@@ -540,18 +655,30 @@ new_file = open("recarepastL.txt", "w+")
 temp = text
 skip5=0
 
+alltext=""
+single=""
+lastlength = 1
+
 for line in temp:
-    if re.search("Family", line):
-        continue
-    count=0
-    for letter in line:
-        count=count+1
-        if skip5>0:
-            skip5 -= 1
-        elif letter == " " and count==1:
-            skip5 = 5
-        else:
-            new_file.write(letter)
+    if line[0:lastlength+3] not in single:
+        single += line
+        if re.search("Family", line):
+            continue
+        count=0
+        for letter in line:
+            count=count+1
+            if skip5>0:
+                skip5 -= 1
+            elif letter == " " and count==1:
+                skip5 = 5
+            elif letter == ",":
+                lastlength = count
+                alltext += letter
+            else:
+                alltext += letter
+    
+for line in alltext:
+    new_file.write(line)
     
 
 new_file.close()
@@ -582,18 +709,30 @@ new_file = open("recarepastE.txt", "w+")
 temp = text
 skip5=0
 
+alltext=""
+single=""
+lastlength = 1
+
 for line in temp:
-    if re.search("Family", line):
-        continue
-    count=0
-    for letter in line:
-        count=count+1
-        if skip5>0:
-            skip5 -= 1
-        elif letter == " " and count==1:
-            skip5 = 5
-        else:
-            new_file.write(letter)
+    if line[0:lastlength+3] not in single:
+        single += line
+        if re.search("Family", line):
+            continue
+        count=0
+        for letter in line:
+            count=count+1
+            if skip5>0:
+                skip5 -= 1
+            elif letter == " " and count==1:
+                skip5 = 5
+            elif letter == ",":
+                lastlength = count
+                alltext += letter
+            else:
+                alltext += letter
+    
+for line in alltext:
+    new_file.write(line)
     
 
 new_file.close()
@@ -623,18 +762,30 @@ new_file = open("recarepastT.txt", "w+")
 temp = text
 skip5=0
 
+alltext=""
+single=""
+lastlength = 1
+
 for line in temp:
-    if re.search("Family", line):
-        continue
-    count=0
-    for letter in line:
-        count=count+1
-        if skip5>0:
-            skip5 -= 1
-        elif letter == " " and count==1:
-            skip5 = 5
-        else:
-            new_file.write(letter)
+    if line[0:lastlength+3] not in single:
+        single += line
+        if re.search("Family", line):
+            continue
+        count=0
+        for letter in line:
+            count=count+1
+            if skip5>0:
+                skip5 -= 1
+            elif letter == " " and count==1:
+                skip5 = 5
+            elif letter == ",":
+                lastlength = count
+                alltext += letter
+            else:
+                alltext += letter
+    
+for line in alltext:
+    new_file.write(line)
     
 
 new_file.close()
@@ -664,18 +815,30 @@ new_file = open("recarereallyE.txt", "w+")
 temp = text
 skip5=0
 
+alltext=""
+single=""
+lastlength = 1
+
 for line in temp:
-    if re.search("Family", line):
-        continue
-    count=0
-    for letter in line:
-        count=count+1
-        if skip5>0:
-            skip5 -= 1
-        elif letter == " " and count==1:
-            skip5 = 5
-        else:
-            new_file.write(letter)
+    if line[0:lastlength+3] not in single:
+        single += line
+        if re.search("Family", line):
+            continue
+        count=0
+        for letter in line:
+            count=count+1
+            if skip5>0:
+                skip5 -= 1
+            elif letter == " " and count==1:
+                skip5 = 5
+            elif letter == ",":
+                lastlength = count
+                alltext += letter
+            else:
+                alltext += letter
+    
+for line in alltext:
+    new_file.write(line)
     
 
 new_file.close()
@@ -705,18 +868,30 @@ new_file = open("recarereallyL.txt", "w+")
 temp = text
 skip5=0
 
+alltext=""
+single=""
+lastlength = 1
+
 for line in temp:
-    if re.search("Family", line):
-        continue
-    count=0
-    for letter in line:
-        count=count+1
-        if skip5>0:
-            skip5 -= 1
-        elif letter == " " and count==1:
-            skip5 = 5
-        else:
-            new_file.write(letter)
+    if line[0:lastlength+3] not in single:
+        single += line
+        if re.search("Family", line):
+            continue
+        count=0
+        for letter in line:
+            count=count+1
+            if skip5>0:
+                skip5 -= 1
+            elif letter == " " and count==1:
+                skip5 = 5
+            elif letter == ",":
+                lastlength = count
+                alltext += letter
+            else:
+                alltext += letter
+    
+for line in alltext:
+    new_file.write(line)
     
 
 new_file.close()
