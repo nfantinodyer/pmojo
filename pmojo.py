@@ -115,13 +115,28 @@ new_file = open("ReminderText.txt", "w+")
 
 temp = text
 skip5=0
+next6=0
 alltext=""
 single=""
+liststring=[]
 lastlength = 1
 
 for line in temp:
+    if line[0:lastlength+3] in single:
+        for li in liststring:
+            if li[0:lastlength+3]==line[0:lastlength+3]:
+                if int(line[next6+1:next6+3])==12:
+                    if int(line[next6+1:next6+3]) > int(li[next6+1:next6+3]):
+                        single = single[0:len(single)-len(li)]
+                        alltext = alltext[0:len(alltext)-(len(li)-6)]
+                elif int(line[next6+1:next6+3]) < int(li[next6+1:next6+3]):
+                    single = single[0:len(single)-len(li)]
+                    alltext = alltext[0:len(alltext)-(len(li)-6)]
+               
+    
     if line[0:lastlength+3] not in single:
-        single += line
+        single+=line
+        liststring.append(line)
         if re.search("Family", line):
             continue
         if re.search("@", line):
@@ -135,6 +150,9 @@ for line in temp:
                 elif letter == ",":
                     lastlength = count
                     alltext += letter
+                elif letter == "@":
+                    alltext += "@"
+                    next6=count
                 else:
                     alltext += letter
     
@@ -168,16 +186,31 @@ del text[-5:]
 
 new_file = open("ReminderE.txt", "w+")
 
-
 temp = text
 skip5=0
+next6=0
 alltext=""
 single=""
+liststring=[]
 lastlength = 1
 
+
 for line in temp:
+    if line[0:lastlength+3] in single:
+        for li in liststring:
+            if li[0:lastlength+3]==line[0:lastlength+3]:
+                if int(line[next6+1:next6+3])==12:
+                    if int(line[next6+1:next6+3]) > int(li[next6+1:next6+3]):
+                        single = single[0:len(single)-len(li)]
+                        alltext = alltext[0:len(alltext)-(len(li)-6)]
+                elif int(line[next6+1:next6+3]) < int(li[next6+1:next6+3]):
+                    single = single[0:len(single)-len(li)]
+                    alltext = alltext[0:len(alltext)-(len(li)-6)]
+               
+    
     if line[0:lastlength+3] not in single:
-        single += line
+        single+=line
+        liststring.append(line)
         if re.search("Family", line):
             continue
         if re.search("@", line):
@@ -191,6 +224,9 @@ for line in temp:
                 elif letter == ",":
                     lastlength = count
                     alltext += letter
+                elif letter == "@":
+                    alltext += "@"
+                    next6=count
                 else:
                     alltext += letter
     
@@ -198,7 +234,6 @@ for line in alltext:
     new_file.write(line)
 
 new_file.close()
-
 
 
 driver.get("https://app.practicemojo.com/cgi-bin/WebObjects/PracticeMojo.woa/wa/gotoActivityDetail?td="+m+"%2F"+d+"%2F"+y+"&cdi=130&cdn=2")#Courtesy Reminder: Unconfirmed	Text Message
@@ -225,13 +260,29 @@ new_file = open("UnconfirmedText.txt", "w+")
 
 temp = text
 skip5=0
+next6=0
 alltext=""
 single=""
+liststring=[]
 lastlength = 1
 
+
 for line in temp:
+    if line[0:lastlength+3] in single:
+        for li in liststring:
+            if li[0:lastlength+3]==line[0:lastlength+3]:
+                if int(line[next6+1:next6+3])==12:
+                    if int(line[next6+1:next6+3]) > int(li[next6+1:next6+3]):
+                        single = single[0:len(single)-len(li)]
+                        alltext = alltext[0:len(alltext)-(len(li)-6)]
+                elif int(line[next6+1:next6+3]) < int(li[next6+1:next6+3]):
+                    single = single[0:len(single)-len(li)]
+                    alltext = alltext[0:len(alltext)-(len(li)-6)]
+               
+    
     if line[0:lastlength+3] not in single:
-        single += line
+        single+=line
+        liststring.append(line)
         if re.search("Family", line):
             continue
         if re.search("@", line):
@@ -245,6 +296,9 @@ for line in temp:
                 elif letter == ",":
                     lastlength = count
                     alltext += letter
+                elif letter == "@":
+                    alltext += "@"
+                    next6=count
                 else:
                     alltext += letter
     
@@ -252,7 +306,6 @@ for line in alltext:
     new_file.write(line)
 
 new_file.close()
-
 
 
 driver.get("https://app.practicemojo.com/cgi-bin/WebObjects/PracticeMojo.woa/wa/gotoActivityDetail?td="+m+"%2F"+d+"%2F"+y+"&cdi=36&cdn=1")#e-Birthday Adult	Email
