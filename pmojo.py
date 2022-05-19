@@ -12,6 +12,7 @@ import os.path
 import shutil
 import tkinter as tk
 import re
+from ahk import AHK
 
 
 
@@ -22,7 +23,8 @@ m = today.strftime("%m")
 y = today.strftime("%Y")
 
 
-
+#ahk
+ahk = AHK()
 
 #chrome
 driver = webdriver.Chrome() #executable_path=r"C:\Program Files (x86)\Microsoft Visual Studio\Shared\Python37_64\chromedriver.exe"
@@ -35,6 +37,17 @@ elem.clear()
 elem.send_keys("OMDC20162017!")
 elem.send_keys(Keys.RETURN)
 
+app = Application()
+app.connect(title_re='.*- Google Chrome')
+chrome = app.window(title_re='.*- Google Chrome')
+#chrome.set_focus()
+
+soft = Application()
+soft.connect(title_re='.*- S')
+softdent = soft.window(title_re='.*- S')
+#softdent.set_focus()
+
+chrome.set_focus()
 driver.get("https://app.practicemojo.com/cgi-bin/WebObjects/PracticeMojo.woa/wa/gotoActivityDetail?td="+m+"%2F"+d+"%2F"+y+"&cdi=21&cdn=1")#bday adult postcard
 send_keys("^a^c")
 
@@ -82,6 +95,8 @@ for line in temp:
                 alltext += letter
     
 alltext = alltext[:-1]
+alltext = alltext.replace("\t","")
+alltext = alltext.replace(" ","")
 
 for line in alltext:
     new_file.write(line)
@@ -90,7 +105,6 @@ for line in alltext:
 new_file.close()
 
 #softdent
-#app = Application().start("C:\Program Files (x86)\SoftDent\SoftDent.exe")
 
 num = "[0-9]+"
 
@@ -100,35 +114,33 @@ file1 = open("bdayletter.txt", "r")
 lines = file1.readlines()
 file1.close()
 
-Application(backend="uia").connect(title_re=".*SDWIN.EXE*")
-send_keys("f")
+softdent.set_focus()
 
 for line in lines:
-    for word in line.split():
-        if re.fullmatch(NUMBER, word):
-            break
-        else:
-            send_keys(word)
-    send_keys(Keys.ENTER)
-    send_keys("0ca")
-    send_keys(Keys.TAB)
-    send_keys("bday card")
-    send_keys(Keys.TAB)
-    send_keys(Keys.TAB)
-    send_keys("l") #letter
-    send_keys(Keys.TAB)
-    send_keys("pmojoNFD")
-    send_keys(Keys.TAB)
-    send_keys(Keys.ENTER)
+    line = line.replace("\n","")
+    ahk.type('f')
+    ahk.type(line)
+    ahk.key_press('Enter')
+    ahk.type("0ca")
+    ahk.key_press("Tab")
+    ahk.type("bday card")
+    ahk.key_press("Tab")
+    ahk.key_press("Tab")
+    ahk.type("l") #letter
+    ahk.key_press("Tab")
+    ahk.type("pmojoNFD")
+    ahk.key_press("Tab")
+    ahk.key_press("Enter")
 
-    send_keys("l")
-    send_keys("l")
-    send_keys("n")
+    ahk.type("l")
+    ahk.type("l")
+    ahk.type("n")
 
-    send_keys("f")
+    
 
 #chrome
-Application(backend="uia").connect(title_re=".*PracticeMojo.woa*")
+chrome.set_focus()
+
 
 driver.get("https://app.practicemojo.com/cgi-bin/WebObjects/PracticeMojo.woa/wa/gotoActivityDetail?td="+m+"%2F"+d+"%2F"+y+"&cdi=23&cdn=2")#Courtesy Reminder	Text Message
 send_keys("^a^c")
@@ -196,6 +208,8 @@ for line in temp:
                     alltext += letter
     
 alltext = alltext[:-1]
+alltext = alltext.replace("\t","")
+alltext = alltext.replace(" ","")
 
 for line in alltext:
     new_file.write(line)
@@ -213,44 +227,45 @@ file1 = open("ReminderText.txt", "r")
 lines = file1.readlines()
 file1.close()
 
-Application(backend="uia").connect(title_re=".*SDWIN.EXE*")
-send_keys("f")
+softdent.set_focus()
 
 for line in lines:
+    line = line.replace("\n","")
+    ahk.type('f')
     for word in line.split():
         if re.fullmatch(NUMBER, word):
             break
         else:
-            send_keys(word)
-    send_keys(Keys.ENTER)
-    send_keys("0ca")
-    send_keys("cc")
-    send_keys(Keys.TAB)
-    send_keys("Reminder for ")
+            ahk.type(word)
+    ahk.key_press("Enter")
+    ahk.type("0ca")
+    ahk.type("cc")
+    ahk.key_press("Tab")
+    ahk.type("Reminder for ")
     for word in line.split():
         if re.fullmatch(NUMBER, word):
-            send_keys(word)
+            ahk.type(word)
         elif re.fullmatch("M", word):
-            send_keys("M")
+            ahk.type("M")
             stop=True
             break
 
-    send_keys(Keys.TAB)
-    send_keys(Keys.TAB)
-    send_keys("t") #text
-    send_keys(Keys.TAB)
-    send_keys("pmojoNFD")
-    send_keys(Keys.TAB)
-    send_keys(Keys.ENTER)
+    ahk.key_press("Tab")
+    ahk.key_press("Tab")
+    ahk.type("t") #text
+    ahk.key_press("Tab")
+    ahk.type("pmojoNFD")
+    ahk.key_press("Tab")
+    ahk.key_press("Enter")
 
-    send_keys("l")
-    send_keys("l")
-    send_keys("n")
+    ahk.type("l")
+    ahk.type("l")
+    ahk.type("n")
 
-    send_keys("f")
+    
 
 #chrome
-Application(backend="uia").connect(title_re=".*PracticeMojo.woa*")
+chrome.set_focus()
 
 
 driver.get("https://app.practicemojo.com/cgi-bin/WebObjects/PracticeMojo.woa/wa/gotoActivityDetail?td="+m+"%2F"+d+"%2F"+y+"&cdi=23&cdn=1")#Courtesy Reminder	Email
@@ -320,6 +335,8 @@ for line in temp:
                     alltext += letter
     
 alltext = alltext[:-1]
+alltext = alltext.replace("\t","")
+alltext = alltext.replace(" ","")
 
 for line in alltext:
     new_file.write(line)
@@ -337,44 +354,45 @@ file1 = open("ReminderE.txt", "r")
 lines = file1.readlines()
 file1.close()
 
-Application(backend="uia").connect(title_re=".*SDWIN.EXE*")
-send_keys("f")
+softdent.set_focus()
 
 for line in lines:
+    line = line.replace("\n","")
+    ahk.type('f')
     for word in line.split():
         if re.fullmatch(NUMBER, word):
             break
         else:
-            send_keys(word)
-    send_keys(Keys.ENTER)
-    send_keys("0ca")
-    send_keys("cc")
-    send_keys(Keys.TAB)
-    send_keys("Reminder for ")
+            ahk.type(word)
+    ahk.key_press("Enter")
+    ahk.type("0ca")
+    ahk.type("cc")
+    ahk.key_press("Tab")
+    ahk.type("Reminder for ")
     for word in line.split():
         if re.fullmatch(NUMBER, word):
-            send_keys(word)
+            ahk.type(word)
         elif re.fullmatch("M", word):
-            send_keys("M")
+            ahk.type("M")
             stop=True
             break
 
-    send_keys(Keys.TAB)
-    send_keys(Keys.TAB)
-    send_keys("e") #email
-    send_keys(Keys.TAB)
-    send_keys("pmojoNFD")
-    send_keys(Keys.TAB)
-    send_keys(Keys.ENTER)
+    ahk.key_press("Tab")
+    ahk.key_press("Tab")
+    ahk.type("e") #email
+    ahk.key_press("Tab")
+    ahk.type("pmojoNFD")
+    ahk.key_press("Tab")
+    ahk.key_press("Enter")
 
-    send_keys("l")
-    send_keys("l")
-    send_keys("n")
+    ahk.type("l")
+    ahk.type("l")
+    ahk.type("n")
     
-    send_keys("f")
+    
 
 #chrome
-Application(backend="uia").connect(title_re=".*PracticeMojo.woa*")
+chrome.set_focus()
 
 driver.get("https://app.practicemojo.com/cgi-bin/WebObjects/PracticeMojo.woa/wa/gotoActivityDetail?td="+m+"%2F"+d+"%2F"+y+"&cdi=130&cdn=2")#Courtesy Reminder: Unconfirmed	Text Message
 send_keys("^a^c")
@@ -443,6 +461,8 @@ for line in temp:
                     alltext += letter
     
 alltext = alltext[:-1]
+alltext = alltext.replace("\t","")
+alltext = alltext.replace(" ","")
 
 for line in alltext:
     new_file.write(line)
@@ -460,44 +480,45 @@ file1 = open("UnconfirmedText.txt", "r")
 lines = file1.readlines()
 file1.close()
 
-Application(backend="uia").connect(title_re=".*SDWIN.EXE*")
-send_keys("f")
+softdent.set_focus()
 
 for line in lines:
+    line = line.replace("\n","")
+    ahk.type('f')
     for word in line.split():
         if re.fullmatch(NUMBER, word):
             break
         else:
-            send_keys(word)
-    send_keys(Keys.ENTER)
-    send_keys("0ca")
-    send_keys("cc")
-    send_keys(Keys.TAB)
-    send_keys("Reminder for ")
+            ahk.type(word)
+    ahk.key_press("Enter")
+    ahk.type("0ca")
+    ahk.type("cc")
+    ahk.key_press("Tab")
+    ahk.type("Reminder for ")
     for word in line.split():
         if re.fullmatch(NUMBER, word):
-            send_keys(word)
+            ahk.type(word)
         elif re.fullmatch("M", word):
-            send_keys("M")
+            ahk.type("M")
             stop=True
             break
 
-    send_keys(Keys.TAB)
-    send_keys(Keys.TAB)
-    send_keys("t") #text
-    send_keys(Keys.TAB)
-    send_keys("pmojoNFD")
-    send_keys(Keys.TAB)
-    send_keys(Keys.ENTER)
+    ahk.key_press("Tab")
+    ahk.key_press("Tab")
+    ahk.type("t") #text
+    ahk.key_press("Tab")
+    ahk.type("pmojoNFD")
+    ahk.key_press("Tab")
+    ahk.key_press("Enter")
 
-    send_keys("l")
-    send_keys("l")
-    send_keys("n")
+    ahk.type("l")
+    ahk.type("l")
+    ahk.type("n")
     
-    send_keys("f")
+    
 
 #chrome
-Application(backend="uia").connect(title_re=".*PracticeMojo.woa*")
+chrome.set_focus()
 
 driver.get("https://app.practicemojo.com/cgi-bin/WebObjects/PracticeMojo.woa/wa/gotoActivityDetail?td="+m+"%2F"+d+"%2F"+y+"&cdi=36&cdn=1")#e-Birthday Adult	Email
 send_keys("^a^c")
@@ -547,6 +568,8 @@ for line in temp:
                 alltext += letter
 
 alltext = alltext[:-1]
+alltext = alltext.replace("\t","")
+alltext = alltext.replace(" ","")
 
 for line in alltext:
     new_file.write(line)
@@ -565,35 +588,32 @@ file1 = open("ebday.txt", "r")
 lines = file1.readlines()
 file1.close()
 
-Application(backend="uia").connect(title_re=".*SDWIN.EXE*")
-send_keys("f")
+softdent.set_focus()
 
 for line in lines:
-    for word in line.split():
-        if re.fullmatch(NUMBER, word):
-            break
-        else:
-            send_keys(word)
-    send_keys(Keys.ENTER)
-    send_keys("0ca")
-    send_keys(Keys.TAB)
-    send_keys("bday card")
-    send_keys(Keys.TAB)
-    send_keys(Keys.TAB)
-    send_keys("e") #email
-    send_keys(Keys.TAB)
-    send_keys("pmojoNFD")
-    send_keys(Keys.TAB)
-    send_keys(Keys.ENTER)
+    line = line.replace("\n","")
+    ahk.type('f')
+    ahk.type(line)
+    ahk.key_press('Enter')
+    ahk.type("0ca")
+    ahk.key_press("Tab")
+    ahk.type("bday card")
+    ahk.key_press("Tab")
+    ahk.key_press("Tab")
+    ahk.type("e") #email
+    ahk.key_press("Tab")
+    ahk.type("pmojoNFD")
+    ahk.key_press("Tab")
+    ahk.key_press("Enter")
 
-    send_keys("l")
-    send_keys("l")
-    send_keys("n")
+    ahk.type("l")
+    ahk.type("l")
+    ahk.type("n")
 
-    send_keys("f")
+    
 
 #chrome
-Application(backend="uia").connect(title_re=".*PracticeMojo.woa*")
+chrome.set_focus()
 
 
 driver.get("https://app.practicemojo.com/cgi-bin/WebObjects/PracticeMojo.woa/wa/gotoActivityDetail?td="+m+"%2F"+d+"%2F"+y+"&cdi=35&cdn=1")#Happy Anniversary	Postcard
@@ -644,6 +664,8 @@ for line in temp:
                 alltext += letter
     
 alltext = alltext[:-1]
+alltext = alltext.replace("\t","")
+alltext = alltext.replace(" ","")
 
 for line in alltext:
     new_file.write(line)
@@ -662,35 +684,32 @@ file1 = open("anniversary.txt", "r")
 lines = file1.readlines()
 file1.close()
 
-Application(backend="uia").connect(title_re=".*SDWIN.EXE*")
-send_keys("f")
+softdent.set_focus()
 
 for line in lines:
-    for word in line.split():
-        if re.fullmatch(NUMBER, word):
-            break
-        else:
-            send_keys(word)
-    send_keys(Keys.ENTER)
-    send_keys("0ca")
-    send_keys(Keys.TAB)
-    send_keys("anniversary card")
-    send_keys(Keys.TAB)
-    send_keys(Keys.TAB)
-    send_keys("l") #letter
-    send_keys(Keys.TAB)
-    send_keys("pmojoNFD")
-    send_keys(Keys.TAB)
-    send_keys(Keys.ENTER)
+    line = line.replace("\n","")
+    ahk.type('f')
+    ahk.type(line)
+    ahk.key_press('Enter')
+    ahk.type("0ca")
+    ahk.key_press("Tab")
+    ahk.type("anniversary card")
+    ahk.key_press("Tab")
+    ahk.key_press("Tab")
+    ahk.type("l") #letter
+    ahk.key_press("Tab")
+    ahk.type("pmojoNFD")
+    ahk.key_press("Tab")
+    ahk.key_press("Enter")
 
-    send_keys("l")
-    send_keys("l")
-    send_keys("n")
+    ahk.type("l")
+    ahk.type("l")
+    ahk.type("n")
 
-    send_keys("f")
+    
 
 #chrome
-Application(backend="uia").connect(title_re=".*PracticeMojo.woa*")
+chrome.set_focus()
 
 
 driver.get("https://app.practicemojo.com/cgi-bin/WebObjects/PracticeMojo.woa/wa/gotoActivityDetail?td="+m+"%2F"+d+"%2F"+y+"&cdi=30&cdn=2")#Reactivate: 1 year ago	Email
@@ -741,6 +760,8 @@ for line in temp:
                 alltext += letter
     
 alltext = alltext[:-1]
+alltext = alltext.replace("\t","")
+alltext = alltext.replace(" ","")
 
 for line in alltext:
     new_file.write(line)
@@ -759,35 +780,32 @@ file1 = open("reactivateE.txt", "r")
 lines = file1.readlines()
 file1.close()
 
-Application(backend="uia").connect(title_re=".*SDWIN.EXE*")
-send_keys("f")
+softdent.set_focus()
 
 for line in lines:
-    for word in line.split():
-        if re.fullmatch(NUMBER, word):
-            break
-        else:
-            send_keys(word)
-    send_keys(Keys.ENTER)
-    send_keys("0ca")
-    send_keys(Keys.TAB)
-    send_keys("reactivate 1 year ago")
-    send_keys(Keys.TAB)
-    send_keys(Keys.TAB)
-    send_keys("e") #email
-    send_keys(Keys.TAB)
-    send_keys("pmojoNFD")
-    send_keys(Keys.TAB)
-    send_keys(Keys.ENTER)
+    line = line.replace("\n","")
+    ahk.type('f')
+    ahk.type(line)
+    ahk.key_press('Enter')
+    ahk.type("0ca")
+    ahk.key_press("Tab")
+    ahk.type("Reactivate: 1 year ago")
+    ahk.key_press("Tab")
+    ahk.key_press("Tab")
+    ahk.type("e") #email
+    ahk.key_press("Tab")
+    ahk.type("pmojoNFD")
+    ahk.key_press("Tab")
+    ahk.key_press("Enter")
 
-    send_keys("l")
-    send_keys("l")
-    send_keys("n")
+    ahk.type("l")
+    ahk.type("l")
+    ahk.type("n")
 
-    send_keys("f")
+    
 
 #chrome
-Application(backend="uia").connect(title_re=".*PracticeMojo.woa*")
+chrome.set_focus()
 
 driver.get("https://app.practicemojo.com/cgi-bin/WebObjects/PracticeMojo.woa/wa/gotoActivityDetail?td="+m+"%2F"+d+"%2F"+y+"&cdi=30&cdn=1")#Reactivate: 1 year ago	Postcard
 send_keys("^a^c")
@@ -837,6 +855,8 @@ for line in temp:
                 alltext += letter
     
 alltext = alltext[:-1]
+alltext = alltext.replace("\t","")
+alltext = alltext.replace(" ","")
 
 for line in alltext:
     new_file.write(line)
@@ -855,35 +875,32 @@ file1 = open("reactivateL.txt", "r")
 lines = file1.readlines()
 file1.close()
 
-Application(backend="uia").connect(title_re=".*SDWIN.EXE*")
-send_keys("f")
+softdent.set_focus()
 
 for line in lines:
-    for word in line.split():
-        if re.fullmatch(NUMBER, word):
-            break
-        else:
-            send_keys(word)
-    send_keys(Keys.ENTER)
-    send_keys("0ca")
-    send_keys(Keys.TAB)
-    send_keys("reactivate 1 year ago")
-    send_keys(Keys.TAB)
-    send_keys(Keys.TAB)
-    send_keys("l") #letter
-    send_keys(Keys.TAB)
-    send_keys("pmojoNFD")
-    send_keys(Keys.TAB)
-    send_keys(Keys.ENTER)
+    line = line.replace("\n","")
+    ahk.type('f')
+    ahk.type(line)
+    ahk.key_press('Enter')
+    ahk.type("0ca")
+    ahk.key_press("Tab")
+    ahk.type("Reactivate: 1 year ago")
+    ahk.key_press("Tab")
+    ahk.key_press("Tab")
+    ahk.type("l") #letter
+    ahk.key_press("Tab")
+    ahk.type("pmojoNFD")
+    ahk.key_press("Tab")
+    ahk.key_press("Enter")
 
-    send_keys("l")
-    send_keys("l")
-    send_keys("n")
+    ahk.type("l")
+    ahk.type("l")
+    ahk.type("n")
 
-    send_keys("f")
+    
 
 #chrome
-Application(backend="uia").connect(title_re=".*PracticeMojo.woa*")
+chrome.set_focus()
 
 driver.get("https://app.practicemojo.com/cgi-bin/WebObjects/PracticeMojo.woa/wa/gotoActivityDetail?td="+m+"%2F"+d+"%2F"+y+"&cdi=1&cdn=2")#Recare: Due	Email
 send_keys("^a^c")
@@ -933,6 +950,8 @@ for line in temp:
                 alltext += letter
     
 alltext = alltext[:-1]
+alltext = alltext.replace("\t","")
+alltext = alltext.replace(" ","")
 
 for line in alltext:
     new_file.write(line)
@@ -951,36 +970,33 @@ file1 = open("recaredueE.txt", "r")
 lines = file1.readlines()
 file1.close()
 
-Application(backend="uia").connect(title_re=".*SDWIN.EXE*")
-send_keys("f")
+softdent.set_focus()
 
 for line in lines:
-    for word in line.split():
-        if re.fullmatch(NUMBER, word):
-            break
-        else:
-            send_keys(word)
-    send_keys(Keys.ENTER)
-    send_keys("0ca")
-    send_keys("r") #recare
-    send_keys(Keys.TAB)
-    send_keys("recare due")
-    send_keys(Keys.TAB)
-    send_keys(Keys.TAB)
-    send_keys("e") #email
-    send_keys(Keys.TAB)
-    send_keys("pmojoNFD")
-    send_keys(Keys.TAB)
-    send_keys(Keys.ENTER)
+    line = line.replace("\n","")
+    ahk.type('f')
+    ahk.type(line)
+    ahk.key_press('Enter')
+    ahk.type("0ca")
+    ahk.type("r")#recare
+    ahk.key_press("Tab")
+    ahk.type("Recare: Due")
+    ahk.key_press("Tab")
+    ahk.key_press("Tab")
+    ahk.type("e") #email
+    ahk.key_press("Tab")
+    ahk.type("pmojoNFD")
+    ahk.key_press("Tab")
+    ahk.key_press("Enter")
 
-    send_keys("l")
-    send_keys("l")
-    send_keys("n")
+    ahk.type("l")
+    ahk.type("l")
+    ahk.type("n")
 
-    send_keys("f")
+    
 
 #chrome
-Application(backend="uia").connect(title_re=".*PracticeMojo.woa*")
+chrome.set_focus()
 
 driver.get("https://app.practicemojo.com/cgi-bin/WebObjects/PracticeMojo.woa/wa/gotoActivityDetail?td="+m+"%2F"+d+"%2F"+y+"&cdi=1&cdn=3")#Recare: Due	Text Message
 send_keys("^a^c")
@@ -1030,6 +1046,8 @@ for line in temp:
                 alltext += letter
     
 alltext = alltext[:-1]
+alltext = alltext.replace("\t","")
+alltext = alltext.replace(" ","")
 
 for line in alltext:
     new_file.write(line)
@@ -1048,36 +1066,33 @@ file1 = open("recaredueT.txt", "r")
 lines = file1.readlines()
 file1.close()
 
-Application(backend="uia").connect(title_re=".*SDWIN.EXE*")
-send_keys("f")
+softdent.set_focus()
 
 for line in lines:
-    for word in line.split():
-        if re.fullmatch(NUMBER, word):
-            break
-        else:
-            send_keys(word)
-    send_keys(Keys.ENTER)
-    send_keys("0ca")
-    send_keys("r") #recare
-    send_keys(Keys.TAB)
-    send_keys("recare due")
-    send_keys(Keys.TAB)
-    send_keys(Keys.TAB)
-    send_keys("t") #text
-    send_keys(Keys.TAB)
-    send_keys("pmojoNFD")
-    send_keys(Keys.TAB)
-    send_keys(Keys.ENTER)
+    line = line.replace("\n","")
+    ahk.type('f')
+    ahk.type(line)
+    ahk.key_press('Enter')
+    ahk.type("0ca")
+    ahk.type("r")#recare
+    ahk.key_press("Tab")
+    ahk.type("Recare: Due")
+    ahk.key_press("Tab")
+    ahk.key_press("Tab")
+    ahk.type("t") #txt
+    ahk.key_press("Tab")
+    ahk.type("pmojoNFD")
+    ahk.key_press("Tab")
+    ahk.key_press("Enter")
 
-    send_keys("l")
-    send_keys("l")
-    send_keys("n")
+    ahk.type("l")
+    ahk.type("l")
+    ahk.type("n")
 
-    send_keys("f")
+    
 
 #chrome
-Application(backend="uia").connect(title_re=".*PracticeMojo.woa*")
+chrome.set_focus()
 
 driver.get("https://app.practicemojo.com/cgi-bin/WebObjects/PracticeMojo.woa/wa/gotoActivityDetail?td="+m+"%2F"+d+"%2F"+y+"&cdi=1&cdn=1")#Recare: Due    Postcard
 send_keys("^a^c")
@@ -1127,6 +1142,8 @@ for line in temp:
                 alltext += letter
 
 alltext = alltext[:-1]
+alltext = alltext.replace("\t","")
+alltext = alltext.replace(" ","")
 
 for line in alltext:
     new_file.write(line)
@@ -1145,36 +1162,33 @@ file1 = open("recaredueL.txt", "r")
 lines = file1.readlines()
 file1.close()
 
-Application(backend="uia").connect(title_re=".*SDWIN.EXE*")
-send_keys("f")
+softdent.set_focus()
 
 for line in lines:
-    for word in line.split():
-        if re.fullmatch(NUMBER, word):
-            break
-        else:
-            send_keys(word)
-    send_keys(Keys.ENTER)
-    send_keys("0ca")
-    send_keys("r")
-    send_keys(Keys.TAB)
-    send_keys("recare due")
-    send_keys(Keys.TAB)
-    send_keys(Keys.TAB)
-    send_keys("l") #letter
-    send_keys(Keys.TAB)
-    send_keys("pmojoNFD")
-    send_keys(Keys.TAB)
-    send_keys(Keys.ENTER)
+    line = line.replace("\n","")
+    ahk.type('f')
+    ahk.type(line)
+    ahk.key_press('Enter')
+    ahk.type("0ca")
+    ahk.type("r")#recare
+    ahk.key_press("Tab")
+    ahk.type("Recare: Due")
+    ahk.key_press("Tab")
+    ahk.key_press("Tab")
+    ahk.type("l") #letter
+    ahk.key_press("Tab")
+    ahk.type("pmojoNFD")
+    ahk.key_press("Tab")
+    ahk.key_press("Enter")
 
-    send_keys("l")
-    send_keys("l")
-    send_keys("n")
+    ahk.type("l")
+    ahk.type("l")
+    ahk.type("n")
 
-    send_keys("f")
+    
 
 #chrome
-Application(backend="uia").connect(title_re=".*PracticeMojo.woa*")
+chrome.set_focus()
 
 driver.get("https://app.practicemojo.com/cgi-bin/WebObjects/PracticeMojo.woa/wa/gotoActivityDetail?td="+m+"%2F"+d+"%2F"+y+"&cdi=33&cdn=1")#Recare: Past Due	Postcard
 send_keys("^a^c")
@@ -1224,6 +1238,8 @@ for line in temp:
                 alltext += letter
 
 alltext = alltext[:-1]
+alltext = alltext.replace("\t","")
+alltext = alltext.replace(" ","")
 
 for line in alltext:
     new_file.write(line)
@@ -1242,36 +1258,33 @@ file1 = open("recarepastL.txt", "r")
 lines = file1.readlines()
 file1.close()
 
-Application(backend="uia").connect(title_re=".*SDWIN.EXE*")
-send_keys("f")
+softdent.set_focus()
 
 for line in lines:
-    for word in line.split():
-        if re.fullmatch(NUMBER, word):
-            break
-        else:
-            send_keys(word)
-    send_keys(Keys.ENTER)
-    send_keys("0ca")
-    send_keys("r") #recare
-    send_keys(Keys.TAB)
-    send_keys("recare past due")
-    send_keys(Keys.TAB)
-    send_keys(Keys.TAB)
-    send_keys("l") #letter
-    send_keys(Keys.TAB)
-    send_keys("pmojoNFD")
-    send_keys(Keys.TAB)
-    send_keys(Keys.ENTER)
+    line = line.replace("\n","")
+    ahk.type('f')
+    ahk.type(line)
+    ahk.key_press('Enter')
+    ahk.type("0ca")
+    ahk.type("r")#recare
+    ahk.key_press("Tab")
+    ahk.type("Recare: Past Due")
+    ahk.key_press("Tab")
+    ahk.key_press("Tab")
+    ahk.type("l") #letter
+    ahk.key_press("Tab")
+    ahk.type("pmojoNFD")
+    ahk.key_press("Tab")
+    ahk.key_press("Enter")
 
-    send_keys("l")
-    send_keys("l")
-    send_keys("n")
+    ahk.type("l")
+    ahk.type("l")
+    ahk.type("n")
 
-    send_keys("f")
+    
 
 #chrome
-Application(backend="uia").connect(title_re=".*PracticeMojo.woa*")
+chrome.set_focus()
 
 driver.get("https://app.practicemojo.com/cgi-bin/WebObjects/PracticeMojo.woa/wa/gotoActivityDetail?td="+m+"%2F"+d+"%2F"+y+"&cdi=33&cdn=2")#Recare: Past Due	Email
 send_keys("^a^c")
@@ -1321,6 +1334,8 @@ for line in temp:
                 alltext += letter
     
 alltext = alltext[:-1]
+alltext = alltext.replace("\t","")
+alltext = alltext.replace(" ","")
 
 for line in alltext:
     new_file.write(line)
@@ -1339,36 +1354,33 @@ file1 = open("recarepastE.txt", "r")
 lines = file1.readlines()
 file1.close()
 
-Application(backend="uia").connect(title_re=".*SDWIN.EXE*")
-send_keys("f")
+softdent.set_focus()
 
 for line in lines:
-    for word in line.split():
-        if re.fullmatch(NUMBER, word):
-            break
-        else:
-            send_keys(word)
-    send_keys(Keys.ENTER)
-    send_keys("0ca")
-    send_keys("r") #recare
-    send_keys(Keys.TAB)
-    send_keys("recare past due")
-    send_keys(Keys.TAB)
-    send_keys(Keys.TAB)
-    send_keys("e") #email
-    send_keys(Keys.TAB)
-    send_keys("pmojoNFD")
-    send_keys(Keys.TAB)
-    send_keys(Keys.ENTER)
+    line = line.replace("\n","")
+    ahk.type('f')
+    ahk.type(line)
+    ahk.key_press('Enter')
+    ahk.type("0ca")
+    ahk.type("r")#recare
+    ahk.key_press("Tab")
+    ahk.type("Recare: Past Due")
+    ahk.key_press("Tab")
+    ahk.key_press("Tab")
+    ahk.type("e") #email
+    ahk.key_press("Tab")
+    ahk.type("pmojoNFD")
+    ahk.key_press("Tab")
+    ahk.key_press("Enter")
 
-    send_keys("l")
-    send_keys("l")
-    send_keys("n")
+    ahk.type("l")
+    ahk.type("l")
+    ahk.type("n")
 
-    send_keys("f")
+    
 
 #chrome
-Application(backend="uia").connect(title_re=".*PracticeMojo.woa*")
+chrome.set_focus()
 
 driver.get("https://app.practicemojo.com/cgi-bin/WebObjects/PracticeMojo.woa/wa/gotoActivityDetail?td="+m+"%2F"+d+"%2F"+y+"&cdi=33&cdn=3")#Recare: Past Due	Text Message
 send_keys("^a^c")
@@ -1418,6 +1430,8 @@ for line in temp:
                 alltext += letter
 
 alltext = alltext[:-1]
+alltext = alltext.replace("\t","")
+alltext = alltext.replace(" ","")
 
 for line in alltext:
     new_file.write(line)
@@ -1436,36 +1450,33 @@ file1 = open("recarepastT.txt", "r")
 lines = file1.readlines()
 file1.close()
 
-Application(backend="uia").connect(title_re=".*SDWIN.EXE*")
-send_keys("f")
+softdent.set_focus()
 
 for line in lines:
-    for word in line.split():
-        if re.fullmatch(NUMBER, word):
-            break
-        else:
-            send_keys(word)
-    send_keys(Keys.ENTER)
-    send_keys("0ca")
-    send_keys("r") #recare
-    send_keys(Keys.TAB)
-    send_keys("recare past due")
-    send_keys(Keys.TAB)
-    send_keys(Keys.TAB)
-    send_keys("t") #text
-    send_keys(Keys.TAB)
-    send_keys("pmojoNFD")
-    send_keys(Keys.TAB)
-    send_keys(Keys.ENTER)
+    line = line.replace("\n","")
+    ahk.type('f')
+    ahk.type(line)
+    ahk.key_press('Enter')
+    ahk.type("0ca")
+    ahk.type("r")#recare
+    ahk.key_press("Tab")
+    ahk.type("Recare: Past Due")
+    ahk.key_press("Tab")
+    ahk.key_press("Tab")
+    ahk.type("t") #text
+    ahk.key_press("Tab")
+    ahk.type("pmojoNFD")
+    ahk.key_press("Tab")
+    ahk.key_press("Enter")
 
-    send_keys("l")
-    send_keys("l")
-    send_keys("n")
+    ahk.type("l")
+    ahk.type("l")
+    ahk.type("n")
 
-    send_keys("f")
+    
 
 #chrome
-Application(backend="uia").connect(title_re=".*PracticeMojo.woa*")
+chrome.set_focus()
 
 driver.get("https://app.practicemojo.com/cgi-bin/WebObjects/PracticeMojo.woa/wa/gotoActivityDetail?td="+m+"%2F"+d+"%2F"+y+"&cdi=8&cdn=2")#Recare: Really Past Due	Email
 send_keys("^a^c")
@@ -1515,6 +1526,8 @@ for line in temp:
                 alltext += letter
 
 alltext = alltext[:-1]
+alltext = alltext.replace("\t","")
+alltext = alltext.replace(" ","")
 
 for line in alltext:
     new_file.write(line)
@@ -1533,36 +1546,33 @@ file1 = open("recarereallyE.txt", "r")
 lines = file1.readlines()
 file1.close()
 
-Application(backend="uia").connect(title_re=".*SDWIN.EXE*")
-send_keys("f")
+softdent.set_focus()
 
 for line in lines:
-    for word in line.split():
-        if re.fullmatch(NUMBER, word):
-            break
-        else:
-            send_keys(word)
-    send_keys(Keys.ENTER)
-    send_keys("0ca")
-    send_keys("r") #recare
-    send_keys(Keys.TAB)
-    send_keys("recare really past due")
-    send_keys(Keys.TAB)
-    send_keys(Keys.TAB)
-    send_keys("e") #email
-    send_keys(Keys.TAB)
-    send_keys("pmojoNFD")
-    send_keys(Keys.TAB)
-    send_keys(Keys.ENTER)
+    line = line.replace("\n","")
+    ahk.type('f')
+    ahk.type(line)
+    ahk.key_press('Enter')
+    ahk.type("0ca")
+    ahk.type("r")#recare
+    ahk.key_press("Tab")
+    ahk.type("Recare: Really Past Due")
+    ahk.key_press("Tab")
+    ahk.key_press("Tab")
+    ahk.type("e") #email
+    ahk.key_press("Tab")
+    ahk.type("pmojoNFD")
+    ahk.key_press("Tab")
+    ahk.key_press("Enter")
 
-    send_keys("l")
-    send_keys("l")
-    send_keys("n")
+    ahk.type("l")
+    ahk.type("l")
+    ahk.type("n")
 
-    send_keys("f")
+    
 
 #chrome
-Application(backend="uia").connect(title_re=".*PracticeMojo.woa*")
+chrome.set_focus()
 
 driver.get("https://app.practicemojo.com/cgi-bin/WebObjects/PracticeMojo.woa/wa/gotoActivityDetail?td="+m+"%2F"+d+"%2F"+y+"&cdi=8&cdn=1")#Recare: Really Past Due	Postcard
 send_keys("^a^c")
@@ -1612,6 +1622,8 @@ for line in temp:
                 alltext += letter
     
 alltext = alltext[:-1]
+alltext = alltext.replace("\t","")
+alltext = alltext.replace(" ","")
 
 for line in alltext:
     new_file.write(line)
@@ -1629,36 +1641,34 @@ file1 = open("recarereallyL.txt", "r")
 lines = file1.readlines()
 file1.close()
 
-Application(backend="uia").connect(title_re=".*SDWIN.EXE*")
-send_keys("f")
+softdent.set_focus()
+
 
 for line in lines:
-    for word in line.split():
-        if re.fullmatch(NUMBER, word):
-            break
-        else:
-            send_keys(word)
-    send_keys(Keys.ENTER)
-    send_keys("0ca")
-    send_keys("r") #recare
-    send_keys(Keys.TAB)
-    send_keys("recare really past due")
-    send_keys(Keys.TAB)
-    send_keys(Keys.TAB)
-    send_keys("l") #letter
-    send_keys(Keys.TAB)
-    send_keys("pmojoNFD")
-    send_keys(Keys.TAB)
-    send_keys(Keys.ENTER)
+    line = line.replace("\n","")
+    ahk.type('f')
+    ahk.type(line)
+    ahk.key_press('Enter')
+    ahk.type("0ca")
+    ahk.type("r")#recare
+    ahk.key_press("Tab")
+    ahk.type("Recare: Really Past Due")
+    ahk.key_press("Tab")
+    ahk.key_press("Tab")
+    ahk.type("l") #letter
+    ahk.key_press("Tab")
+    ahk.type("pmojoNFD")
+    ahk.key_press("Tab")
+    ahk.key_press("Enter")
 
-    send_keys("l")
-    send_keys("l")
-    send_keys("n")
+    ahk.type("l")
+    ahk.type("l")
+    ahk.type("n")
 
-    send_keys("f")
+    
 
 #chrome
-Application(backend="uia").connect(title_re=".*PracticeMojo.woa*")
+chrome.set_focus()
 
 while(True):
     pass
