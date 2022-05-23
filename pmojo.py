@@ -615,6 +615,101 @@ for line in lines:
 #chrome
 chrome.set_focus()
 
+driver.get("https://app.practicemojo.com/cgi-bin/WebObjects/PracticeMojo.woa/wa/gotoActivityDetail?td="+m+"%2F"+d+"%2F"+y+"&cdi=22&cdn=1")#Bday Child Postcard
+send_keys("^a^c")
+
+
+root = tk.Tk()
+root.withdraw()
+clip_text = root.clipboard_get()
+
+go = open('bdaykid.txt' ,"w",encoding="utf-8")
+go.write(clip_text)
+go.close()
+
+
+text_file = open('bdaykid.txt', 'r')
+text = text_file.readlines()
+text_file.close()
+
+del text[0:7+1]
+del text[-5:]
+
+new_file = open("bdaykid.txt", "w+")
+
+temp = text
+skip5=0
+
+alltext=""
+single=""
+lastlength = 1
+
+for line in temp:
+    if line[0:lastlength+3] not in single:
+        single += line
+        if re.search("Family", line):
+            continue
+        count=0
+        for letter in line:
+            count=count+1
+            if skip5>0:
+                skip5 -= 1
+            elif letter == " " and count==1:
+                skip5 = 5
+            elif letter == ",":
+                lastlength = count
+                alltext += letter
+            else:
+                alltext += letter
+
+alltext = alltext[:-1]
+alltext = alltext.replace("\t","")
+alltext = alltext.replace(" ","")
+
+for line in alltext:
+    new_file.write(line)
+    
+
+new_file.close()
+
+#softdent
+#app = Application().start("C:\Program Files (x86)\SoftDent\SoftDent.exe")
+
+num = "[0-9]+"
+
+NUMBER = re.compile(num)
+
+file1 = open("bdaykid.txt", "r")
+lines = file1.readlines()
+file1.close()
+
+softdent.set_focus()
+
+for line in lines:
+    line = line.replace("\n","")
+    ahk.type('f')
+    ahk.type(line)
+    ahk.key_press('Enter')
+    ahk.type("0ca")
+    ahk.key_press("Tab")
+    ahk.type("bday card")
+    ahk.key_press("Tab")
+    ahk.key_press("Tab")
+    ahk.type("l") #letter
+    ahk.key_press("Tab")
+    ahk.type("pmojoNFD")
+    ahk.key_press("Tab")
+    ahk.key_press("Enter")
+
+    ahk.type("l")
+    ahk.type("l")
+    ahk.type("n")
+
+    
+
+#chrome
+chrome.set_focus()
+
 
 driver.get("https://app.practicemojo.com/cgi-bin/WebObjects/PracticeMojo.woa/wa/gotoActivityDetail?td="+m+"%2F"+d+"%2F"+y+"&cdi=35&cdn=1")#Happy Anniversary	Postcard
 send_keys("^a^c")
@@ -1368,102 +1463,6 @@ for line in lines:
     ahk.key_press("Tab")
     ahk.key_press("Tab")
     ahk.type("e") #email
-    ahk.key_press("Tab")
-    ahk.type("pmojoNFD")
-    ahk.key_press("Tab")
-    ahk.key_press("Enter")
-
-    ahk.type("l")
-    ahk.type("l")
-    ahk.type("n")
-
-    
-
-#chrome
-chrome.set_focus()
-
-driver.get("https://app.practicemojo.com/cgi-bin/WebObjects/PracticeMojo.woa/wa/gotoActivityDetail?td="+m+"%2F"+d+"%2F"+y+"&cdi=33&cdn=3")#Recare: Past Due	Text Message
-send_keys("^a^c")
-
-
-root = tk.Tk()
-root.withdraw()
-clip_text = root.clipboard_get()
-
-go = open('recarepastT.txt' ,"w",encoding="utf-8")
-go.write(clip_text)
-go.close()
-
-
-text_file = open('recarepastT.txt', 'r')
-text = text_file.readlines()
-text_file.close()
-
-del text[0:7+1]
-del text[-5:]
-
-new_file = open("recarepastT.txt", "w+")
-
-temp = text
-skip5=0
-
-alltext=""
-single=""
-lastlength = 1
-
-for line in temp:
-    if line[0:lastlength+3] not in single:
-        single += line
-        if re.search("Family", line):
-            continue
-        count=0
-        for letter in line:
-            count=count+1
-            if skip5>0:
-                skip5 -= 1
-            elif letter == " " and count==1:
-                skip5 = 5
-            elif letter == ",":
-                lastlength = count
-                alltext += letter
-            else:
-                alltext += letter
-
-alltext = alltext[:-1]
-alltext = alltext.replace("\t","")
-alltext = alltext.replace(" ","")
-
-for line in alltext:
-    new_file.write(line)
-    
-
-new_file.close()
-
-#softdent
-#app = Application().start("C:\Program Files (x86)\SoftDent\SoftDent.exe")
-
-num = "[0-9]+"
-
-NUMBER = re.compile(num)
-
-file1 = open("recarepastT.txt", "r")
-lines = file1.readlines()
-file1.close()
-
-softdent.set_focus()
-
-for line in lines:
-    line = line.replace("\n","")
-    ahk.type('f')
-    ahk.type(line)
-    ahk.key_press('Enter')
-    ahk.type("0ca")
-    ahk.type("r")#recare
-    ahk.key_press("Tab")
-    ahk.type("Recare: Past Due")
-    ahk.key_press("Tab")
-    ahk.key_press("Tab")
-    ahk.type("t") #text
     ahk.key_press("Tab")
     ahk.type("pmojoNFD")
     ahk.key_press("Tab")
