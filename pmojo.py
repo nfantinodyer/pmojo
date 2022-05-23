@@ -81,8 +81,10 @@ def begin():
     alltext=""
     single=""
     lastlength = 1
-
+    
     for line in temp:
+        numcomma = 0
+        commaindex = 0
         if line[0:lastlength+3] not in single:
             single += line
             if re.search("Family", line):
@@ -95,18 +97,30 @@ def begin():
                 elif letter == " " and count==1:
                     skip5 = 5
                 elif letter == ",":
+                    numcomma+=1
+                    if numcomma==1:
+                        commaindex=count
                     lastlength = count
                     alltext += letter
                 else:
                     alltext += letter
+        #if second comma (Phd or DDS or etc removes first comma)
+        if numcomma>0:
+            tempt=""
+            for i in range(len(alltext)):
+                if i != commaindex-1:
+                    tempt = tempt + alltext[i]
+            alltext = tempt
+        alltext = alltext.rstrip()
+        alltext+="\n"
         
     alltext = alltext[:-1]
     alltext = alltext.replace("\t","")
-    alltext = alltext.replace(" ","")
+    alltext = alltext.strip()
 
     for line in alltext:
         new_file.write(line)
-
+        
 
     new_file.close()
 
@@ -186,6 +200,9 @@ def begin():
     lastlength = 1
 
     for line in temp:
+        numcomma = 0
+        commaindex = 0
+
         if line[0:lastlength+3] in single:
             for li in liststring:
                 if li[0:lastlength+3]==line[0:lastlength+3]:
@@ -195,9 +212,8 @@ def begin():
                             alltext = alltext[0:len(alltext)-(len(li)-6)]
                     elif line[next6+1:next6+3] < li[next6+1:next6+3]:
                         single = single[0:len(single)-len(li)]
-                        alltext = alltext[0:len(alltext)-(len(li)-6)]
-                
-        
+                        alltext = alltext[0:len(alltext)-(len(li)-6)]    
+
         if line[0:lastlength+3] not in single:
             single+=line
             liststring.append(line)
@@ -212,6 +228,9 @@ def begin():
                     elif letter == " " and count==1:
                         skip5 = 5
                     elif letter == ",":
+                        numcomma+=1
+                        if numcomma==2:
+                            commaindex=count
                         lastlength = count
                         alltext += letter
                     elif letter == "@":
@@ -219,10 +238,20 @@ def begin():
                         next6=count
                     else:
                         alltext += letter
+    
+        #if second comma (Phd or DDS or etc removes first comma)
+        if numcomma>0:
+            tempt=""
+            for i in range(len(alltext)):
+                if i != commaindex-1:
+                    tempt = tempt + alltext[i]
+            alltext = tempt
+        alltext = alltext.rstrip()
+        alltext+="\n"
         
     alltext = alltext[:-1]
     alltext = alltext.replace("\t","")
-    alltext = alltext.replace(" ","")
+    alltext = alltext.strip()
 
     for line in alltext:
         new_file.write(line)
@@ -331,6 +360,9 @@ def begin():
 
 
     for line in temp:
+        numcomma = 0
+        commaindex = 0
+
         if line[0:lastlength+3] in single:
             for li in liststring:
                 if li[0:lastlength+3]==line[0:lastlength+3]:
@@ -340,9 +372,8 @@ def begin():
                             alltext = alltext[0:len(alltext)-(len(li)-6)]
                     elif line[next6+1:next6+3] < li[next6+1:next6+3]:
                         single = single[0:len(single)-len(li)]
-                        alltext = alltext[0:len(alltext)-(len(li)-6)]
-                
-        
+                        alltext = alltext[0:len(alltext)-(len(li)-6)]    
+
         if line[0:lastlength+3] not in single:
             single+=line
             liststring.append(line)
@@ -357,6 +388,9 @@ def begin():
                     elif letter == " " and count==1:
                         skip5 = 5
                     elif letter == ",":
+                        numcomma+=1
+                        if numcomma==2:
+                            commaindex=count
                         lastlength = count
                         alltext += letter
                     elif letter == "@":
@@ -364,10 +398,20 @@ def begin():
                         next6=count
                     else:
                         alltext += letter
+    
+        #if second comma (Phd or DDS or etc removes first comma)
+        if numcomma>0:
+            tempt=""
+            for i in range(len(alltext)):
+                if i != commaindex-1:
+                    tempt = tempt + alltext[i]
+            alltext = tempt
+        alltext = alltext.rstrip()
+        alltext+="\n"
         
     alltext = alltext[:-1]
     alltext = alltext.replace("\t","")
-    alltext = alltext.replace(" ","")
+    alltext = alltext.strip()
 
     for line in alltext:
         new_file.write(line)
@@ -475,6 +519,9 @@ def begin():
 
 
     for line in temp:
+        numcomma = 0
+        commaindex = 0
+
         if line[0:lastlength+3] in single:
             for li in liststring:
                 if li[0:lastlength+3]==line[0:lastlength+3]:
@@ -484,9 +531,8 @@ def begin():
                             alltext = alltext[0:len(alltext)-(len(li)-6)]
                     elif line[next6+1:next6+3] < li[next6+1:next6+3]:
                         single = single[0:len(single)-len(li)]
-                        alltext = alltext[0:len(alltext)-(len(li)-6)]
-                
-        
+                        alltext = alltext[0:len(alltext)-(len(li)-6)]    
+
         if line[0:lastlength+3] not in single:
             single+=line
             liststring.append(line)
@@ -501,6 +547,9 @@ def begin():
                     elif letter == " " and count==1:
                         skip5 = 5
                     elif letter == ",":
+                        numcomma+=1
+                        if numcomma==2:
+                            commaindex=count
                         lastlength = count
                         alltext += letter
                     elif letter == "@":
@@ -508,10 +557,20 @@ def begin():
                         next6=count
                     else:
                         alltext += letter
+    
+        #if second comma (Phd or DDS or etc removes first comma)
+        if numcomma>0:
+            tempt=""
+            for i in range(len(alltext)):
+                if i != commaindex-1:
+                    tempt = tempt + alltext[i]
+            alltext = tempt
+        alltext = alltext.rstrip()
+        alltext+="\n"
         
     alltext = alltext[:-1]
     alltext = alltext.replace("\t","")
-    alltext = alltext.replace(" ","")
+    alltext = alltext.strip()
 
     for line in alltext:
         new_file.write(line)
@@ -617,6 +676,8 @@ def begin():
     lastlength = 1
 
     for line in temp:
+        numcomma = 0
+        commaindex = 0
         if line[0:lastlength+3] not in single:
             single += line
             if re.search("Family", line):
@@ -629,14 +690,26 @@ def begin():
                 elif letter == " " and count==1:
                     skip5 = 5
                 elif letter == ",":
+                    numcomma+=1
+                    if numcomma==1:
+                        commaindex=count
                     lastlength = count
                     alltext += letter
                 else:
                     alltext += letter
-
+        #if second comma (Phd or DDS or etc removes first comma)
+        if numcomma>0:
+            tempt=""
+            for i in range(len(alltext)):
+                if i != commaindex-1:
+                    tempt = tempt + alltext[i]
+            alltext = tempt
+        alltext = alltext.rstrip()
+        alltext+="\n"
+        
     alltext = alltext[:-1]
     alltext = alltext.replace("\t","")
-    alltext = alltext.replace(" ","")
+    alltext = alltext.strip()
 
     for line in alltext:
         new_file.write(line)
@@ -719,6 +792,8 @@ def begin():
     lastlength = 1
 
     for line in temp:
+        numcomma = 0
+        commaindex = 0
         if line[0:lastlength+3] not in single:
             single += line
             if re.search("Family", line):
@@ -731,14 +806,26 @@ def begin():
                 elif letter == " " and count==1:
                     skip5 = 5
                 elif letter == ",":
+                    numcomma+=1
+                    if numcomma==1:
+                        commaindex=count
                     lastlength = count
                     alltext += letter
                 else:
                     alltext += letter
-
+        #if second comma (Phd or DDS or etc removes first comma)
+        if numcomma>0:
+            tempt=""
+            for i in range(len(alltext)):
+                if i != commaindex-1:
+                    tempt = tempt + alltext[i]
+            alltext = tempt
+        alltext = alltext.rstrip()
+        alltext+="\n"
+        
     alltext = alltext[:-1]
     alltext = alltext.replace("\t","")
-    alltext = alltext.replace(" ","")
+    alltext = alltext.strip()
 
     for line in alltext:
         new_file.write(line)
@@ -822,6 +909,8 @@ def begin():
     lastlength = 1
 
     for line in temp:
+        numcomma = 0
+        commaindex = 0
         if line[0:lastlength+3] not in single:
             single += line
             if re.search("Family", line):
@@ -834,14 +923,26 @@ def begin():
                 elif letter == " " and count==1:
                     skip5 = 5
                 elif letter == ",":
+                    numcomma+=1
+                    if numcomma==1:
+                        commaindex=count
                     lastlength = count
                     alltext += letter
                 else:
                     alltext += letter
+        #if second comma (Phd or DDS or etc removes first comma)
+        if numcomma>0:
+            tempt=""
+            for i in range(len(alltext)):
+                if i != commaindex-1:
+                    tempt = tempt + alltext[i]
+            alltext = tempt
+        alltext = alltext.rstrip()
+        alltext+="\n"
         
     alltext = alltext[:-1]
     alltext = alltext.replace("\t","")
-    alltext = alltext.replace(" ","")
+    alltext = alltext.strip()
 
     for line in alltext:
         new_file.write(line)
@@ -925,6 +1026,8 @@ def begin():
     lastlength = 1
 
     for line in temp:
+        numcomma = 0
+        commaindex = 0
         if line[0:lastlength+3] not in single:
             single += line
             if re.search("Family", line):
@@ -937,14 +1040,26 @@ def begin():
                 elif letter == " " and count==1:
                     skip5 = 5
                 elif letter == ",":
+                    numcomma+=1
+                    if numcomma==1:
+                        commaindex=count
                     lastlength = count
                     alltext += letter
                 else:
                     alltext += letter
+        #if second comma (Phd or DDS or etc removes first comma)
+        if numcomma>0:
+            tempt=""
+            for i in range(len(alltext)):
+                if i != commaindex-1:
+                    tempt = tempt + alltext[i]
+            alltext = tempt
+        alltext = alltext.rstrip()
+        alltext+="\n"
         
     alltext = alltext[:-1]
     alltext = alltext.replace("\t","")
-    alltext = alltext.replace(" ","")
+    alltext = alltext.strip()
 
     for line in alltext:
         new_file.write(line)
@@ -1027,6 +1142,8 @@ def begin():
     lastlength = 1
 
     for line in temp:
+        numcomma = 0
+        commaindex = 0
         if line[0:lastlength+3] not in single:
             single += line
             if re.search("Family", line):
@@ -1039,14 +1156,26 @@ def begin():
                 elif letter == " " and count==1:
                     skip5 = 5
                 elif letter == ",":
+                    numcomma+=1
+                    if numcomma==1:
+                        commaindex=count
                     lastlength = count
                     alltext += letter
                 else:
                     alltext += letter
+        #if second comma (Phd or DDS or etc removes first comma)
+        if numcomma>0:
+            tempt=""
+            for i in range(len(alltext)):
+                if i != commaindex-1:
+                    tempt = tempt + alltext[i]
+            alltext = tempt
+        alltext = alltext.rstrip()
+        alltext+="\n"
         
     alltext = alltext[:-1]
     alltext = alltext.replace("\t","")
-    alltext = alltext.replace(" ","")
+    alltext = alltext.strip()
 
     for line in alltext:
         new_file.write(line)
@@ -1129,6 +1258,8 @@ def begin():
     lastlength = 1
 
     for line in temp:
+        numcomma = 0
+        commaindex = 0
         if line[0:lastlength+3] not in single:
             single += line
             if re.search("Family", line):
@@ -1141,14 +1272,26 @@ def begin():
                 elif letter == " " and count==1:
                     skip5 = 5
                 elif letter == ",":
+                    numcomma+=1
+                    if numcomma==1:
+                        commaindex=count
                     lastlength = count
                     alltext += letter
                 else:
                     alltext += letter
+        #if second comma (Phd or DDS or etc removes first comma)
+        if numcomma>0:
+            tempt=""
+            for i in range(len(alltext)):
+                if i != commaindex-1:
+                    tempt = tempt + alltext[i]
+            alltext = tempt
+        alltext = alltext.rstrip()
+        alltext+="\n"
         
     alltext = alltext[:-1]
     alltext = alltext.replace("\t","")
-    alltext = alltext.replace(" ","")
+    alltext = alltext.strip()
 
     for line in alltext:
         new_file.write(line)
@@ -1232,6 +1375,8 @@ def begin():
     lastlength = 1
 
     for line in temp:
+        numcomma = 0
+        commaindex = 0
         if line[0:lastlength+3] not in single:
             single += line
             if re.search("Family", line):
@@ -1244,14 +1389,26 @@ def begin():
                 elif letter == " " and count==1:
                     skip5 = 5
                 elif letter == ",":
+                    numcomma+=1
+                    if numcomma==1:
+                        commaindex=count
                     lastlength = count
                     alltext += letter
                 else:
                     alltext += letter
+        #if second comma (Phd or DDS or etc removes first comma)
+        if numcomma>0:
+            tempt=""
+            for i in range(len(alltext)):
+                if i != commaindex-1:
+                    tempt = tempt + alltext[i]
+            alltext = tempt
+        alltext = alltext.rstrip()
+        alltext+="\n"
         
     alltext = alltext[:-1]
     alltext = alltext.replace("\t","")
-    alltext = alltext.replace(" ","")
+    alltext = alltext.strip()
 
     for line in alltext:
         new_file.write(line)
@@ -1335,6 +1492,8 @@ def begin():
     lastlength = 1
 
     for line in temp:
+        numcomma = 0
+        commaindex = 0
         if line[0:lastlength+3] not in single:
             single += line
             if re.search("Family", line):
@@ -1347,14 +1506,26 @@ def begin():
                 elif letter == " " and count==1:
                     skip5 = 5
                 elif letter == ",":
+                    numcomma+=1
+                    if numcomma==1:
+                        commaindex=count
                     lastlength = count
                     alltext += letter
                 else:
                     alltext += letter
-
+        #if second comma (Phd or DDS or etc removes first comma)
+        if numcomma>0:
+            tempt=""
+            for i in range(len(alltext)):
+                if i != commaindex-1:
+                    tempt = tempt + alltext[i]
+            alltext = tempt
+        alltext = alltext.rstrip()
+        alltext+="\n"
+        
     alltext = alltext[:-1]
     alltext = alltext.replace("\t","")
-    alltext = alltext.replace(" ","")
+    alltext = alltext.strip()
 
     for line in alltext:
         new_file.write(line)
@@ -1438,6 +1609,8 @@ def begin():
     lastlength = 1
 
     for line in temp:
+        numcomma = 0
+        commaindex = 0
         if line[0:lastlength+3] not in single:
             single += line
             if re.search("Family", line):
@@ -1450,14 +1623,26 @@ def begin():
                 elif letter == " " and count==1:
                     skip5 = 5
                 elif letter == ",":
+                    numcomma+=1
+                    if numcomma==1:
+                        commaindex=count
                     lastlength = count
                     alltext += letter
                 else:
                     alltext += letter
-
+        #if second comma (Phd or DDS or etc removes first comma)
+        if numcomma>0:
+            tempt=""
+            for i in range(len(alltext)):
+                if i != commaindex-1:
+                    tempt = tempt + alltext[i]
+            alltext = tempt
+        alltext = alltext.rstrip()
+        alltext+="\n"
+        
     alltext = alltext[:-1]
     alltext = alltext.replace("\t","")
-    alltext = alltext.replace(" ","")
+    alltext = alltext.strip()
 
     for line in alltext:
         new_file.write(line)
@@ -1541,6 +1726,8 @@ def begin():
     lastlength = 1
 
     for line in temp:
+        numcomma = 0
+        commaindex = 0
         if line[0:lastlength+3] not in single:
             single += line
             if re.search("Family", line):
@@ -1553,14 +1740,26 @@ def begin():
                 elif letter == " " and count==1:
                     skip5 = 5
                 elif letter == ",":
+                    numcomma+=1
+                    if numcomma==1:
+                        commaindex=count
                     lastlength = count
                     alltext += letter
                 else:
                     alltext += letter
+        #if second comma (Phd or DDS or etc removes first comma)
+        if numcomma>0:
+            tempt=""
+            for i in range(len(alltext)):
+                if i != commaindex-1:
+                    tempt = tempt + alltext[i]
+            alltext = tempt
+        alltext = alltext.rstrip()
+        alltext+="\n"
         
     alltext = alltext[:-1]
     alltext = alltext.replace("\t","")
-    alltext = alltext.replace(" ","")
+    alltext = alltext.strip()
 
     for line in alltext:
         new_file.write(line)
@@ -1644,6 +1843,8 @@ def begin():
     lastlength = 1
 
     for line in temp:
+        numcomma = 0
+        commaindex = 0
         if line[0:lastlength+3] not in single:
             single += line
             if re.search("Family", line):
@@ -1656,14 +1857,26 @@ def begin():
                 elif letter == " " and count==1:
                     skip5 = 5
                 elif letter == ",":
+                    numcomma+=1
+                    if numcomma==1:
+                        commaindex=count
                     lastlength = count
                     alltext += letter
                 else:
                     alltext += letter
-
+        #if second comma (Phd or DDS or etc removes first comma)
+        if numcomma>0:
+            tempt=""
+            for i in range(len(alltext)):
+                if i != commaindex-1:
+                    tempt = tempt + alltext[i]
+            alltext = tempt
+        alltext = alltext.rstrip()
+        alltext+="\n"
+        
     alltext = alltext[:-1]
     alltext = alltext.replace("\t","")
-    alltext = alltext.replace(" ","")
+    alltext = alltext.strip()
 
     for line in alltext:
         new_file.write(line)
@@ -1747,6 +1960,8 @@ def begin():
     lastlength = 1
 
     for line in temp:
+        numcomma = 0
+        commaindex = 0
         if line[0:lastlength+3] not in single:
             single += line
             if re.search("Family", line):
@@ -1759,18 +1974,31 @@ def begin():
                 elif letter == " " and count==1:
                     skip5 = 5
                 elif letter == ",":
+                    numcomma+=1
+                    if numcomma==1:
+                        commaindex=count
                     lastlength = count
                     alltext += letter
                 else:
                     alltext += letter
+        #if second comma (Phd or DDS or etc removes first comma)
+        if numcomma>0:
+            tempt=""
+            for i in range(len(alltext)):
+                if i != commaindex-1:
+                    tempt = tempt + alltext[i]
+            alltext = tempt
+        alltext = alltext.rstrip()
+        alltext+="\n"
         
     alltext = alltext[:-1]
     alltext = alltext.replace("\t","")
-    alltext = alltext.replace(" ","")
+    alltext = alltext.strip()
 
     for line in alltext:
         new_file.write(line)
         
+
     new_file.close()
 
     #softdent
