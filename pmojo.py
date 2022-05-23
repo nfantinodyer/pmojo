@@ -123,26 +123,31 @@ def begin():
     softdent.set_focus()
 
     for line in lines:
-        line = line.replace("\n","")
-        ahk.type('f')
-        time.sleep(3)
-        ahk.type(line)
-        time.sleep(3)
-        ahk.key_press('Enter')
-        ahk.type("0ca")
-        ahk.key_press("Tab")
-        ahk.type("bday card")
-        ahk.key_press("Tab")
-        ahk.key_press("Tab")
-        ahk.type("l") #letter
-        ahk.key_press("Tab")
-        ahk.type("pmojoNFD")
-        ahk.key_press("Tab")
-        ahk.key_press("Enter")
+        if line != "":
+                
+            line = line.replace("\n","")
+            ahk.key_press("Tab")
+            ahk.type('f')
+                
+            ahk.type(line)
+            time.sleep(3)
+            ahk.key_press('Enter')
+            ahk.type("0ca")
+            ahk.key_press("Tab")
+            ahk.type("bday card")
+            ahk.key_press("Tab")
+            ahk.key_press("Tab")
+            ahk.type("l") #letter
+            ahk.key_press("Tab")
+            ahk.type("pmojoNFD")
+            ahk.key_press("Tab")
+            time.sleep(2)
+                
+            ahk.key_press("Enter")
 
-        ahk.type("l")
-        ahk.type("l")
-        ahk.type("n")
+            ahk.type("l")
+            ahk.type("l")
+            ahk.type("n")
 
         
 
@@ -238,39 +243,55 @@ def begin():
     softdent.set_focus()
 
     for line in lines:
-        line = line.replace("\n","")
-        ahk.type('f')
-        time.sleep(3)
-        for word in line.split():
-            if re.fullmatch(NUMBER, word):
-                break
-            else:
-                ahk.type(word)
-        time.sleep(3)
-        ahk.key_press("Enter")
-        ahk.type("0ca")
-        ahk.type("cc")
-        ahk.key_press("Tab")
-        ahk.type("Reminder for ")
-        for word in line.split():
-            if re.fullmatch(NUMBER, word):
-                ahk.type(word)
-            elif re.fullmatch("M", word):
-                ahk.type("M")
-                stop=True
-                break
+        now = False
+        if line != "":
+                
+            line = line.replace("\n","")
+            ahk.key_press("Tab")
+            ahk.type('f')
+                
+            for word in line:
+                if re.fullmatch(NUMBER, word):
+                    break
+                else:
+                    ahk.type(word)
+            time.sleep(3)
+            ahk.key_press("Enter")
+            ahk.type("0ca")
+            ahk.type("cc")
+            ahk.key_press("Tab")
+            ahk.type("Reminder for ")
+            size = 0
+            for word in line:
+                size+=1
+                if now:
+                    line = line[size-1:]
+                    now=False
+                    break
+                elif re.fullmatch(NUMBER, word):
+                    ahk.key_press("Space")
+                    ahk.type(word)
+                    now = True
+                
+            for word in line:
+                if re.fullmatch("M", word):
+                    ahk.type("M")
+                    break
+                else:
+                    ahk.type(word)
+            ahk.key_press("Tab")
+            ahk.key_press("Tab")
+            ahk.type("t") #text
+            ahk.key_press("Tab")
+            ahk.type("pmojoNFD")
+            ahk.key_press("Tab")
+            time.sleep(2)
+                
+            ahk.key_press("Enter")
 
-        ahk.key_press("Tab")
-        ahk.key_press("Tab")
-        ahk.type("t") #text
-        ahk.key_press("Tab")
-        ahk.type("pmojoNFD")
-        ahk.key_press("Tab")
-        ahk.key_press("Enter")
-
-        ahk.type("l")
-        ahk.type("l")
-        ahk.type("n")
+            ahk.type("l")
+            ahk.type("l")
+            ahk.type("n")
 
         
 
@@ -367,39 +388,55 @@ def begin():
     softdent.set_focus()
 
     for line in lines:
-        line = line.replace("\n","")
-        ahk.type('f')
-        time.sleep(3)
-        for word in line.split():
-            if re.fullmatch(NUMBER, word):
-                break
-            else:
-                ahk.type(word)
-        time.sleep(3)
-        ahk.key_press("Enter")
-        ahk.type("0ca")
-        ahk.type("cc")
-        ahk.key_press("Tab")
-        ahk.type("Reminder for ")
-        for word in line.split():
-            if re.fullmatch(NUMBER, word):
-                ahk.type(word)
-            elif re.fullmatch("M", word):
-                ahk.type("M")
-                stop=True
-                break
+        now = False
+        if line != "":
+                
+            line = line.replace("\n","")
+            ahk.key_press("Tab")
+            ahk.type('f')
+                
+            for word in line:
+                if re.fullmatch(NUMBER, word):
+                    break
+                else:
+                    ahk.type(word)
+            time.sleep(3)
+            ahk.key_press("Enter")
+            ahk.type("0ca")
+            ahk.type("cc")
+            ahk.key_press("Tab")
+            ahk.type("Reminder for ")
+            size = 0
+            for word in line:
+                size+=1
+                if now:
+                    line = line[size-1:]
+                    now=False
+                    break
+                elif re.fullmatch(NUMBER, word):
+                    ahk.key_press("Space")
+                    ahk.type(word)
+                    now = True
+                
+            for word in line:
+                if re.fullmatch("M", word):
+                    ahk.type("M")
+                    break
+                else:
+                    ahk.type(word)
+            ahk.key_press("Tab")
+            ahk.key_press("Tab")
+            ahk.type("e") #email
+            ahk.key_press("Tab")
+            ahk.type("pmojoNFD")
+            ahk.key_press("Tab")
+            time.sleep(2)
+                
+            ahk.key_press("Enter")
 
-        ahk.key_press("Tab")
-        ahk.key_press("Tab")
-        ahk.type("e") #email
-        ahk.key_press("Tab")
-        ahk.type("pmojoNFD")
-        ahk.key_press("Tab")
-        ahk.key_press("Enter")
-
-        ahk.type("l")
-        ahk.type("l")
-        ahk.type("n")
+            ahk.type("l")
+            ahk.type("l")
+            ahk.type("n")
         
         
 
@@ -495,39 +532,55 @@ def begin():
     softdent.set_focus()
 
     for line in lines:
-        line = line.replace("\n","")
-        ahk.type('f')
-        time.sleep(3)
-        for word in line.split():
-            if re.fullmatch(NUMBER, word):
-                break
-            else:
-                ahk.type(word)
-        time.sleep(3)
-        ahk.key_press("Enter")
-        ahk.type("0ca")
-        ahk.type("cc")
-        ahk.key_press("Tab")
-        ahk.type("Reminder for ")
-        for word in line.split():
-            if re.fullmatch(NUMBER, word):
-                ahk.type(word)
-            elif re.fullmatch("M", word):
-                ahk.type("M")
-                stop=True
-                break
+        now = False
+        if line != "":
+                
+            line = line.replace("\n","")
+            ahk.key_press("Tab")
+            ahk.type('f')
+                
+            for word in line:
+                if re.fullmatch(NUMBER, word):
+                    break
+                else:
+                    ahk.type(word)
+            time.sleep(3)
+            ahk.key_press("Enter")
+            ahk.type("0ca")
+            ahk.type("cc")
+            ahk.key_press("Tab")
+            ahk.type("Reminder for ")
+            size = 0
+            for word in line:
+                size+=1
+                if now:
+                    line = line[size-1:]
+                    now=False
+                    break
+                elif re.fullmatch(NUMBER, word):
+                    ahk.key_press("Space")
+                    ahk.type(word)
+                    now = True
+                
+            for word in line:
+                if re.fullmatch("M", word):
+                    ahk.type("M")
+                    break
+                else:
+                    ahk.type(word)
+            ahk.key_press("Tab")
+            ahk.key_press("Tab")
+            ahk.type("t") #text
+            ahk.key_press("Tab")
+            ahk.type("pmojoNFD")
+            ahk.key_press("Tab")
+            time.sleep(2)
+                
+            ahk.key_press("Enter")
 
-        ahk.key_press("Tab")
-        ahk.key_press("Tab")
-        ahk.type("t") #text
-        ahk.key_press("Tab")
-        ahk.type("pmojoNFD")
-        ahk.key_press("Tab")
-        ahk.key_press("Enter")
-
-        ahk.type("l")
-        ahk.type("l")
-        ahk.type("n")
+            ahk.type("l")
+            ahk.type("l")
+            ahk.type("n")
         
         
 
@@ -605,26 +658,31 @@ def begin():
     softdent.set_focus()
 
     for line in lines:
-        line = line.replace("\n","")
-        ahk.type('f')
-        time.sleep(3)
-        ahk.type(line)
-        time.sleep(3)
-        ahk.key_press('Enter')
-        ahk.type("0ca")
-        ahk.key_press("Tab")
-        ahk.type("bday card")
-        ahk.key_press("Tab")
-        ahk.key_press("Tab")
-        ahk.type("e") #email
-        ahk.key_press("Tab")
-        ahk.type("pmojoNFD")
-        ahk.key_press("Tab")
-        ahk.key_press("Enter")
+        if line != "":
+                
+            line = line.replace("\n","")
+            ahk.key_press("Tab")
+            ahk.type('f')
+                
+            ahk.type(line)
+            time.sleep(3)
+            ahk.key_press('Enter')
+            ahk.type("0ca")
+            ahk.key_press("Tab")
+            ahk.type("bday card")
+            ahk.key_press("Tab")
+            ahk.key_press("Tab")
+            ahk.type("e") #email
+            ahk.key_press("Tab")
+            ahk.type("pmojoNFD")
+            ahk.key_press("Tab")
+            time.sleep(2)
+                
+            ahk.key_press("Enter")
 
-        ahk.type("l")
-        ahk.type("l")
-        ahk.type("n")
+            ahk.type("l")
+            ahk.type("l")
+            ahk.type("n")
 
         
 
@@ -702,26 +760,31 @@ def begin():
     softdent.set_focus()
 
     for line in lines:
-        line = line.replace("\n","")
-        ahk.type('f')
-        time.sleep(3)
-        ahk.type(line)
-        time.sleep(3)
-        ahk.key_press('Enter')
-        ahk.type("0ca")
-        ahk.key_press("Tab")
-        ahk.type("bday card")
-        ahk.key_press("Tab")
-        ahk.key_press("Tab")
-        ahk.type("l") #letter
-        ahk.key_press("Tab")
-        ahk.type("pmojoNFD")
-        ahk.key_press("Tab")
-        ahk.key_press("Enter")
+        if line != "":
+                
+            line = line.replace("\n","")
+            ahk.key_press("Tab")
+            ahk.type('f')
+                
+            ahk.type(line)
+            time.sleep(3)
+            ahk.key_press('Enter')
+            ahk.type("0ca")
+            ahk.key_press("Tab")
+            ahk.type("bday card")
+            ahk.key_press("Tab")
+            ahk.key_press("Tab")
+            ahk.type("l") #letter
+            ahk.key_press("Tab")
+            ahk.type("pmojoNFD")
+            ahk.key_press("Tab")
+            time.sleep(2)
+                
+            ahk.key_press("Enter")
 
-        ahk.type("l")
-        ahk.type("l")
-        ahk.type("n")
+            ahk.type("l")
+            ahk.type("l")
+            ahk.type("n")
 
         
 
@@ -800,26 +863,31 @@ def begin():
     softdent.set_focus()
 
     for line in lines:
-        line = line.replace("\n","")
-        ahk.type('f')
-        time.sleep(3)
-        ahk.type(line)
-        time.sleep(3)
-        ahk.key_press('Enter')
-        ahk.type("0ca")
-        ahk.key_press("Tab")
-        ahk.type("anniversary card")
-        ahk.key_press("Tab")
-        ahk.key_press("Tab")
-        ahk.type("l") #letter
-        ahk.key_press("Tab")
-        ahk.type("pmojoNFD")
-        ahk.key_press("Tab")
-        ahk.key_press("Enter")
+        if line != "":
+                
+            line = line.replace("\n","")
+            ahk.key_press("Tab")
+            ahk.type('f')
+                
+            ahk.type(line)
+            time.sleep(3)
+            ahk.key_press('Enter')
+            ahk.type("0ca")
+            ahk.key_press("Tab")
+            ahk.type("anniversary card")
+            ahk.key_press("Tab")
+            ahk.key_press("Tab")
+            ahk.type("l") #letter
+            ahk.key_press("Tab")
+            ahk.type("pmojoNFD")
+            ahk.key_press("Tab")
+            time.sleep(2)
+                
+            ahk.key_press("Enter")
 
-        ahk.type("l")
-        ahk.type("l")
-        ahk.type("n")
+            ahk.type("l")
+            ahk.type("l")
+            ahk.type("n")
 
         
 
@@ -898,26 +966,31 @@ def begin():
     softdent.set_focus()
 
     for line in lines:
-        line = line.replace("\n","")
-        ahk.type('f')
-        time.sleep(3)
-        ahk.type(line)
-        time.sleep(3)
-        ahk.key_press('Enter')
-        ahk.type("0ca")
-        ahk.key_press("Tab")
-        ahk.type("Reactivate: 1 year ago")
-        ahk.key_press("Tab")
-        ahk.key_press("Tab")
-        ahk.type("e") #email
-        ahk.key_press("Tab")
-        ahk.type("pmojoNFD")
-        ahk.key_press("Tab")
-        ahk.key_press("Enter")
+        if line != "":
+                
+            line = line.replace("\n","")
+            ahk.key_press("Tab")
+            ahk.type('f')
+                
+            ahk.type(line)
+            time.sleep(3)
+            ahk.key_press('Enter')
+            ahk.type("0ca")
+            ahk.key_press("Tab")
+            ahk.type("Reactivate: 1 year ago")
+            ahk.key_press("Tab")
+            ahk.key_press("Tab")
+            ahk.type("e") #email
+            ahk.key_press("Tab")
+            ahk.type("pmojoNFD")
+            ahk.key_press("Tab")
+            time.sleep(2)
+                
+            ahk.key_press("Enter")
 
-        ahk.type("l")
-        ahk.type("l")
-        ahk.type("n")
+            ahk.type("l")
+            ahk.type("l")
+            ahk.type("n")
 
         
 
@@ -995,26 +1068,31 @@ def begin():
     softdent.set_focus()
 
     for line in lines:
-        line = line.replace("\n","")
-        ahk.type('f')
-        time.sleep(3)
-        ahk.type(line)
-        time.sleep(3)
-        ahk.key_press('Enter')
-        ahk.type("0ca")
-        ahk.key_press("Tab")
-        ahk.type("Reactivate: 1 year ago")
-        ahk.key_press("Tab")
-        ahk.key_press("Tab")
-        ahk.type("l") #letter
-        ahk.key_press("Tab")
-        ahk.type("pmojoNFD")
-        ahk.key_press("Tab")
-        ahk.key_press("Enter")
+        if line != "":
+                
+            line = line.replace("\n","")
+            ahk.key_press("Tab")
+            ahk.type('f')
+                
+            ahk.type(line)
+            time.sleep(3)
+            ahk.key_press('Enter')
+            ahk.type("0ca")
+            ahk.key_press("Tab")
+            ahk.type("Reactivate: 1 year ago")
+            ahk.key_press("Tab")
+            ahk.key_press("Tab")
+            ahk.type("l") #letter
+            ahk.key_press("Tab")
+            ahk.type("pmojoNFD")
+            ahk.key_press("Tab")
+            time.sleep(2)
+                
+            ahk.key_press("Enter")
 
-        ahk.type("l")
-        ahk.type("l")
-        ahk.type("n")
+            ahk.type("l")
+            ahk.type("l")
+            ahk.type("n")
 
         
 
@@ -1092,27 +1170,32 @@ def begin():
     softdent.set_focus()
 
     for line in lines:
-        line = line.replace("\n","")
-        ahk.type('f')
-        time.sleep(3)
-        ahk.type(line)
-        time.sleep(3)
-        ahk.key_press('Enter')
-        ahk.type("0ca")
-        ahk.type("r")#recare
-        ahk.key_press("Tab")
-        ahk.type("Recare: Due")
-        ahk.key_press("Tab")
-        ahk.key_press("Tab")
-        ahk.type("e") #email
-        ahk.key_press("Tab")
-        ahk.type("pmojoNFD")
-        ahk.key_press("Tab")
-        ahk.key_press("Enter")
+        if line != "":
+                
+            line = line.replace("\n","")
+            ahk.key_press("Tab")
+            ahk.type('f')
+                
+            ahk.type(line)
+            time.sleep(3)
+            ahk.key_press('Enter')
+            ahk.type("0ca")
+            ahk.type("r")#recare
+            ahk.key_press("Tab")
+            ahk.type("Recare: Due")
+            ahk.key_press("Tab")
+            ahk.key_press("Tab")
+            ahk.type("e") #email
+            ahk.key_press("Tab")
+            ahk.type("pmojoNFD")
+            ahk.key_press("Tab")
+            time.sleep(2)
+                
+            ahk.key_press("Enter")
 
-        ahk.type("l")
-        ahk.type("l")
-        ahk.type("n")
+            ahk.type("l")
+            ahk.type("l")
+            ahk.type("n")
 
         
 
@@ -1190,27 +1273,32 @@ def begin():
     softdent.set_focus()
 
     for line in lines:
-        line = line.replace("\n","")
-        ahk.type('f')
-        time.sleep(3)
-        ahk.type(line)
-        time.sleep(3)
-        ahk.key_press('Enter')
-        ahk.type("0ca")
-        ahk.type("r")#recare
-        ahk.key_press("Tab")
-        ahk.type("Recare: Due")
-        ahk.key_press("Tab")
-        ahk.key_press("Tab")
-        ahk.type("t") #txt
-        ahk.key_press("Tab")
-        ahk.type("pmojoNFD")
-        ahk.key_press("Tab")
-        ahk.key_press("Enter")
+        if line != "":
+                
+            line = line.replace("\n","")
+            ahk.key_press("Tab")
+            ahk.type('f')
+                
+            ahk.type(line)
+            time.sleep(3)
+            ahk.key_press('Enter')
+            ahk.type("0ca")
+            ahk.type("r")#recare
+            ahk.key_press("Tab")
+            ahk.type("Recare: Due")
+            ahk.key_press("Tab")
+            ahk.key_press("Tab")
+            ahk.type("t") #txt
+            ahk.key_press("Tab")
+            ahk.type("pmojoNFD")
+            ahk.key_press("Tab")
+            time.sleep(2)
+                
+            ahk.key_press("Enter")
 
-        ahk.type("l")
-        ahk.type("l")
-        ahk.type("n")
+            ahk.type("l")
+            ahk.type("l")
+            ahk.type("n")
 
         
 
@@ -1288,27 +1376,32 @@ def begin():
     softdent.set_focus()
 
     for line in lines:
-        line = line.replace("\n","")
-        ahk.type('f')
-        time.sleep(3)
-        ahk.type(line)
-        time.sleep(3)
-        ahk.key_press('Enter')
-        ahk.type("0ca")
-        ahk.type("r")#recare
-        ahk.key_press("Tab")
-        ahk.type("Recare: Due")
-        ahk.key_press("Tab")
-        ahk.key_press("Tab")
-        ahk.type("l") #letter
-        ahk.key_press("Tab")
-        ahk.type("pmojoNFD")
-        ahk.key_press("Tab")
-        ahk.key_press("Enter")
+        if line != "":
+                
+            line = line.replace("\n","")
+            ahk.key_press("Tab")
+            ahk.type('f')
+                
+            ahk.type(line)
+            time.sleep(3)
+            ahk.key_press('Enter')
+            ahk.type("0ca")
+            ahk.type("r")#recare
+            ahk.key_press("Tab")
+            ahk.type("Recare: Due")
+            ahk.key_press("Tab")
+            ahk.key_press("Tab")
+            ahk.type("l") #letter
+            ahk.key_press("Tab")
+            ahk.type("pmojoNFD")
+            ahk.key_press("Tab")
+            time.sleep(2)
+                
+            ahk.key_press("Enter")
 
-        ahk.type("l")
-        ahk.type("l")
-        ahk.type("n")
+            ahk.type("l")
+            ahk.type("l")
+            ahk.type("n")
 
         
 
@@ -1386,27 +1479,32 @@ def begin():
     softdent.set_focus()
 
     for line in lines:
-        line = line.replace("\n","")
-        ahk.type('f')
-        time.sleep(3)
-        ahk.type(line)
-        time.sleep(3)
-        ahk.key_press('Enter')
-        ahk.type("0ca")
-        ahk.type("r")#recare
-        ahk.key_press("Tab")
-        ahk.type("Recare: Past Due")
-        ahk.key_press("Tab")
-        ahk.key_press("Tab")
-        ahk.type("l") #letter
-        ahk.key_press("Tab")
-        ahk.type("pmojoNFD")
-        ahk.key_press("Tab")
-        ahk.key_press("Enter")
+        if line != "":
+                
+            line = line.replace("\n","")
+            ahk.key_press("Tab")
+            ahk.type('f')
+                
+            ahk.type(line)
+            time.sleep(3)
+            ahk.key_press('Enter')
+            ahk.type("0ca")
+            ahk.type("r")#recare
+            ahk.key_press("Tab")
+            ahk.type("Recare: Past Due")
+            ahk.key_press("Tab")
+            ahk.key_press("Tab")
+            ahk.type("l") #letter
+            ahk.key_press("Tab")
+            ahk.type("pmojoNFD")
+            ahk.key_press("Tab")
+            time.sleep(2)
+                
+            ahk.key_press("Enter")
 
-        ahk.type("l")
-        ahk.type("l")
-        ahk.type("n")
+            ahk.type("l")
+            ahk.type("l")
+            ahk.type("n")
 
         
 
@@ -1484,27 +1582,32 @@ def begin():
     softdent.set_focus()
 
     for line in lines:
-        line = line.replace("\n","")
-        ahk.type('f')
-        time.sleep(3)
-        ahk.type(line)
-        time.sleep(3)
-        ahk.key_press('Enter')
-        ahk.type("0ca")
-        ahk.type("r")#recare
-        ahk.key_press("Tab")
-        ahk.type("Recare: Past Due")
-        ahk.key_press("Tab")
-        ahk.key_press("Tab")
-        ahk.type("e") #email
-        ahk.key_press("Tab")
-        ahk.type("pmojoNFD")
-        ahk.key_press("Tab")
-        ahk.key_press("Enter")
+        if line != "":
+                
+            line = line.replace("\n","")
+            ahk.key_press("Tab")
+            ahk.type('f')
+                
+            ahk.type(line)
+            time.sleep(3)
+            ahk.key_press('Enter')
+            ahk.type("0ca")
+            ahk.type("r")#recare
+            ahk.key_press("Tab")
+            ahk.type("Recare: Past Due")
+            ahk.key_press("Tab")
+            ahk.key_press("Tab")
+            ahk.type("e") #email
+            ahk.key_press("Tab")
+            ahk.type("pmojoNFD")
+            ahk.key_press("Tab")
+            time.sleep(2)
+                
+            ahk.key_press("Enter")
 
-        ahk.type("l")
-        ahk.type("l")
-        ahk.type("n")
+            ahk.type("l")
+            ahk.type("l")
+            ahk.type("n")
 
         
 
@@ -1582,27 +1685,32 @@ def begin():
     softdent.set_focus()
 
     for line in lines:
-        line = line.replace("\n","")
-        ahk.type('f')
-        time.sleep(3)
-        ahk.type(line)
-        time.sleep(3)
-        ahk.key_press('Enter')
-        ahk.type("0ca")
-        ahk.type("r")#recare
-        ahk.key_press("Tab")
-        ahk.type("Recare: Really Past Due")
-        ahk.key_press("Tab")
-        ahk.key_press("Tab")
-        ahk.type("e") #email
-        ahk.key_press("Tab")
-        ahk.type("pmojoNFD")
-        ahk.key_press("Tab")
-        ahk.key_press("Enter")
+        if line != "":
+                
+            line = line.replace("\n","")
+            ahk.key_press("Tab")
+            ahk.type('f')
+                
+            ahk.type(line)
+            time.sleep(3)
+            ahk.key_press('Enter')
+            ahk.type("0ca")
+            ahk.type("r")#recare
+            ahk.key_press("Tab")
+            ahk.type("Recare: Really Past Due")
+            ahk.key_press("Tab")
+            ahk.key_press("Tab")
+            ahk.type("e") #email
+            ahk.key_press("Tab")
+            ahk.type("pmojoNFD")
+            ahk.key_press("Tab")
+            time.sleep(2)
+                
+            ahk.key_press("Enter")
 
-        ahk.type("l")
-        ahk.type("l")
-        ahk.type("n")
+            ahk.type("l")
+            ahk.type("l")
+            ahk.type("n")
 
         
 
@@ -1680,27 +1788,32 @@ def begin():
 
 
     for line in lines:
-        line = line.replace("\n","")
-        ahk.type('f')
-        time.sleep(3)
-        ahk.type(line)
-        time.sleep(3)
-        ahk.key_press('Enter')
-        ahk.type("0ca")
-        ahk.type("r")#recare
-        ahk.key_press("Tab")
-        ahk.type("Recare: Really Past Due")
-        ahk.key_press("Tab")
-        ahk.key_press("Tab")
-        ahk.type("l") #letter
-        ahk.key_press("Tab")
-        ahk.type("pmojoNFD")
-        ahk.key_press("Tab")
-        ahk.key_press("Enter")
+        if line != "":
+                
+            line = line.replace("\n","")
+            ahk.key_press("Tab")
+            ahk.type('f')
+                
+            ahk.type(line)
+            time.sleep(3)
+            ahk.key_press('Enter')
+            ahk.type("0ca")
+            ahk.type("r")#recare
+            ahk.key_press("Tab")
+            ahk.type("Recare: Really Past Due")
+            ahk.key_press("Tab")
+            ahk.key_press("Tab")
+            ahk.type("l") #letter
+            ahk.key_press("Tab")
+            ahk.type("pmojoNFD")
+            ahk.key_press("Tab")
+            time.sleep(2)
+                
+            ahk.key_press("Enter")
 
-        ahk.type("l")
-        ahk.type("l")
-        ahk.type("n")
+            ahk.type("l")
+            ahk.type("l")
+            ahk.type("n")
 
     #chrome
     chrome.set_focus()
