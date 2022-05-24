@@ -164,6 +164,7 @@ def begin(date):
             ahk.key_press("Tab")
             ahk.type("pmojoNFD")
             ahk.key_press("Tab")
+            ahk.type(m+"/"+d+"/"+y)
             time.sleep(2)
                 
             ahk.key_press("Enter")
@@ -289,22 +290,25 @@ def begin(date):
 
     for line in lines:
         now = False
+        name = ""
         if line != "":
             first = True
-            line = line.replace("\n","")
-            ahk.key_press("Tab")
-            ahk.type('f')
-                
             for word in line:
                 if re.fullmatch(NUMBER, word):
                     break
                 elif word.isupper() and not first and re.match(comma,line):
-                    ahk.key_press("Space")
-                    ahk.type(word)
+                    name+=word
                 else:
-                    ahk.type(word)
+                    name+=word
                     first=False
-            time.sleep(15)
+
+            
+            line = line.replace("\n","")
+            ahk.key_press("Tab")
+            ahk.type('f')
+                
+            ahk.type(name)
+            time.sleep(3)
             ahk.key_press("Enter")
             ahk.type("0ca")
             ahk.type("cc")
@@ -334,6 +338,7 @@ def begin(date):
             ahk.key_press("Tab")
             ahk.type("pmojoNFD")
             ahk.key_press("Tab")
+            ahk.type(m+"/"+d+"/"+y)
             time.sleep(2)
                 
             ahk.key_press("Enter")
@@ -459,21 +464,24 @@ def begin(date):
 
     for line in lines:
         now = False
+        name = ""
         if line != "":
             first = True
-            line = line.replace("\n","")
-            ahk.key_press("Tab")
-            ahk.type('f')
-                
             for word in line:
                 if re.fullmatch(NUMBER, word):
                     break
                 elif word.isupper() and not first and re.match(comma,line):
-                    ahk.key_press("Space")
-                    ahk.type(word)
+                    name+=word
                 else:
-                    ahk.type(word)
+                    name+=word
                     first=False
+
+            
+            line = line.replace("\n","")
+            ahk.key_press("Tab")
+            ahk.type('f')
+                
+            ahk.type(name)
             time.sleep(3)
             ahk.key_press("Enter")
             ahk.type("0ca")
@@ -504,6 +512,7 @@ def begin(date):
             ahk.key_press("Tab")
             ahk.type("pmojoNFD")
             ahk.key_press("Tab")
+            ahk.type(m+"/"+d+"/"+y)
             time.sleep(2)
                 
             ahk.key_press("Enter")
@@ -628,21 +637,24 @@ def begin(date):
 
     for line in lines:
         now = False
+        name = ""
         if line != "":
             first = True
-            line = line.replace("\n","")
-            ahk.key_press("Tab")
-            ahk.type('f')
-                
             for word in line:
                 if re.fullmatch(NUMBER, word):
                     break
                 elif word.isupper() and not first and re.match(comma,line):
-                    ahk.key_press("Space")
-                    ahk.type(word)
+                    name+=word
                 else:
-                    ahk.type(word)
+                    name+=word
                     first=False
+
+            
+            line = line.replace("\n","")
+            ahk.key_press("Tab")
+            ahk.type('f')
+                
+            ahk.type(name)
             time.sleep(3)
             ahk.key_press("Enter")
             ahk.type("0ca")
@@ -673,6 +685,7 @@ def begin(date):
             ahk.key_press("Tab")
             ahk.type("pmojoNFD")
             ahk.key_press("Tab")
+            ahk.type(m+"/"+d+"/"+y)
             time.sleep(2)
                 
             ahk.key_press("Enter")
@@ -795,6 +808,7 @@ def begin(date):
             ahk.key_press("Tab")
             ahk.type("pmojoNFD")
             ahk.key_press("Tab")
+            ahk.type(m+"/"+d+"/"+y)
             time.sleep(2)
                 
             ahk.key_press("Enter")
@@ -917,6 +931,7 @@ def begin(date):
             ahk.key_press("Tab")
             ahk.type("pmojoNFD")
             ahk.key_press("Tab")
+            ahk.type(m+"/"+d+"/"+y)
             time.sleep(2)
                 
             ahk.key_press("Enter")
@@ -1040,6 +1055,7 @@ def begin(date):
             ahk.key_press("Tab")
             ahk.type("pmojoNFD")
             ahk.key_press("Tab")
+            ahk.type(m+"/"+d+"/"+y)
             time.sleep(2)
                 
             ahk.key_press("Enter")
@@ -1163,6 +1179,7 @@ def begin(date):
             ahk.key_press("Tab")
             ahk.type("pmojoNFD")
             ahk.key_press("Tab")
+            ahk.type(m+"/"+d+"/"+y)
             time.sleep(2)
                 
             ahk.key_press("Enter")
@@ -1285,6 +1302,7 @@ def begin(date):
             ahk.key_press("Tab")
             ahk.type("pmojoNFD")
             ahk.key_press("Tab")
+            ahk.type(m+"/"+d+"/"+y)
             time.sleep(2)
                 
             ahk.key_press("Enter")
@@ -1408,6 +1426,7 @@ def begin(date):
             ahk.key_press("Tab")
             ahk.type("pmojoNFD")
             ahk.key_press("Tab")
+            ahk.type(m+"/"+d+"/"+y)
             time.sleep(2)
                 
             ahk.key_press("Enter")
@@ -1531,6 +1550,7 @@ def begin(date):
             ahk.key_press("Tab")
             ahk.type("pmojoNFD")
             ahk.key_press("Tab")
+            ahk.type(m+"/"+d+"/"+y)
             time.sleep(2)
                 
             ahk.key_press("Enter")
@@ -1654,6 +1674,7 @@ def begin(date):
             ahk.key_press("Tab")
             ahk.type("pmojoNFD")
             ahk.key_press("Tab")
+            ahk.type(m+"/"+d+"/"+y)
             time.sleep(2)
                 
             ahk.key_press("Enter")
@@ -1777,6 +1798,7 @@ def begin(date):
             ahk.key_press("Tab")
             ahk.type("pmojoNFD")
             ahk.key_press("Tab")
+            ahk.type(m+"/"+d+"/"+y)
             time.sleep(2)
                 
             ahk.key_press("Enter")
@@ -1900,6 +1922,7 @@ def begin(date):
             ahk.key_press("Tab")
             ahk.type("pmojoNFD")
             ahk.key_press("Tab")
+            ahk.type(m+"/"+d+"/"+y)
             time.sleep(2)
                 
             ahk.key_press("Enter")
@@ -2023,6 +2046,7 @@ def begin(date):
             ahk.key_press("Tab")
             ahk.type("pmojoNFD")
             ahk.key_press("Tab")
+            ahk.type(m+"/"+d+"/"+y)
             time.sleep(2)
                 
             ahk.key_press("Enter")
@@ -2147,6 +2171,7 @@ def begin(date):
             ahk.key_press("Tab")
             ahk.type("pmojoNFD")
             ahk.key_press("Tab")
+            ahk.type(m+"/"+d+"/"+y)
             time.sleep(2)
                 
             ahk.key_press("Enter")
