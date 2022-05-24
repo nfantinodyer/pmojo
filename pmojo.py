@@ -85,8 +85,7 @@ def begin(date):
     alltext=""
     single=""
     lastlength = 1
-    
-    totalcount = 0
+
     totallines = 0
     for line in temp:
         totallines += 1
@@ -97,9 +96,9 @@ def begin(date):
             if re.search("Family", line):
                 continue
             count=0
+            line = line.replace("\t","")
             for letter in line:
                 count=count+1
-                totalcount=totalcount+1
                 if skip5>0:
                     skip5 -= 1
                 elif letter == " " and count==1:
@@ -107,7 +106,7 @@ def begin(date):
                 elif letter == ",":
                     numcomma+=1
                     if numcomma==1:
-                        commaindex=totalcount
+                        commaindex=len(alltext)
                     lastlength = count
                     alltext += letter
                 else:
@@ -115,7 +114,7 @@ def begin(date):
         #if second comma (Phd or DDS or etc removes first comma)
         if numcomma>1:
             tempt=""
-            noti = commaindex-totallines+1
+            noti = commaindex
             for i in range(len(alltext)):
                 if i != noti:
                     tempt = tempt + alltext[i]
@@ -126,7 +125,6 @@ def begin(date):
     alltext = alltext[:-1]
     alltext = alltext.replace("\t","")
     alltext = alltext.strip()
-
     for line in alltext:
         new_file.write(line)
         
@@ -208,9 +206,7 @@ def begin(date):
     single=""
     liststring=[]
     lastlength = 1
-    comma = ""
 
-    totalcount = 0
     totallines = 0
     for line in temp:
         totallines += 1
@@ -236,7 +232,6 @@ def begin(date):
                 count=0
                 for letter in line:
                     count=count+1
-                    totalcount=totalcount+1
                     if skip5>0:
                         skip5 -= 1
                     elif letter == " " and count==1:
@@ -244,9 +239,7 @@ def begin(date):
                     elif letter == ",":
                         numcomma+=1
                         if numcomma==1:
-                            commaindex=totalcount
-                        elif numcomma==2:
-                            comma = line
+                            commaindex=len(alltext)
                         lastlength = count
                         alltext += letter
                     elif letter == "@":
@@ -258,7 +251,7 @@ def begin(date):
         #if second comma (Phd or DDS or etc removes first comma)
         if numcomma>1:
             tempt=""
-            noti = commaindex-totallines+1
+            noti = commaindex
             for i in range(len(alltext)):
                 if i != noti:
                     tempt = tempt + alltext[i]
@@ -275,8 +268,6 @@ def begin(date):
 
     new_file.close()
 
-    #softdent
-    #app = Application().start("C:\Program Files (x86)\SoftDent\SoftDent.exe")
 
     num = "[0-9]+"
 
@@ -292,15 +283,11 @@ def begin(date):
         now = False
         name = ""
         if line != "":
-            first = True
             for word in line:
                 if re.fullmatch(NUMBER, word):
                     break
-                elif word.isupper() and not first and re.match(comma,line):
-                    name+=word
                 else:
                     name+=word
-                    first=False
 
             
             line = line.replace("\n","")
@@ -382,9 +369,7 @@ def begin(date):
     single=""
     liststring=[]
     lastlength = 1
-    comma = ""
 
-    totalcount = 0
     totallines = 0
     for line in temp:
         totallines += 1
@@ -410,7 +395,6 @@ def begin(date):
                 count=0
                 for letter in line:
                     count=count+1
-                    totalcount=totalcount+1
                     if skip5>0:
                         skip5 -= 1
                     elif letter == " " and count==1:
@@ -418,9 +402,7 @@ def begin(date):
                     elif letter == ",":
                         numcomma+=1
                         if numcomma==1:
-                            commaindex=totalcount
-                        elif numcomma==2:
-                            comma = line
+                            commaindex=len(alltext)
                         lastlength = count
                         alltext += letter
                     elif letter == "@":
@@ -432,7 +414,7 @@ def begin(date):
         #if second comma (Phd or DDS or etc removes first comma)
         if numcomma>1:
             tempt=""
-            noti = commaindex-totallines+1
+            noti = commaindex
             for i in range(len(alltext)):
                 if i != noti:
                     tempt = tempt + alltext[i]
@@ -449,8 +431,6 @@ def begin(date):
 
     new_file.close()
 
-    #softdent
-    #app = Application().start("C:\Program Files (x86)\SoftDent\SoftDent.exe")
 
     num = "[0-9]+"
 
@@ -466,15 +446,11 @@ def begin(date):
         now = False
         name = ""
         if line != "":
-            first = True
             for word in line:
                 if re.fullmatch(NUMBER, word):
                     break
-                elif word.isupper() and not first and re.match(comma,line):
-                    name+=word
                 else:
                     name+=word
-                    first=False
 
             
             line = line.replace("\n","")
@@ -508,7 +484,7 @@ def begin(date):
                     ahk.type(word)
             ahk.key_press("Tab")
             ahk.key_press("Tab")
-            ahk.type("e") #email
+            ahk.type("t") #text
             ahk.key_press("Tab")
             ahk.type("pmojoNFD")
             ahk.key_press("Tab")
@@ -555,9 +531,7 @@ def begin(date):
     single=""
     liststring=[]
     lastlength = 1
-    comma = ""
 
-    totalcount = 0
     totallines = 0
     for line in temp:
         totallines += 1
@@ -583,7 +557,6 @@ def begin(date):
                 count=0
                 for letter in line:
                     count=count+1
-                    totalcount=totalcount+1
                     if skip5>0:
                         skip5 -= 1
                     elif letter == " " and count==1:
@@ -591,9 +564,7 @@ def begin(date):
                     elif letter == ",":
                         numcomma+=1
                         if numcomma==1:
-                            commaindex=totalcount
-                        elif numcomma==2:
-                            comma = line
+                            commaindex=len(alltext)
                         lastlength = count
                         alltext += letter
                     elif letter == "@":
@@ -605,7 +576,7 @@ def begin(date):
         #if second comma (Phd or DDS or etc removes first comma)
         if numcomma>1:
             tempt=""
-            noti = commaindex-totallines+1
+            noti = commaindex
             for i in range(len(alltext)):
                 if i != noti:
                     tempt = tempt + alltext[i]
@@ -622,8 +593,6 @@ def begin(date):
 
     new_file.close()
 
-    #softdent
-    #app = Application().start("C:\Program Files (x86)\SoftDent\SoftDent.exe")
 
     num = "[0-9]+"
 
@@ -639,15 +608,11 @@ def begin(date):
         now = False
         name = ""
         if line != "":
-            first = True
             for word in line:
                 if re.fullmatch(NUMBER, word):
                     break
-                elif word.isupper() and not first and re.match(comma,line):
-                    name+=word
                 else:
                     name+=word
-                    first=False
 
             
             line = line.replace("\n","")
@@ -728,8 +693,6 @@ def begin(date):
     single=""
     lastlength = 1
 
-    
-    totalcount = 0
     totallines = 0
     for line in temp:
         totallines += 1
@@ -740,9 +703,9 @@ def begin(date):
             if re.search("Family", line):
                 continue
             count=0
+            line = line.replace("\t","")
             for letter in line:
                 count=count+1
-                totalcount=totalcount+1
                 if skip5>0:
                     skip5 -= 1
                 elif letter == " " and count==1:
@@ -750,7 +713,7 @@ def begin(date):
                 elif letter == ",":
                     numcomma+=1
                     if numcomma==1:
-                        commaindex=totalcount
+                        commaindex=len(alltext)
                     lastlength = count
                     alltext += letter
                 else:
@@ -758,7 +721,7 @@ def begin(date):
         #if second comma (Phd or DDS or etc removes first comma)
         if numcomma>1:
             tempt=""
-            noti = commaindex-totallines+1
+            noti = commaindex
             for i in range(len(alltext)):
                 if i != noti:
                     tempt = tempt + alltext[i]
@@ -851,8 +814,6 @@ def begin(date):
     single=""
     lastlength = 1
 
-    
-    totalcount = 0
     totallines = 0
     for line in temp:
         totallines += 1
@@ -863,9 +824,9 @@ def begin(date):
             if re.search("Family", line):
                 continue
             count=0
+            line = line.replace("\t","")
             for letter in line:
                 count=count+1
-                totalcount=totalcount+1
                 if skip5>0:
                     skip5 -= 1
                 elif letter == " " and count==1:
@@ -873,7 +834,7 @@ def begin(date):
                 elif letter == ",":
                     numcomma+=1
                     if numcomma==1:
-                        commaindex=totalcount
+                        commaindex=len(alltext)
                     lastlength = count
                     alltext += letter
                 else:
@@ -881,7 +842,7 @@ def begin(date):
         #if second comma (Phd or DDS or etc removes first comma)
         if numcomma>1:
             tempt=""
-            noti = commaindex-totallines+1
+            noti = commaindex
             for i in range(len(alltext)):
                 if i != noti:
                     tempt = tempt + alltext[i]
@@ -975,8 +936,6 @@ def begin(date):
     single=""
     lastlength = 1
 
-    
-    totalcount = 0
     totallines = 0
     for line in temp:
         totallines += 1
@@ -987,9 +946,9 @@ def begin(date):
             if re.search("Family", line):
                 continue
             count=0
+            line = line.replace("\t","")
             for letter in line:
                 count=count+1
-                totalcount=totalcount+1
                 if skip5>0:
                     skip5 -= 1
                 elif letter == " " and count==1:
@@ -997,7 +956,7 @@ def begin(date):
                 elif letter == ",":
                     numcomma+=1
                     if numcomma==1:
-                        commaindex=totalcount
+                        commaindex=len(alltext)
                     lastlength = count
                     alltext += letter
                 else:
@@ -1005,7 +964,7 @@ def begin(date):
         #if second comma (Phd or DDS or etc removes first comma)
         if numcomma>1:
             tempt=""
-            noti = commaindex-totallines+1
+            noti = commaindex
             for i in range(len(alltext)):
                 if i != noti:
                     tempt = tempt + alltext[i]
@@ -1099,8 +1058,6 @@ def begin(date):
     single=""
     lastlength = 1
 
-    
-    totalcount = 0
     totallines = 0
     for line in temp:
         totallines += 1
@@ -1111,9 +1068,9 @@ def begin(date):
             if re.search("Family", line):
                 continue
             count=0
+            line = line.replace("\t","")
             for letter in line:
                 count=count+1
-                totalcount=totalcount+1
                 if skip5>0:
                     skip5 -= 1
                 elif letter == " " and count==1:
@@ -1121,7 +1078,7 @@ def begin(date):
                 elif letter == ",":
                     numcomma+=1
                     if numcomma==1:
-                        commaindex=totalcount
+                        commaindex=len(alltext)
                     lastlength = count
                     alltext += letter
                 else:
@@ -1129,7 +1086,7 @@ def begin(date):
         #if second comma (Phd or DDS or etc removes first comma)
         if numcomma>1:
             tempt=""
-            noti = commaindex-totallines+1
+            noti = commaindex
             for i in range(len(alltext)):
                 if i != noti:
                     tempt = tempt + alltext[i]
@@ -1222,8 +1179,6 @@ def begin(date):
     single=""
     lastlength = 1
 
-    
-    totalcount = 0
     totallines = 0
     for line in temp:
         totallines += 1
@@ -1234,9 +1189,9 @@ def begin(date):
             if re.search("Family", line):
                 continue
             count=0
+            line = line.replace("\t","")
             for letter in line:
                 count=count+1
-                totalcount=totalcount+1
                 if skip5>0:
                     skip5 -= 1
                 elif letter == " " and count==1:
@@ -1244,7 +1199,7 @@ def begin(date):
                 elif letter == ",":
                     numcomma+=1
                     if numcomma==1:
-                        commaindex=totalcount
+                        commaindex=len(alltext)
                     lastlength = count
                     alltext += letter
                 else:
@@ -1252,7 +1207,7 @@ def begin(date):
         #if second comma (Phd or DDS or etc removes first comma)
         if numcomma>1:
             tempt=""
-            noti = commaindex-totallines+1
+            noti = commaindex
             for i in range(len(alltext)):
                 if i != noti:
                     tempt = tempt + alltext[i]
@@ -1345,8 +1300,6 @@ def begin(date):
     single=""
     lastlength = 1
 
-    
-    totalcount = 0
     totallines = 0
     for line in temp:
         totallines += 1
@@ -1357,9 +1310,9 @@ def begin(date):
             if re.search("Family", line):
                 continue
             count=0
+            line = line.replace("\t","")
             for letter in line:
                 count=count+1
-                totalcount=totalcount+1
                 if skip5>0:
                     skip5 -= 1
                 elif letter == " " and count==1:
@@ -1367,7 +1320,7 @@ def begin(date):
                 elif letter == ",":
                     numcomma+=1
                     if numcomma==1:
-                        commaindex=totalcount
+                        commaindex=len(alltext)
                     lastlength = count
                     alltext += letter
                 else:
@@ -1375,7 +1328,7 @@ def begin(date):
         #if second comma (Phd or DDS or etc removes first comma)
         if numcomma>1:
             tempt=""
-            noti = commaindex-totallines+1
+            noti = commaindex
             for i in range(len(alltext)):
                 if i != noti:
                     tempt = tempt + alltext[i]
@@ -1469,8 +1422,6 @@ def begin(date):
     single=""
     lastlength = 1
 
-    
-    totalcount = 0
     totallines = 0
     for line in temp:
         totallines += 1
@@ -1481,9 +1432,9 @@ def begin(date):
             if re.search("Family", line):
                 continue
             count=0
+            line = line.replace("\t","")
             for letter in line:
                 count=count+1
-                totalcount=totalcount+1
                 if skip5>0:
                     skip5 -= 1
                 elif letter == " " and count==1:
@@ -1491,7 +1442,7 @@ def begin(date):
                 elif letter == ",":
                     numcomma+=1
                     if numcomma==1:
-                        commaindex=totalcount
+                        commaindex=len(alltext)
                     lastlength = count
                     alltext += letter
                 else:
@@ -1499,7 +1450,7 @@ def begin(date):
         #if second comma (Phd or DDS or etc removes first comma)
         if numcomma>1:
             tempt=""
-            noti = commaindex-totallines+1
+            noti = commaindex
             for i in range(len(alltext)):
                 if i != noti:
                     tempt = tempt + alltext[i]
@@ -1593,8 +1544,6 @@ def begin(date):
     single=""
     lastlength = 1
 
-    
-    totalcount = 0
     totallines = 0
     for line in temp:
         totallines += 1
@@ -1605,9 +1554,9 @@ def begin(date):
             if re.search("Family", line):
                 continue
             count=0
+            line = line.replace("\t","")
             for letter in line:
                 count=count+1
-                totalcount=totalcount+1
                 if skip5>0:
                     skip5 -= 1
                 elif letter == " " and count==1:
@@ -1615,7 +1564,7 @@ def begin(date):
                 elif letter == ",":
                     numcomma+=1
                     if numcomma==1:
-                        commaindex=totalcount
+                        commaindex=len(alltext)
                     lastlength = count
                     alltext += letter
                 else:
@@ -1623,7 +1572,7 @@ def begin(date):
         #if second comma (Phd or DDS or etc removes first comma)
         if numcomma>1:
             tempt=""
-            noti = commaindex-totallines+1
+            noti = commaindex
             for i in range(len(alltext)):
                 if i != noti:
                     tempt = tempt + alltext[i]
@@ -1717,8 +1666,6 @@ def begin(date):
     single=""
     lastlength = 1
 
-    
-    totalcount = 0
     totallines = 0
     for line in temp:
         totallines += 1
@@ -1729,9 +1676,9 @@ def begin(date):
             if re.search("Family", line):
                 continue
             count=0
+            line = line.replace("\t","")
             for letter in line:
                 count=count+1
-                totalcount=totalcount+1
                 if skip5>0:
                     skip5 -= 1
                 elif letter == " " and count==1:
@@ -1739,7 +1686,7 @@ def begin(date):
                 elif letter == ",":
                     numcomma+=1
                     if numcomma==1:
-                        commaindex=totalcount
+                        commaindex=len(alltext)
                     lastlength = count
                     alltext += letter
                 else:
@@ -1747,7 +1694,7 @@ def begin(date):
         #if second comma (Phd or DDS or etc removes first comma)
         if numcomma>1:
             tempt=""
-            noti = commaindex-totallines+1
+            noti = commaindex
             for i in range(len(alltext)):
                 if i != noti:
                     tempt = tempt + alltext[i]
@@ -1841,8 +1788,6 @@ def begin(date):
     single=""
     lastlength = 1
 
-    
-    totalcount = 0
     totallines = 0
     for line in temp:
         totallines += 1
@@ -1853,9 +1798,9 @@ def begin(date):
             if re.search("Family", line):
                 continue
             count=0
+            line = line.replace("\t","")
             for letter in line:
                 count=count+1
-                totalcount=totalcount+1
                 if skip5>0:
                     skip5 -= 1
                 elif letter == " " and count==1:
@@ -1863,7 +1808,7 @@ def begin(date):
                 elif letter == ",":
                     numcomma+=1
                     if numcomma==1:
-                        commaindex=totalcount
+                        commaindex=len(alltext)
                     lastlength = count
                     alltext += letter
                 else:
@@ -1871,7 +1816,7 @@ def begin(date):
         #if second comma (Phd or DDS or etc removes first comma)
         if numcomma>1:
             tempt=""
-            noti = commaindex-totallines+1
+            noti = commaindex
             for i in range(len(alltext)):
                 if i != noti:
                     tempt = tempt + alltext[i]
@@ -1965,8 +1910,6 @@ def begin(date):
     single=""
     lastlength = 1
 
-    
-    totalcount = 0
     totallines = 0
     for line in temp:
         totallines += 1
@@ -1977,9 +1920,9 @@ def begin(date):
             if re.search("Family", line):
                 continue
             count=0
+            line = line.replace("\t","")
             for letter in line:
                 count=count+1
-                totalcount=totalcount+1
                 if skip5>0:
                     skip5 -= 1
                 elif letter == " " and count==1:
@@ -1987,7 +1930,7 @@ def begin(date):
                 elif letter == ",":
                     numcomma+=1
                     if numcomma==1:
-                        commaindex=totalcount
+                        commaindex=len(alltext)
                     lastlength = count
                     alltext += letter
                 else:
@@ -1995,7 +1938,7 @@ def begin(date):
         #if second comma (Phd or DDS or etc removes first comma)
         if numcomma>1:
             tempt=""
-            noti = commaindex-totallines+1
+            noti = commaindex
             for i in range(len(alltext)):
                 if i != noti:
                     tempt = tempt + alltext[i]
@@ -2089,8 +2032,6 @@ def begin(date):
     single=""
     lastlength = 1
 
-    
-    totalcount = 0
     totallines = 0
     for line in temp:
         totallines += 1
@@ -2101,9 +2042,9 @@ def begin(date):
             if re.search("Family", line):
                 continue
             count=0
+            line = line.replace("\t","")
             for letter in line:
                 count=count+1
-                totalcount=totalcount+1
                 if skip5>0:
                     skip5 -= 1
                 elif letter == " " and count==1:
@@ -2111,7 +2052,7 @@ def begin(date):
                 elif letter == ",":
                     numcomma+=1
                     if numcomma==1:
-                        commaindex=totalcount
+                        commaindex=len(alltext)
                     lastlength = count
                     alltext += letter
                 else:
@@ -2119,7 +2060,7 @@ def begin(date):
         #if second comma (Phd or DDS or etc removes first comma)
         if numcomma>1:
             tempt=""
-            noti = commaindex-totallines+1
+            noti = commaindex
             for i in range(len(alltext)):
                 if i != noti:
                     tempt = tempt + alltext[i]
