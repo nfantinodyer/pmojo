@@ -59,6 +59,7 @@ def begin(date):
 
     chrome.set_focus()
     driver.get("https://app.practicemojo.com/cgi-bin/WebObjects/PracticeMojo.woa/wa/gotoActivityDetail?td="+m+"%2F"+d+"%2F"+y+"&cdi=21&cdn=1")#bday adult postcard
+    time.sleep(1)
     send_keys("^a^c")
 
 
@@ -178,6 +179,7 @@ def begin(date):
 
 
     driver.get("https://app.practicemojo.com/cgi-bin/WebObjects/PracticeMojo.woa/wa/gotoActivityDetail?td="+m+"%2F"+d+"%2F"+y+"&cdi=23&cdn=2")#Courtesy Reminder	Text Message
+    time.sleep(1)
     send_keys("^a^c")
 
 
@@ -341,6 +343,7 @@ def begin(date):
 
 
     driver.get("https://app.practicemojo.com/cgi-bin/WebObjects/PracticeMojo.woa/wa/gotoActivityDetail?td="+m+"%2F"+d+"%2F"+y+"&cdi=23&cdn=1")#Courtesy Reminder	Email
+    time.sleep(1)
     send_keys("^a^c")
 
 
@@ -503,6 +506,7 @@ def begin(date):
     chrome.set_focus()
 
     driver.get("https://app.practicemojo.com/cgi-bin/WebObjects/PracticeMojo.woa/wa/gotoActivityDetail?td="+m+"%2F"+d+"%2F"+y+"&cdi=130&cdn=2")#Courtesy Reminder: Unconfirmed	Text Message
+    time.sleep(1)
     send_keys("^a^c")
 
 
@@ -665,6 +669,7 @@ def begin(date):
     chrome.set_focus()
 
     driver.get("https://app.practicemojo.com/cgi-bin/WebObjects/PracticeMojo.woa/wa/gotoActivityDetail?td="+m+"%2F"+d+"%2F"+y+"&cdi=36&cdn=1")#e-Birthday Adult	Email
+    time.sleep(1)
     send_keys("^a^c")
 
 
@@ -786,6 +791,7 @@ def begin(date):
     chrome.set_focus()
 
     driver.get("https://app.practicemojo.com/cgi-bin/WebObjects/PracticeMojo.woa/wa/gotoActivityDetail?td="+m+"%2F"+d+"%2F"+y+"&cdi=22&cdn=1")#Bday Child Postcard
+    time.sleep(1)
     send_keys("^a^c")
 
 
@@ -908,6 +914,7 @@ def begin(date):
 
 
     driver.get("https://app.practicemojo.com/cgi-bin/WebObjects/PracticeMojo.woa/wa/gotoActivityDetail?td="+m+"%2F"+d+"%2F"+y+"&cdi=35&cdn=1")#Happy Anniversary	Postcard
+    time.sleep(1)
     send_keys("^a^c")
 
 
@@ -1030,6 +1037,7 @@ def begin(date):
 
 
     driver.get("https://app.practicemojo.com/cgi-bin/WebObjects/PracticeMojo.woa/wa/gotoActivityDetail?td="+m+"%2F"+d+"%2F"+y+"&cdi=30&cdn=2")#Reactivate: 1 year ago	Email
+    time.sleep(1)
     send_keys("^a^c")
 
 
@@ -1151,6 +1159,7 @@ def begin(date):
     chrome.set_focus()
 
     driver.get("https://app.practicemojo.com/cgi-bin/WebObjects/PracticeMojo.woa/wa/gotoActivityDetail?td="+m+"%2F"+d+"%2F"+y+"&cdi=30&cdn=1")#Reactivate: 1 year ago	Postcard
+    time.sleep(1)
     send_keys("^a^c")
 
 
@@ -1272,6 +1281,7 @@ def begin(date):
     chrome.set_focus()
 
     driver.get("https://app.practicemojo.com/cgi-bin/WebObjects/PracticeMojo.woa/wa/gotoActivityDetail?td="+m+"%2F"+d+"%2F"+y+"&cdi=1&cdn=2")#Recare: Due	Email
+    time.sleep(1)
     send_keys("^a^c")
 
 
@@ -1394,6 +1404,7 @@ def begin(date):
     chrome.set_focus()
 
     driver.get("https://app.practicemojo.com/cgi-bin/WebObjects/PracticeMojo.woa/wa/gotoActivityDetail?td="+m+"%2F"+d+"%2F"+y+"&cdi=1&cdn=3")#Recare: Due	Text Message
+    time.sleep(1)
     send_keys("^a^c")
 
 
@@ -1516,6 +1527,7 @@ def begin(date):
     chrome.set_focus()
 
     driver.get("https://app.practicemojo.com/cgi-bin/WebObjects/PracticeMojo.woa/wa/gotoActivityDetail?td="+m+"%2F"+d+"%2F"+y+"&cdi=1&cdn=1")#Recare: Due    Postcard
+    time.sleep(1)
     send_keys("^a^c")
 
 
@@ -1638,6 +1650,7 @@ def begin(date):
     chrome.set_focus()
 
     driver.get("https://app.practicemojo.com/cgi-bin/WebObjects/PracticeMojo.woa/wa/gotoActivityDetail?td="+m+"%2F"+d+"%2F"+y+"&cdi=33&cdn=1")#Recare: Past Due	Postcard
+    time.sleep(1)
     send_keys("^a^c")
 
 
@@ -1760,6 +1773,7 @@ def begin(date):
     chrome.set_focus()
 
     driver.get("https://app.practicemojo.com/cgi-bin/WebObjects/PracticeMojo.woa/wa/gotoActivityDetail?td="+m+"%2F"+d+"%2F"+y+"&cdi=33&cdn=2")#Recare: Past Due	Email
+    time.sleep(1)
     send_keys("^a^c")
 
 
@@ -1882,6 +1896,7 @@ def begin(date):
     chrome.set_focus()
 
     driver.get("https://app.practicemojo.com/cgi-bin/WebObjects/PracticeMojo.woa/wa/gotoActivityDetail?td="+m+"%2F"+d+"%2F"+y+"&cdi=8&cdn=2")#Recare: Really Past Due	Email
+    time.sleep(1)
     send_keys("^a^c")
 
 
@@ -2004,6 +2019,7 @@ def begin(date):
     chrome.set_focus()
 
     driver.get("https://app.practicemojo.com/cgi-bin/WebObjects/PracticeMojo.woa/wa/gotoActivityDetail?td="+m+"%2F"+d+"%2F"+y+"&cdi=8&cdn=1")#Recare: Really Past Due	Postcard
+    time.sleep(1)
     send_keys("^a^c")
 
 
