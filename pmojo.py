@@ -1,3 +1,4 @@
+from binhex import LINELEN
 from selenium import webdriver
 import chromedriver_binary
 from selenium.webdriver.common.keys import Keys
@@ -20,14 +21,17 @@ window.title("Pmojo")
 window.columnconfigure(0, weight=1,minsize=250)
 window.rowconfigure(0, weight=1, minsize=250)
 
-def begin():
+def begin(date):
 
     #date
-    today = date.today()
-    d = today.strftime("%d")
-    m = today.strftime("%m")
-    y = today.strftime("%Y")
+    #today = date.today()
+    #d = today.strftime("%d")
+    #m = today.strftime("%m")
+    #y = today.strftime("%Y")
 
+    m = date[0:2]
+    d = date[3:5]
+    y = date[6:10]
 
     #ahk
     ahk = AHK()
@@ -82,7 +86,10 @@ def begin():
     single=""
     lastlength = 1
     
+    totalcount = 0
+    totallines = 0
     for line in temp:
+        totallines += 1
         numcomma = 0
         commaindex = 0
         if line[0:lastlength+3] not in single:
@@ -92,6 +99,7 @@ def begin():
             count=0
             for letter in line:
                 count=count+1
+                totalcount=totalcount+1
                 if skip5>0:
                     skip5 -= 1
                 elif letter == " " and count==1:
@@ -99,16 +107,17 @@ def begin():
                 elif letter == ",":
                     numcomma+=1
                     if numcomma==1:
-                        commaindex=count
+                        commaindex=totalcount
                     lastlength = count
                     alltext += letter
                 else:
                     alltext += letter
         #if second comma (Phd or DDS or etc removes first comma)
-        if numcomma>0:
+        if numcomma>1:
             tempt=""
+            noti = commaindex-totallines+1
             for i in range(len(alltext)):
-                if i != commaindex-1:
+                if i != noti:
                     tempt = tempt + alltext[i]
             alltext = tempt
         alltext = alltext.rstrip()
@@ -198,11 +207,14 @@ def begin():
     single=""
     liststring=[]
     lastlength = 1
+    comma = ""
 
+    totalcount = 0
+    totallines = 0
     for line in temp:
+        totallines += 1
         numcomma = 0
         commaindex = 0
-
         if line[0:lastlength+3] in single:
             for li in liststring:
                 if li[0:lastlength+3]==line[0:lastlength+3]:
@@ -223,14 +235,17 @@ def begin():
                 count=0
                 for letter in line:
                     count=count+1
+                    totalcount=totalcount+1
                     if skip5>0:
                         skip5 -= 1
                     elif letter == " " and count==1:
                         skip5 = 5
                     elif letter == ",":
                         numcomma+=1
-                        if numcomma==2:
-                            commaindex=count
+                        if numcomma==1:
+                            commaindex=totalcount
+                        elif numcomma==2:
+                            comma = line
                         lastlength = count
                         alltext += letter
                     elif letter == "@":
@@ -238,12 +253,13 @@ def begin():
                         next6=count
                     else:
                         alltext += letter
-    
+
         #if second comma (Phd or DDS or etc removes first comma)
-        if numcomma>0:
+        if numcomma>1:
             tempt=""
+            noti = commaindex-totallines+1
             for i in range(len(alltext)):
-                if i != commaindex-1:
+                if i != noti:
                     tempt = tempt + alltext[i]
             alltext = tempt
         alltext = alltext.rstrip()
@@ -274,7 +290,7 @@ def begin():
     for line in lines:
         now = False
         if line != "":
-                
+            first = True
             line = line.replace("\n","")
             ahk.key_press("Tab")
             ahk.type('f')
@@ -282,9 +298,13 @@ def begin():
             for word in line:
                 if re.fullmatch(NUMBER, word):
                     break
+                elif word.isupper() and not first and re.match(comma,line):
+                    ahk.key_press("Space")
+                    ahk.type(word)
                 else:
                     ahk.type(word)
-            time.sleep(3)
+                    first=False
+            time.sleep(15)
             ahk.key_press("Enter")
             ahk.type("0ca")
             ahk.type("cc")
@@ -357,12 +377,14 @@ def begin():
     single=""
     liststring=[]
     lastlength = 1
+    comma = ""
 
-
+    totalcount = 0
+    totallines = 0
     for line in temp:
+        totallines += 1
         numcomma = 0
         commaindex = 0
-
         if line[0:lastlength+3] in single:
             for li in liststring:
                 if li[0:lastlength+3]==line[0:lastlength+3]:
@@ -383,14 +405,17 @@ def begin():
                 count=0
                 for letter in line:
                     count=count+1
+                    totalcount=totalcount+1
                     if skip5>0:
                         skip5 -= 1
                     elif letter == " " and count==1:
                         skip5 = 5
                     elif letter == ",":
                         numcomma+=1
-                        if numcomma==2:
-                            commaindex=count
+                        if numcomma==1:
+                            commaindex=totalcount
+                        elif numcomma==2:
+                            comma = line
                         lastlength = count
                         alltext += letter
                     elif letter == "@":
@@ -398,12 +423,13 @@ def begin():
                         next6=count
                     else:
                         alltext += letter
-    
+
         #if second comma (Phd or DDS or etc removes first comma)
-        if numcomma>0:
+        if numcomma>1:
             tempt=""
+            noti = commaindex-totallines+1
             for i in range(len(alltext)):
-                if i != commaindex-1:
+                if i != noti:
                     tempt = tempt + alltext[i]
             alltext = tempt
         alltext = alltext.rstrip()
@@ -434,7 +460,7 @@ def begin():
     for line in lines:
         now = False
         if line != "":
-                
+            first = True
             line = line.replace("\n","")
             ahk.key_press("Tab")
             ahk.type('f')
@@ -442,8 +468,12 @@ def begin():
             for word in line:
                 if re.fullmatch(NUMBER, word):
                     break
+                elif word.isupper() and not first and re.match(comma,line):
+                    ahk.key_press("Space")
+                    ahk.type(word)
                 else:
                     ahk.type(word)
+                    first=False
             time.sleep(3)
             ahk.key_press("Enter")
             ahk.type("0ca")
@@ -516,12 +546,14 @@ def begin():
     single=""
     liststring=[]
     lastlength = 1
+    comma = ""
 
-
+    totalcount = 0
+    totallines = 0
     for line in temp:
+        totallines += 1
         numcomma = 0
         commaindex = 0
-
         if line[0:lastlength+3] in single:
             for li in liststring:
                 if li[0:lastlength+3]==line[0:lastlength+3]:
@@ -542,14 +574,17 @@ def begin():
                 count=0
                 for letter in line:
                     count=count+1
+                    totalcount=totalcount+1
                     if skip5>0:
                         skip5 -= 1
                     elif letter == " " and count==1:
                         skip5 = 5
                     elif letter == ",":
                         numcomma+=1
-                        if numcomma==2:
-                            commaindex=count
+                        if numcomma==1:
+                            commaindex=totalcount
+                        elif numcomma==2:
+                            comma = line
                         lastlength = count
                         alltext += letter
                     elif letter == "@":
@@ -557,12 +592,13 @@ def begin():
                         next6=count
                     else:
                         alltext += letter
-    
+
         #if second comma (Phd or DDS or etc removes first comma)
-        if numcomma>0:
+        if numcomma>1:
             tempt=""
+            noti = commaindex-totallines+1
             for i in range(len(alltext)):
-                if i != commaindex-1:
+                if i != noti:
                     tempt = tempt + alltext[i]
             alltext = tempt
         alltext = alltext.rstrip()
@@ -593,7 +629,7 @@ def begin():
     for line in lines:
         now = False
         if line != "":
-                
+            first = True
             line = line.replace("\n","")
             ahk.key_press("Tab")
             ahk.type('f')
@@ -601,8 +637,12 @@ def begin():
             for word in line:
                 if re.fullmatch(NUMBER, word):
                     break
+                elif word.isupper() and not first and re.match(comma,line):
+                    ahk.key_press("Space")
+                    ahk.type(word)
                 else:
                     ahk.type(word)
+                    first=False
             time.sleep(3)
             ahk.key_press("Enter")
             ahk.type("0ca")
@@ -675,7 +715,11 @@ def begin():
     single=""
     lastlength = 1
 
+    
+    totalcount = 0
+    totallines = 0
     for line in temp:
+        totallines += 1
         numcomma = 0
         commaindex = 0
         if line[0:lastlength+3] not in single:
@@ -685,6 +729,7 @@ def begin():
             count=0
             for letter in line:
                 count=count+1
+                totalcount=totalcount+1
                 if skip5>0:
                     skip5 -= 1
                 elif letter == " " and count==1:
@@ -692,16 +737,17 @@ def begin():
                 elif letter == ",":
                     numcomma+=1
                     if numcomma==1:
-                        commaindex=count
+                        commaindex=totalcount
                     lastlength = count
                     alltext += letter
                 else:
                     alltext += letter
         #if second comma (Phd or DDS or etc removes first comma)
-        if numcomma>0:
+        if numcomma>1:
             tempt=""
+            noti = commaindex-totallines+1
             for i in range(len(alltext)):
-                if i != commaindex-1:
+                if i != noti:
                     tempt = tempt + alltext[i]
             alltext = tempt
         alltext = alltext.rstrip()
@@ -791,7 +837,11 @@ def begin():
     single=""
     lastlength = 1
 
+    
+    totalcount = 0
+    totallines = 0
     for line in temp:
+        totallines += 1
         numcomma = 0
         commaindex = 0
         if line[0:lastlength+3] not in single:
@@ -801,6 +851,7 @@ def begin():
             count=0
             for letter in line:
                 count=count+1
+                totalcount=totalcount+1
                 if skip5>0:
                     skip5 -= 1
                 elif letter == " " and count==1:
@@ -808,16 +859,17 @@ def begin():
                 elif letter == ",":
                     numcomma+=1
                     if numcomma==1:
-                        commaindex=count
+                        commaindex=totalcount
                     lastlength = count
                     alltext += letter
                 else:
                     alltext += letter
         #if second comma (Phd or DDS or etc removes first comma)
-        if numcomma>0:
+        if numcomma>1:
             tempt=""
+            noti = commaindex-totallines+1
             for i in range(len(alltext)):
-                if i != commaindex-1:
+                if i != noti:
                     tempt = tempt + alltext[i]
             alltext = tempt
         alltext = alltext.rstrip()
@@ -908,7 +960,11 @@ def begin():
     single=""
     lastlength = 1
 
+    
+    totalcount = 0
+    totallines = 0
     for line in temp:
+        totallines += 1
         numcomma = 0
         commaindex = 0
         if line[0:lastlength+3] not in single:
@@ -918,6 +974,7 @@ def begin():
             count=0
             for letter in line:
                 count=count+1
+                totalcount=totalcount+1
                 if skip5>0:
                     skip5 -= 1
                 elif letter == " " and count==1:
@@ -925,16 +982,17 @@ def begin():
                 elif letter == ",":
                     numcomma+=1
                     if numcomma==1:
-                        commaindex=count
+                        commaindex=totalcount
                     lastlength = count
                     alltext += letter
                 else:
                     alltext += letter
         #if second comma (Phd or DDS or etc removes first comma)
-        if numcomma>0:
+        if numcomma>1:
             tempt=""
+            noti = commaindex-totallines+1
             for i in range(len(alltext)):
-                if i != commaindex-1:
+                if i != noti:
                     tempt = tempt + alltext[i]
             alltext = tempt
         alltext = alltext.rstrip()
@@ -1025,7 +1083,11 @@ def begin():
     single=""
     lastlength = 1
 
+    
+    totalcount = 0
+    totallines = 0
     for line in temp:
+        totallines += 1
         numcomma = 0
         commaindex = 0
         if line[0:lastlength+3] not in single:
@@ -1035,6 +1097,7 @@ def begin():
             count=0
             for letter in line:
                 count=count+1
+                totalcount=totalcount+1
                 if skip5>0:
                     skip5 -= 1
                 elif letter == " " and count==1:
@@ -1042,16 +1105,17 @@ def begin():
                 elif letter == ",":
                     numcomma+=1
                     if numcomma==1:
-                        commaindex=count
+                        commaindex=totalcount
                     lastlength = count
                     alltext += letter
                 else:
                     alltext += letter
         #if second comma (Phd or DDS or etc removes first comma)
-        if numcomma>0:
+        if numcomma>1:
             tempt=""
+            noti = commaindex-totallines+1
             for i in range(len(alltext)):
-                if i != commaindex-1:
+                if i != noti:
                     tempt = tempt + alltext[i]
             alltext = tempt
         alltext = alltext.rstrip()
@@ -1141,7 +1205,11 @@ def begin():
     single=""
     lastlength = 1
 
+    
+    totalcount = 0
+    totallines = 0
     for line in temp:
+        totallines += 1
         numcomma = 0
         commaindex = 0
         if line[0:lastlength+3] not in single:
@@ -1151,6 +1219,7 @@ def begin():
             count=0
             for letter in line:
                 count=count+1
+                totalcount=totalcount+1
                 if skip5>0:
                     skip5 -= 1
                 elif letter == " " and count==1:
@@ -1158,16 +1227,17 @@ def begin():
                 elif letter == ",":
                     numcomma+=1
                     if numcomma==1:
-                        commaindex=count
+                        commaindex=totalcount
                     lastlength = count
                     alltext += letter
                 else:
                     alltext += letter
         #if second comma (Phd or DDS or etc removes first comma)
-        if numcomma>0:
+        if numcomma>1:
             tempt=""
+            noti = commaindex-totallines+1
             for i in range(len(alltext)):
-                if i != commaindex-1:
+                if i != noti:
                     tempt = tempt + alltext[i]
             alltext = tempt
         alltext = alltext.rstrip()
@@ -1257,7 +1327,11 @@ def begin():
     single=""
     lastlength = 1
 
+    
+    totalcount = 0
+    totallines = 0
     for line in temp:
+        totallines += 1
         numcomma = 0
         commaindex = 0
         if line[0:lastlength+3] not in single:
@@ -1267,6 +1341,7 @@ def begin():
             count=0
             for letter in line:
                 count=count+1
+                totalcount=totalcount+1
                 if skip5>0:
                     skip5 -= 1
                 elif letter == " " and count==1:
@@ -1274,16 +1349,17 @@ def begin():
                 elif letter == ",":
                     numcomma+=1
                     if numcomma==1:
-                        commaindex=count
+                        commaindex=totalcount
                     lastlength = count
                     alltext += letter
                 else:
                     alltext += letter
         #if second comma (Phd or DDS or etc removes first comma)
-        if numcomma>0:
+        if numcomma>1:
             tempt=""
+            noti = commaindex-totallines+1
             for i in range(len(alltext)):
-                if i != commaindex-1:
+                if i != noti:
                     tempt = tempt + alltext[i]
             alltext = tempt
         alltext = alltext.rstrip()
@@ -1374,7 +1450,11 @@ def begin():
     single=""
     lastlength = 1
 
+    
+    totalcount = 0
+    totallines = 0
     for line in temp:
+        totallines += 1
         numcomma = 0
         commaindex = 0
         if line[0:lastlength+3] not in single:
@@ -1384,6 +1464,7 @@ def begin():
             count=0
             for letter in line:
                 count=count+1
+                totalcount=totalcount+1
                 if skip5>0:
                     skip5 -= 1
                 elif letter == " " and count==1:
@@ -1391,16 +1472,17 @@ def begin():
                 elif letter == ",":
                     numcomma+=1
                     if numcomma==1:
-                        commaindex=count
+                        commaindex=totalcount
                     lastlength = count
                     alltext += letter
                 else:
                     alltext += letter
         #if second comma (Phd or DDS or etc removes first comma)
-        if numcomma>0:
+        if numcomma>1:
             tempt=""
+            noti = commaindex-totallines+1
             for i in range(len(alltext)):
-                if i != commaindex-1:
+                if i != noti:
                     tempt = tempt + alltext[i]
             alltext = tempt
         alltext = alltext.rstrip()
@@ -1491,7 +1573,11 @@ def begin():
     single=""
     lastlength = 1
 
+    
+    totalcount = 0
+    totallines = 0
     for line in temp:
+        totallines += 1
         numcomma = 0
         commaindex = 0
         if line[0:lastlength+3] not in single:
@@ -1501,6 +1587,7 @@ def begin():
             count=0
             for letter in line:
                 count=count+1
+                totalcount=totalcount+1
                 if skip5>0:
                     skip5 -= 1
                 elif letter == " " and count==1:
@@ -1508,16 +1595,17 @@ def begin():
                 elif letter == ",":
                     numcomma+=1
                     if numcomma==1:
-                        commaindex=count
+                        commaindex=totalcount
                     lastlength = count
                     alltext += letter
                 else:
                     alltext += letter
         #if second comma (Phd or DDS or etc removes first comma)
-        if numcomma>0:
+        if numcomma>1:
             tempt=""
+            noti = commaindex-totallines+1
             for i in range(len(alltext)):
-                if i != commaindex-1:
+                if i != noti:
                     tempt = tempt + alltext[i]
             alltext = tempt
         alltext = alltext.rstrip()
@@ -1608,7 +1696,11 @@ def begin():
     single=""
     lastlength = 1
 
+    
+    totalcount = 0
+    totallines = 0
     for line in temp:
+        totallines += 1
         numcomma = 0
         commaindex = 0
         if line[0:lastlength+3] not in single:
@@ -1618,6 +1710,7 @@ def begin():
             count=0
             for letter in line:
                 count=count+1
+                totalcount=totalcount+1
                 if skip5>0:
                     skip5 -= 1
                 elif letter == " " and count==1:
@@ -1625,16 +1718,17 @@ def begin():
                 elif letter == ",":
                     numcomma+=1
                     if numcomma==1:
-                        commaindex=count
+                        commaindex=totalcount
                     lastlength = count
                     alltext += letter
                 else:
                     alltext += letter
         #if second comma (Phd or DDS or etc removes first comma)
-        if numcomma>0:
+        if numcomma>1:
             tempt=""
+            noti = commaindex-totallines+1
             for i in range(len(alltext)):
-                if i != commaindex-1:
+                if i != noti:
                     tempt = tempt + alltext[i]
             alltext = tempt
         alltext = alltext.rstrip()
@@ -1725,7 +1819,11 @@ def begin():
     single=""
     lastlength = 1
 
+    
+    totalcount = 0
+    totallines = 0
     for line in temp:
+        totallines += 1
         numcomma = 0
         commaindex = 0
         if line[0:lastlength+3] not in single:
@@ -1735,6 +1833,7 @@ def begin():
             count=0
             for letter in line:
                 count=count+1
+                totalcount=totalcount+1
                 if skip5>0:
                     skip5 -= 1
                 elif letter == " " and count==1:
@@ -1742,16 +1841,17 @@ def begin():
                 elif letter == ",":
                     numcomma+=1
                     if numcomma==1:
-                        commaindex=count
+                        commaindex=totalcount
                     lastlength = count
                     alltext += letter
                 else:
                     alltext += letter
         #if second comma (Phd or DDS or etc removes first comma)
-        if numcomma>0:
+        if numcomma>1:
             tempt=""
+            noti = commaindex-totallines+1
             for i in range(len(alltext)):
-                if i != commaindex-1:
+                if i != noti:
                     tempt = tempt + alltext[i]
             alltext = tempt
         alltext = alltext.rstrip()
@@ -1842,7 +1942,11 @@ def begin():
     single=""
     lastlength = 1
 
+    
+    totalcount = 0
+    totallines = 0
     for line in temp:
+        totallines += 1
         numcomma = 0
         commaindex = 0
         if line[0:lastlength+3] not in single:
@@ -1852,6 +1956,7 @@ def begin():
             count=0
             for letter in line:
                 count=count+1
+                totalcount=totalcount+1
                 if skip5>0:
                     skip5 -= 1
                 elif letter == " " and count==1:
@@ -1859,16 +1964,17 @@ def begin():
                 elif letter == ",":
                     numcomma+=1
                     if numcomma==1:
-                        commaindex=count
+                        commaindex=totalcount
                     lastlength = count
                     alltext += letter
                 else:
                     alltext += letter
         #if second comma (Phd or DDS or etc removes first comma)
-        if numcomma>0:
+        if numcomma>1:
             tempt=""
+            noti = commaindex-totallines+1
             for i in range(len(alltext)):
-                if i != commaindex-1:
+                if i != noti:
                     tempt = tempt + alltext[i]
             alltext = tempt
         alltext = alltext.rstrip()
@@ -1959,7 +2065,11 @@ def begin():
     single=""
     lastlength = 1
 
+    
+    totalcount = 0
+    totallines = 0
     for line in temp:
+        totallines += 1
         numcomma = 0
         commaindex = 0
         if line[0:lastlength+3] not in single:
@@ -1969,6 +2079,7 @@ def begin():
             count=0
             for letter in line:
                 count=count+1
+                totalcount=totalcount+1
                 if skip5>0:
                     skip5 -= 1
                 elif letter == " " and count==1:
@@ -1976,16 +2087,17 @@ def begin():
                 elif letter == ",":
                     numcomma+=1
                     if numcomma==1:
-                        commaindex=count
+                        commaindex=totalcount
                     lastlength = count
                     alltext += letter
                 else:
                     alltext += letter
         #if second comma (Phd or DDS or etc removes first comma)
-        if numcomma>0:
+        if numcomma>1:
             tempt=""
+            noti = commaindex-totallines+1
             for i in range(len(alltext)):
-                if i != commaindex-1:
+                if i != noti:
                     tempt = tempt + alltext[i]
             alltext = tempt
         alltext = alltext.rstrip()
@@ -2046,7 +2158,16 @@ def begin():
     #chrome
     chrome.set_focus()
 
-button = tk.Button(text="Start", width=10, height=2, command=lambda: begin())
+entrylabel = tk.Label(text="Enter the date MM/DD/YYYY: ")
+entrylabel.pack(side=tk.TOP,anchor=tk.W)
+
+frame1 = tk.Frame(window, width=50, relief=tk.SUNKEN)
+frame1.pack(fill=tk.X)
+
+one = tk.Entry(frame1,width=50)
+one.pack(side = tk.LEFT,padx=2,pady=5)
+
+button = tk.Button(text="Start", width=10, height=2, command=lambda: begin(one.get()))
 button.pack(anchor=tk.W,padx=2, pady=5)
 
 button = tk.Button(text="Exit", command=quit, width=10, height=2)
