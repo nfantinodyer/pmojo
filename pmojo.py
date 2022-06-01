@@ -1,4 +1,5 @@
 from binhex import LINELEN
+from http.server import executable
 from selenium import webdriver
 import chromedriver_binary
 from selenium.webdriver.common.keys import Keys
@@ -34,7 +35,7 @@ def begin(date):
     y = date[6:10]
 
     #ahk
-    ahk = AHK()
+    ahk = AHK(executable_path="C:\\Users\\DrDsDesk.OMDC.000\\AppData\\Local\\Programs\\Python\\Python310\\Scripts\\AutoHotKey.exe")
 
     #chrome
     driver = webdriver.Chrome() #executable_path=r"C:\Program Files (x86)\Microsoft Visual Studio\Shared\Python37_64\chromedriver.exe"
@@ -96,6 +97,15 @@ def begin(date):
             single += line
             if re.search("Family", line):
                 continue
+            if re.search("Address",line):
+                lengthRemove = 0
+                for i in range(5, len(line)):
+                    if line[i] == "A" and line[i+1] == "d" and line[i+2] == "d" and line[i+3] == "r" and line[i+4] == "e" and line[i+5] == "s":
+                        lengthRemove = i
+                        break
+                line = line[0:lengthRemove]
+                line += "\n"
+
             count=0
             line = line.replace("\t","")
             for letter in line:
@@ -125,6 +135,8 @@ def begin(date):
         
     alltext = alltext[:-1]
     alltext = alltext.replace("\t","")
+    alltext = alltext.replace("Bounced","")
+    alltext = alltext.replace("Opt Out","")
     alltext = alltext.strip()
     for line in alltext:
         new_file.write(line)
@@ -215,15 +227,16 @@ def begin(date):
         numcomma = 0
         commaindex = 0
         if line[0:lastlength+3] in single:
-            for li in liststring:
-                if li[0:lastlength+3]==line[0:lastlength+3]:
-                    if line[next6+1:next6+3]<="12" and line[next6+1:next6+3]>="7":
-                        if line[next6+1:next6+3] > li[next6+1:next6+3]:
+            if re.search("@", line):
+                for li in liststring:
+                    if li[0:lastlength+3]==line[0:lastlength+3]:
+                        if line[next6+1:next6+3]<="12" and line[next6+1:next6+3]>="7":
+                            if line[next6+1:next6+3] > li[next6+1:next6+3]:
+                                single = single[0:len(single)-len(li)]
+                                alltext = alltext[0:len(alltext)-(len(li)-6)]
+                        elif line[next6+1:next6+3] < li[next6+1:next6+3]:
                             single = single[0:len(single)-len(li)]
-                            alltext = alltext[0:len(alltext)-(len(li)-6)]
-                    elif line[next6+1:next6+3] < li[next6+1:next6+3]:
-                        single = single[0:len(single)-len(li)]
-                        alltext = alltext[0:len(alltext)-(len(li)-6)]    
+                            alltext = alltext[0:len(alltext)-(len(li)-6)]    
 
         if line[0:lastlength+3] not in single:
             single+=line
@@ -379,15 +392,16 @@ def begin(date):
         numcomma = 0
         commaindex = 0
         if line[0:lastlength+3] in single:
-            for li in liststring:
-                if li[0:lastlength+3]==line[0:lastlength+3]:
-                    if line[next6+1:next6+3]<="12" and line[next6+1:next6+3]>="7":
-                        if line[next6+1:next6+3] > li[next6+1:next6+3]:
+            if re.search("@", line):
+                for li in liststring:
+                    if li[0:lastlength+3]==line[0:lastlength+3]:
+                        if line[next6+1:next6+3]<="12" and line[next6+1:next6+3]>="7":
+                            if line[next6+1:next6+3] > li[next6+1:next6+3]:
+                                single = single[0:len(single)-len(li)]
+                                alltext = alltext[0:len(alltext)-(len(li)-6)]
+                        elif line[next6+1:next6+3] < li[next6+1:next6+3]:
                             single = single[0:len(single)-len(li)]
-                            alltext = alltext[0:len(alltext)-(len(li)-6)]
-                    elif line[next6+1:next6+3] < li[next6+1:next6+3]:
-                        single = single[0:len(single)-len(li)]
-                        alltext = alltext[0:len(alltext)-(len(li)-6)]    
+                            alltext = alltext[0:len(alltext)-(len(li)-6)]    
 
         if line[0:lastlength+3] not in single:
             single+=line
@@ -542,15 +556,16 @@ def begin(date):
         numcomma = 0
         commaindex = 0
         if line[0:lastlength+3] in single:
-            for li in liststring:
-                if li[0:lastlength+3]==line[0:lastlength+3]:
-                    if line[next6+1:next6+3]<="12" and line[next6+1:next6+3]>="7":
-                        if line[next6+1:next6+3] > li[next6+1:next6+3]:
+            if re.search("@", line):
+                for li in liststring:
+                    if li[0:lastlength+3]==line[0:lastlength+3]:
+                        if line[next6+1:next6+3]<="12" and line[next6+1:next6+3]>="7":
+                            if line[next6+1:next6+3] > li[next6+1:next6+3]:
+                                single = single[0:len(single)-len(li)]
+                                alltext = alltext[0:len(alltext)-(len(li)-6)]
+                        elif line[next6+1:next6+3] < li[next6+1:next6+3]:
                             single = single[0:len(single)-len(li)]
-                            alltext = alltext[0:len(alltext)-(len(li)-6)]
-                    elif line[next6+1:next6+3] < li[next6+1:next6+3]:
-                        single = single[0:len(single)-len(li)]
-                        alltext = alltext[0:len(alltext)-(len(li)-6)]    
+                            alltext = alltext[0:len(alltext)-(len(li)-6)]    
 
         if line[0:lastlength+3] not in single:
             single+=line
@@ -707,6 +722,15 @@ def begin(date):
             single += line
             if re.search("Family", line):
                 continue
+            if re.search("Address",line):
+                lengthRemove = 0
+                for i in range(5, len(line)):
+                    if line[i] == "A" and line[i+1] == "d" and line[i+2] == "d" and line[i+3] == "r" and line[i+4] == "e" and line[i+5] == "s":
+                        lengthRemove = i
+                        break
+                line = line[0:lengthRemove]
+                line += "\n"
+
             count=0
             line = line.replace("\t","")
             for letter in line:
@@ -736,6 +760,8 @@ def begin(date):
         
     alltext = alltext[:-1]
     alltext = alltext.replace("\t","")
+    alltext = alltext.replace("Bounced","")
+    alltext = alltext.replace("Opt Out","")
     alltext = alltext.strip()
 
     for line in alltext:
@@ -829,6 +855,15 @@ def begin(date):
             single += line
             if re.search("Family", line):
                 continue
+            if re.search("Address",line):
+                lengthRemove = 0
+                for i in range(5, len(line)):
+                    if line[i] == "A" and line[i+1] == "d" and line[i+2] == "d" and line[i+3] == "r" and line[i+4] == "e" and line[i+5] == "s":
+                        lengthRemove = i
+                        break
+                line = line[0:lengthRemove]
+                line += "\n"
+
             count=0
             line = line.replace("\t","")
             for letter in line:
@@ -858,6 +893,8 @@ def begin(date):
         
     alltext = alltext[:-1]
     alltext = alltext.replace("\t","")
+    alltext = alltext.replace("Bounced","")
+    alltext = alltext.replace("Opt Out","")
     alltext = alltext.strip()
 
     for line in alltext:
@@ -952,6 +989,15 @@ def begin(date):
             single += line
             if re.search("Family", line):
                 continue
+            if re.search("Address",line):
+                lengthRemove = 0
+                for i in range(5, len(line)):
+                    if line[i] == "A" and line[i+1] == "d" and line[i+2] == "d" and line[i+3] == "r" and line[i+4] == "e" and line[i+5] == "s":
+                        lengthRemove = i
+                        break
+                line = line[0:lengthRemove]
+                line += "\n"
+
             count=0
             line = line.replace("\t","")
             for letter in line:
@@ -981,6 +1027,8 @@ def begin(date):
         
     alltext = alltext[:-1]
     alltext = alltext.replace("\t","")
+    alltext = alltext.replace("Bounced","")
+    alltext = alltext.replace("Opt Out","")
     alltext = alltext.strip()
 
     for line in alltext:
@@ -1075,6 +1123,15 @@ def begin(date):
             single += line
             if re.search("Family", line):
                 continue
+            if re.search("Address",line):
+                lengthRemove = 0
+                for i in range(5, len(line)):
+                    if line[i] == "A" and line[i+1] == "d" and line[i+2] == "d" and line[i+3] == "r" and line[i+4] == "e" and line[i+5] == "s":
+                        lengthRemove = i
+                        break
+                line = line[0:lengthRemove]
+                line += "\n"
+
             count=0
             line = line.replace("\t","")
             for letter in line:
@@ -1104,6 +1161,8 @@ def begin(date):
         
     alltext = alltext[:-1]
     alltext = alltext.replace("\t","")
+    alltext = alltext.replace("Bounced","")
+    alltext = alltext.replace("Opt Out","")
     alltext = alltext.strip()
 
     for line in alltext:
@@ -1197,6 +1256,15 @@ def begin(date):
             single += line
             if re.search("Family", line):
                 continue
+            if re.search("Address",line):
+                lengthRemove = 0
+                for i in range(5, len(line)):
+                    if line[i] == "A" and line[i+1] == "d" and line[i+2] == "d" and line[i+3] == "r" and line[i+4] == "e" and line[i+5] == "s":
+                        lengthRemove = i
+                        break
+                line = line[0:lengthRemove]
+                line += "\n"
+
             count=0
             line = line.replace("\t","")
             for letter in line:
@@ -1226,6 +1294,8 @@ def begin(date):
         
     alltext = alltext[:-1]
     alltext = alltext.replace("\t","")
+    alltext = alltext.replace("Bounced","")
+    alltext = alltext.replace("Opt Out","")
     alltext = alltext.strip()
 
     for line in alltext:
@@ -1319,6 +1389,15 @@ def begin(date):
             single += line
             if re.search("Family", line):
                 continue
+            if re.search("Address",line):
+                lengthRemove = 0
+                for i in range(5, len(line)):
+                    if line[i] == "A" and line[i+1] == "d" and line[i+2] == "d" and line[i+3] == "r" and line[i+4] == "e" and line[i+5] == "s":
+                        lengthRemove = i
+                        break
+                line = line[0:lengthRemove]
+                line += "\n"
+
             count=0
             line = line.replace("\t","")
             for letter in line:
@@ -1348,6 +1427,8 @@ def begin(date):
         
     alltext = alltext[:-1]
     alltext = alltext.replace("\t","")
+    alltext = alltext.replace("Bounced","")
+    alltext = alltext.replace("Opt Out","")
     alltext = alltext.strip()
 
     for line in alltext:
@@ -1442,6 +1523,15 @@ def begin(date):
             single += line
             if re.search("Family", line):
                 continue
+            if re.search("Address",line):
+                lengthRemove = 0
+                for i in range(5, len(line)):
+                    if line[i] == "A" and line[i+1] == "d" and line[i+2] == "d" and line[i+3] == "r" and line[i+4] == "e" and line[i+5] == "s":
+                        lengthRemove = i
+                        break
+                line = line[0:lengthRemove]
+                line += "\n"
+
             count=0
             line = line.replace("\t","")
             for letter in line:
@@ -1471,6 +1561,8 @@ def begin(date):
         
     alltext = alltext[:-1]
     alltext = alltext.replace("\t","")
+    alltext = alltext.replace("Bounced","")
+    alltext = alltext.replace("Opt Out","")
     alltext = alltext.strip()
 
     for line in alltext:
@@ -1565,6 +1657,15 @@ def begin(date):
             single += line
             if re.search("Family", line):
                 continue
+            if re.search("Address",line):
+                lengthRemove = 0
+                for i in range(5, len(line)):
+                    if line[i] == "A" and line[i+1] == "d" and line[i+2] == "d" and line[i+3] == "r" and line[i+4] == "e" and line[i+5] == "s":
+                        lengthRemove = i
+                        break
+                line = line[0:lengthRemove]
+                line += "\n"
+
             count=0
             line = line.replace("\t","")
             for letter in line:
@@ -1594,6 +1695,8 @@ def begin(date):
         
     alltext = alltext[:-1]
     alltext = alltext.replace("\t","")
+    alltext = alltext.replace("Bounced","")
+    alltext = alltext.replace("Opt Out","")
     alltext = alltext.strip()
 
     for line in alltext:
@@ -1688,6 +1791,15 @@ def begin(date):
             single += line
             if re.search("Family", line):
                 continue
+            if re.search("Address",line):
+                lengthRemove = 0
+                for i in range(5, len(line)):
+                    if line[i] == "A" and line[i+1] == "d" and line[i+2] == "d" and line[i+3] == "r" and line[i+4] == "e" and line[i+5] == "s":
+                        lengthRemove = i
+                        break
+                line = line[0:lengthRemove]
+                line += "\n"
+
             count=0
             line = line.replace("\t","")
             for letter in line:
@@ -1717,6 +1829,8 @@ def begin(date):
         
     alltext = alltext[:-1]
     alltext = alltext.replace("\t","")
+    alltext = alltext.replace("Bounced","")
+    alltext = alltext.replace("Opt Out","")
     alltext = alltext.strip()
 
     for line in alltext:
@@ -1811,6 +1925,15 @@ def begin(date):
             single += line
             if re.search("Family", line):
                 continue
+            if re.search("Address",line):
+                lengthRemove = 0
+                for i in range(5, len(line)):
+                    if line[i] == "A" and line[i+1] == "d" and line[i+2] == "d" and line[i+3] == "r" and line[i+4] == "e" and line[i+5] == "s":
+                        lengthRemove = i
+                        break
+                line = line[0:lengthRemove]
+                line += "\n"
+
             count=0
             line = line.replace("\t","")
             for letter in line:
@@ -1840,6 +1963,8 @@ def begin(date):
         
     alltext = alltext[:-1]
     alltext = alltext.replace("\t","")
+    alltext = alltext.replace("Bounced","")
+    alltext = alltext.replace("Opt Out","")
     alltext = alltext.strip()
 
     for line in alltext:
@@ -1934,6 +2059,15 @@ def begin(date):
             single += line
             if re.search("Family", line):
                 continue
+            if re.search("Address",line):
+                lengthRemove = 0
+                for i in range(5, len(line)):
+                    if line[i] == "A" and line[i+1] == "d" and line[i+2] == "d" and line[i+3] == "r" and line[i+4] == "e" and line[i+5] == "s":
+                        lengthRemove = i
+                        break
+                line = line[0:lengthRemove]
+                line += "\n"
+
             count=0
             line = line.replace("\t","")
             for letter in line:
@@ -1963,6 +2097,8 @@ def begin(date):
         
     alltext = alltext[:-1]
     alltext = alltext.replace("\t","")
+    alltext = alltext.replace("Bounced","")
+    alltext = alltext.replace("Opt Out","")
     alltext = alltext.strip()
 
     for line in alltext:
@@ -2057,6 +2193,15 @@ def begin(date):
             single += line
             if re.search("Family", line):
                 continue
+            if re.search("Address",line):
+                lengthRemove = 0
+                for i in range(5, len(line)):
+                    if line[i] == "A" and line[i+1] == "d" and line[i+2] == "d" and line[i+3] == "r" and line[i+4] == "e" and line[i+5] == "s":
+                        lengthRemove = i
+                        break
+                line = line[0:lengthRemove]
+                line += "\n"
+
             count=0
             line = line.replace("\t","")
             for letter in line:
@@ -2086,6 +2231,8 @@ def begin(date):
         
     alltext = alltext[:-1]
     alltext = alltext.replace("\t","")
+    alltext = alltext.replace("Bounced","")
+    alltext = alltext.replace("Opt Out","")
     alltext = alltext.strip()
 
     for line in alltext:
