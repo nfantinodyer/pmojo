@@ -1,4 +1,0 @@
-chrome_options = webdriver.ChromeOptions()
-chrome_options.add_argument("--disable-notifications")
-webdriver.Chrome(os.path.join(path, 'chromedriver'),
-                 chrome_options=chrome_options)
