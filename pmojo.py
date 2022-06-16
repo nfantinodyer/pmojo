@@ -38,7 +38,10 @@ def begin(date):
     ahk = AHK(executable_path="C:\\Users\\DrDsDesk.OMDC.000\\AppData\\Local\\Programs\\Python\\Python310\\Scripts\\AutoHotKey.exe")
 
     #chrome
-    driver = webdriver.Chrome() #executable_path=r"C:\Program Files (x86)\Microsoft Visual Studio\Shared\Python37_64\chromedriver.exe"
+    chrome_options = webdriver.ChromeOptions()
+    chrome_options.add_argument("--disable-notifications")
+    driver = webdriver.Chrome(chrome_options=chrome_options)
+    #driver = webdriver.Chrome() 
     driver.get("http://www.practicemojo.com/login")
     elem = driver.find_element(By.NAME, "loginId")
     elem.clear()
@@ -501,7 +504,7 @@ def begin(date):
                     ahk.type(word)
             ahk.key_press("Tab")
             ahk.key_press("Tab")
-            ahk.type("t") #text
+            ahk.type("e") #email
             ahk.key_press("Tab")
             ahk.type("pmojoNFD")
             ahk.key_press("Tab")
