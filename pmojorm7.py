@@ -43,7 +43,7 @@ def begin(date):
     #chrome
     chrome_options = webdriver.ChromeOptions()
     chrome_options.add_argument("--disable-notifications")
-    driver = webdriver.Chrome(chrome_options=chrome_options, service=service)
+    driver = webdriver.Chrome(options=chrome_options, service=service)
     #driver = webdriver.Chrome() 
     driver.get("http://www.practicemojo.com/login")
     elem = driver.find_element(By.NAME, "loginId")
