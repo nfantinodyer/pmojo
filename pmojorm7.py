@@ -97,8 +97,6 @@ def begin(date):
     totallines = 0
     for line in temp:
         totallines += 1
-        numcomma = 0
-        commaindex = 0
         if line[0:lastlength+3] not in single:
             single += line
             if re.search("Family", line):
@@ -121,21 +119,11 @@ def begin(date):
                 elif letter == " " and count==1:
                     skip5 = 5
                 elif letter == ",":
-                    numcomma+=1
-                    if numcomma==1:
-                        commaindex=len(alltext)
                     lastlength = count
                     alltext += letter
                 else:
                     alltext += letter
-        #if second comma (Phd or DDS or etc removes first comma)
-        if numcomma>1:
-            tempt=""
-            noti = commaindex
-            for i in range(len(alltext)):
-                if i != noti:
-                    tempt = tempt + alltext[i]
-            alltext = tempt
+       
         alltext = alltext.rstrip()
         alltext+="\n"
         
@@ -230,8 +218,6 @@ def begin(date):
     totallines = 0
     for line in temp:
         totallines += 1
-        numcomma = 0
-        commaindex = 0
         if line[0:lastlength+3] in single:
             if re.search("@", line):
                 for li in liststring:
@@ -258,9 +244,6 @@ def begin(date):
                     elif letter == " " and count==1:
                         skip5 = 5
                     elif letter == ",":
-                        numcomma+=1
-                        if numcomma==1:
-                            commaindex=len(alltext)
                         lastlength = count
                         alltext += letter
                     elif letter == "@":
@@ -269,14 +252,6 @@ def begin(date):
                     else:
                         alltext += letter
 
-        #if second comma (Phd or DDS or etc removes first comma)
-        if numcomma>1:
-            tempt=""
-            noti = commaindex
-            for i in range(len(alltext)):
-                if i != noti:
-                    tempt = tempt + alltext[i]
-            alltext = tempt
         alltext = alltext.rstrip()
         alltext+="\n"
         
@@ -395,8 +370,6 @@ def begin(date):
     totallines = 0
     for line in temp:
         totallines += 1
-        numcomma = 0
-        commaindex = 0
         if line[0:lastlength+3] in single:
             if re.search("@", line):
                 for li in liststring:
@@ -423,9 +396,6 @@ def begin(date):
                     elif letter == " " and count==1:
                         skip5 = 5
                     elif letter == ",":
-                        numcomma+=1
-                        if numcomma==1:
-                            commaindex=len(alltext)
                         lastlength = count
                         alltext += letter
                     elif letter == "@":
@@ -434,14 +404,7 @@ def begin(date):
                     else:
                         alltext += letter
 
-        #if second comma (Phd or DDS or etc removes first comma)
-        if numcomma>1:
-            tempt=""
-            noti = commaindex
-            for i in range(len(alltext)):
-                if i != noti:
-                    tempt = tempt + alltext[i]
-            alltext = tempt
+
         alltext = alltext.rstrip()
         alltext+="\n"
         
@@ -559,8 +522,6 @@ def begin(date):
     totallines = 0
     for line in temp:
         totallines += 1
-        numcomma = 0
-        commaindex = 0
         if line[0:lastlength+3] in single:
             if re.search("@", line):
                 for li in liststring:
@@ -587,9 +548,6 @@ def begin(date):
                     elif letter == " " and count==1:
                         skip5 = 5
                     elif letter == ",":
-                        numcomma+=1
-                        if numcomma==1:
-                            commaindex=len(alltext)
                         lastlength = count
                         alltext += letter
                     elif letter == "@":
@@ -598,14 +556,6 @@ def begin(date):
                     else:
                         alltext += letter
 
-        #if second comma (Phd or DDS or etc removes first comma)
-        if numcomma>1:
-            tempt=""
-            noti = commaindex
-            for i in range(len(alltext)):
-                if i != noti:
-                    tempt = tempt + alltext[i]
-            alltext = tempt
         alltext = alltext.rstrip()
         alltext+="\n"
         
@@ -722,8 +672,6 @@ def begin(date):
     totallines = 0
     for line in temp:
         totallines += 1
-        numcomma = 0
-        commaindex = 0
         if line[0:lastlength+3] not in single:
             single += line
             if re.search("Family", line):
@@ -746,21 +694,11 @@ def begin(date):
                 elif letter == " " and count==1:
                     skip5 = 5
                 elif letter == ",":
-                    numcomma+=1
-                    if numcomma==1:
-                        commaindex=len(alltext)
                     lastlength = count
                     alltext += letter
                 else:
                     alltext += letter
-        #if second comma (Phd or DDS or etc removes first comma)
-        if numcomma>1:
-            tempt=""
-            noti = commaindex
-            for i in range(len(alltext)):
-                if i != noti:
-                    tempt = tempt + alltext[i]
-            alltext = tempt
+
         alltext = alltext.rstrip()
         alltext+="\n"
         
@@ -855,8 +793,6 @@ def begin(date):
     totallines = 0
     for line in temp:
         totallines += 1
-        numcomma = 0
-        commaindex = 0
         if line[0:lastlength+3] not in single:
             single += line
             if re.search("Family", line):
@@ -879,21 +815,11 @@ def begin(date):
                 elif letter == " " and count==1:
                     skip5 = 5
                 elif letter == ",":
-                    numcomma+=1
-                    if numcomma==1:
-                        commaindex=len(alltext)
                     lastlength = count
                     alltext += letter
                 else:
                     alltext += letter
-        #if second comma (Phd or DDS or etc removes first comma)
-        if numcomma>1:
-            tempt=""
-            noti = commaindex
-            for i in range(len(alltext)):
-                if i != noti:
-                    tempt = tempt + alltext[i]
-            alltext = tempt
+
         alltext = alltext.rstrip()
         alltext+="\n"
         
@@ -989,8 +915,6 @@ def begin(date):
     totallines = 0
     for line in temp:
         totallines += 1
-        numcomma = 0
-        commaindex = 0
         if line[0:lastlength+3] not in single:
             single += line
             if re.search("Family", line):
@@ -1013,21 +937,11 @@ def begin(date):
                 elif letter == " " and count==1:
                     skip5 = 5
                 elif letter == ",":
-                    numcomma+=1
-                    if numcomma==1:
-                        commaindex=len(alltext)
                     lastlength = count
                     alltext += letter
                 else:
                     alltext += letter
-        #if second comma (Phd or DDS or etc removes first comma)
-        if numcomma>1:
-            tempt=""
-            noti = commaindex
-            for i in range(len(alltext)):
-                if i != noti:
-                    tempt = tempt + alltext[i]
-            alltext = tempt
+
         alltext = alltext.rstrip()
         alltext+="\n"
         
@@ -1123,8 +1037,6 @@ def begin(date):
     totallines = 0
     for line in temp:
         totallines += 1
-        numcomma = 0
-        commaindex = 0
         if line[0:lastlength+3] not in single:
             single += line
             if re.search("Family", line):
@@ -1147,21 +1059,11 @@ def begin(date):
                 elif letter == " " and count==1:
                     skip5 = 5
                 elif letter == ",":
-                    numcomma+=1
-                    if numcomma==1:
-                        commaindex=len(alltext)
                     lastlength = count
                     alltext += letter
                 else:
                     alltext += letter
-        #if second comma (Phd or DDS or etc removes first comma)
-        if numcomma>1:
-            tempt=""
-            noti = commaindex
-            for i in range(len(alltext)):
-                if i != noti:
-                    tempt = tempt + alltext[i]
-            alltext = tempt
+
         alltext = alltext.rstrip()
         alltext+="\n"
         
@@ -1256,8 +1158,6 @@ def begin(date):
     totallines = 0
     for line in temp:
         totallines += 1
-        numcomma = 0
-        commaindex = 0
         if line[0:lastlength+3] not in single:
             single += line
             if re.search("Family", line):
@@ -1280,21 +1180,11 @@ def begin(date):
                 elif letter == " " and count==1:
                     skip5 = 5
                 elif letter == ",":
-                    numcomma+=1
-                    if numcomma==1:
-                        commaindex=len(alltext)
                     lastlength = count
                     alltext += letter
                 else:
                     alltext += letter
-        #if second comma (Phd or DDS or etc removes first comma)
-        if numcomma>1:
-            tempt=""
-            noti = commaindex
-            for i in range(len(alltext)):
-                if i != noti:
-                    tempt = tempt + alltext[i]
-            alltext = tempt
+
         alltext = alltext.rstrip()
         alltext+="\n"
         
@@ -1389,8 +1279,6 @@ def begin(date):
     totallines = 0
     for line in temp:
         totallines += 1
-        numcomma = 0
-        commaindex = 0
         if line[0:lastlength+3] not in single:
             single += line
             if re.search("Family", line):
@@ -1413,21 +1301,11 @@ def begin(date):
                 elif letter == " " and count==1:
                     skip5 = 5
                 elif letter == ",":
-                    numcomma+=1
-                    if numcomma==1:
-                        commaindex=len(alltext)
                     lastlength = count
                     alltext += letter
                 else:
                     alltext += letter
-        #if second comma (Phd or DDS or etc removes first comma)
-        if numcomma>1:
-            tempt=""
-            noti = commaindex
-            for i in range(len(alltext)):
-                if i != noti:
-                    tempt = tempt + alltext[i]
-            alltext = tempt
+
         alltext = alltext.rstrip()
         alltext+="\n"
         
@@ -1523,8 +1401,6 @@ def begin(date):
     totallines = 0
     for line in temp:
         totallines += 1
-        numcomma = 0
-        commaindex = 0
         if line[0:lastlength+3] not in single:
             single += line
             if re.search("Family", line):
@@ -1547,21 +1423,11 @@ def begin(date):
                 elif letter == " " and count==1:
                     skip5 = 5
                 elif letter == ",":
-                    numcomma+=1
-                    if numcomma==1:
-                        commaindex=len(alltext)
                     lastlength = count
                     alltext += letter
                 else:
                     alltext += letter
-        #if second comma (Phd or DDS or etc removes first comma)
-        if numcomma>1:
-            tempt=""
-            noti = commaindex
-            for i in range(len(alltext)):
-                if i != noti:
-                    tempt = tempt + alltext[i]
-            alltext = tempt
+
         alltext = alltext.rstrip()
         alltext+="\n"
         
@@ -1657,8 +1523,6 @@ def begin(date):
     totallines = 0
     for line in temp:
         totallines += 1
-        numcomma = 0
-        commaindex = 0
         if line[0:lastlength+3] not in single:
             single += line
             if re.search("Family", line):
@@ -1681,21 +1545,11 @@ def begin(date):
                 elif letter == " " and count==1:
                     skip5 = 5
                 elif letter == ",":
-                    numcomma+=1
-                    if numcomma==1:
-                        commaindex=len(alltext)
                     lastlength = count
                     alltext += letter
                 else:
                     alltext += letter
-        #if second comma (Phd or DDS or etc removes first comma)
-        if numcomma>1:
-            tempt=""
-            noti = commaindex
-            for i in range(len(alltext)):
-                if i != noti:
-                    tempt = tempt + alltext[i]
-            alltext = tempt
+
         alltext = alltext.rstrip()
         alltext+="\n"
         
@@ -1791,8 +1645,6 @@ def begin(date):
     totallines = 0
     for line in temp:
         totallines += 1
-        numcomma = 0
-        commaindex = 0
         if line[0:lastlength+3] not in single:
             single += line
             if re.search("Family", line):
@@ -1815,21 +1667,11 @@ def begin(date):
                 elif letter == " " and count==1:
                     skip5 = 5
                 elif letter == ",":
-                    numcomma+=1
-                    if numcomma==1:
-                        commaindex=len(alltext)
                     lastlength = count
                     alltext += letter
                 else:
                     alltext += letter
-        #if second comma (Phd or DDS or etc removes first comma)
-        if numcomma>1:
-            tempt=""
-            noti = commaindex
-            for i in range(len(alltext)):
-                if i != noti:
-                    tempt = tempt + alltext[i]
-            alltext = tempt
+
         alltext = alltext.rstrip()
         alltext+="\n"
         
@@ -1925,8 +1767,6 @@ def begin(date):
     totallines = 0
     for line in temp:
         totallines += 1
-        numcomma = 0
-        commaindex = 0
         if line[0:lastlength+3] not in single:
             single += line
             if re.search("Family", line):
@@ -1949,21 +1789,11 @@ def begin(date):
                 elif letter == " " and count==1:
                     skip5 = 5
                 elif letter == ",":
-                    numcomma+=1
-                    if numcomma==1:
-                        commaindex=len(alltext)
                     lastlength = count
                     alltext += letter
                 else:
                     alltext += letter
-        #if second comma (Phd or DDS or etc removes first comma)
-        if numcomma>1:
-            tempt=""
-            noti = commaindex
-            for i in range(len(alltext)):
-                if i != noti:
-                    tempt = tempt + alltext[i]
-            alltext = tempt
+
         alltext = alltext.rstrip()
         alltext+="\n"
         
@@ -2059,8 +1889,6 @@ def begin(date):
     totallines = 0
     for line in temp:
         totallines += 1
-        numcomma = 0
-        commaindex = 0
         if line[0:lastlength+3] not in single:
             single += line
             if re.search("Family", line):
@@ -2083,21 +1911,11 @@ def begin(date):
                 elif letter == " " and count==1:
                     skip5 = 5
                 elif letter == ",":
-                    numcomma+=1
-                    if numcomma==1:
-                        commaindex=len(alltext)
                     lastlength = count
                     alltext += letter
                 else:
                     alltext += letter
-        #if second comma (Phd or DDS or etc removes first comma)
-        if numcomma>1:
-            tempt=""
-            noti = commaindex
-            for i in range(len(alltext)):
-                if i != noti:
-                    tempt = tempt + alltext[i]
-            alltext = tempt
+
         alltext = alltext.rstrip()
         alltext+="\n"
         
@@ -2193,8 +2011,6 @@ def begin(date):
     totallines = 0
     for line in temp:
         totallines += 1
-        numcomma = 0
-        commaindex = 0
         if line[0:lastlength+3] not in single:
             single += line
             if re.search("Family", line):
@@ -2217,21 +2033,10 @@ def begin(date):
                 elif letter == " " and count==1:
                     skip5 = 5
                 elif letter == ",":
-                    numcomma+=1
-                    if numcomma==1:
-                        commaindex=len(alltext)
                     lastlength = count
                     alltext += letter
                 else:
                     alltext += letter
-        #if second comma (Phd or DDS or etc removes first comma)
-        if numcomma>1:
-            tempt=""
-            noti = commaindex
-            for i in range(len(alltext)):
-                if i != noti:
-                    tempt = tempt + alltext[i]
-            alltext = tempt
         alltext = alltext.rstrip()
         alltext+="\n"
         
