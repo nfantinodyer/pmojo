@@ -216,6 +216,7 @@ def justName(cdi,cdn,d,m,y):
             time.sleep(3)
             ahk.key_press('Enter')
             ahk.type("0ca")
+            #recare is r
             if cdi == 1 or cdi == 8 or cdi == 33:
                 ahk.type("r")
             ahk.key_press("Tab")
@@ -296,16 +297,20 @@ def full(cdi,cdn,d,m,y):
         totallines += 1
         if line[0:lastlength+3] in single:
             if re.search("@", line):
+                #puts first time first no matter the order in practice mojo. Removes second occurance.
                 for li in liststring:
                     if li[0:lastlength+3]==line[0:lastlength+3]:
+                        #since 12pm is earlier than 3pm but 12>3 so this corrects that and fixes 7am time just in case
                         if line[next6+1:next6+3]<="12" and line[next6+1:next6+3]>="7":
                             if line[next6+1:next6+3] > li[next6+1:next6+3]:
                                 single = single[0:len(single)-len(li)]
                                 alltext = alltext[0:len(alltext)-(len(li)-6)]
+                        #since 3pm is before 4pm and 3<4 
                         elif line[next6+1:next6+3] < li[next6+1:next6+3]:
                             single = single[0:len(single)-len(li)]
                             alltext = alltext[0:len(alltext)-(len(li)-6)]    
 
+        #skips family and gets time and date after the @ sign.
         if line[0:lastlength+3] not in single:
             single+=line
             liststring.append(line)
@@ -332,6 +337,7 @@ def full(cdi,cdn,d,m,y):
         alltext = alltext.rstrip()
         alltext+="\n"
         
+    #dont need to replace opt out and address supressed due to the next6 being the next 6 chars 00:00AM
     alltext = alltext[:-1]
     alltext = alltext.replace("\t","")
     alltext = alltext.strip()
@@ -372,6 +378,7 @@ def full(cdi,cdn,d,m,y):
             time.sleep(3)
             ahk.key_press("Enter")
             ahk.type("0ca")
+            #Confirm Appt is cc
             ahk.type("cc")
             ahk.key_press("Tab")
             ahk.type("Reminder for ")
