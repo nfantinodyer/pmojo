@@ -68,13 +68,11 @@ def begin(date):
         #130 and 23 have appt time and date included
         if(i != 23 and i != 130):
             for o in range(1,3):
-                driver.get("https://app.practicemojo.com/cgi-bin/WebObjects/PracticeMojo.woa/wa/gotoActivityDetail?td="+m+"%2F"+d+"%2F"+y+"&cdi="+i+"&cdn="+o)
-                time.sleep(1)
+                driver.get("https://app.practicemojo.com/cgi-bin/WebObjects/PracticeMojo.woa/wa/gotoActivityDetail?td="+m+"%2F"+d+"%2F"+y+"&cdi="+str(i)+"&cdn="+str(o))
                 justName(i,o,d,m,y)
         else:
             for o in range(1,3):
-                driver.get("https://app.practicemojo.com/cgi-bin/WebObjects/PracticeMojo.woa/wa/gotoActivityDetail?td="+m+"%2F"+d+"%2F"+y+"&cdi="+i+"&cdn="+o)
-                time.sleep(1)
+                driver.get("https://app.practicemojo.com/cgi-bin/WebObjects/PracticeMojo.woa/wa/gotoActivityDetail?td="+m+"%2F"+d+"%2F"+y+"&cdi="+str(i)+"&cdn="+str(o))
                 full(i,o,d,m,y)
             
 
@@ -117,6 +115,7 @@ def justName(cdi,cdn,d,m,y):
         com = "Anniversary card"
 
     #to copy page text
+    time.sleep(1)
     send_keys("^a^c")
 
     #get clipboard
@@ -260,6 +259,7 @@ def full(cdi,cdn,d,m,y):
             typeOfCom = "t"
 
     #to copy page text
+    time.sleep(1)
     send_keys("^a^c")
 
     #get clipboard
