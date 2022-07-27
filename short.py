@@ -263,11 +263,6 @@ def full(cdi,cdn,d,m,y):
         if cdi == 130 or cdi == 23:
             typeOfCom = "t"
 
-    #determine commuication sent based on url
-    com = ""
-    if cdi == 23 or cdi == 130:
-        com = "Reminder for "
-
     #to copy page text
     send_keys("^a^c")
 
@@ -349,6 +344,76 @@ def full(cdi,cdn,d,m,y):
         new_file.write(line)
 
     new_file.close()
+
+    #softdent
+
+    #to compare if char is num
+    num = "[0-9]+"
+    NUMBER = re.compile(num)
+
+    file1 = open("practicemojo.txt", "r")
+    lines = file1.readlines()
+    file1.close()
+
+    softdent.set_focus()
+
+    for line in lines:
+        now = False
+        name = ""
+        if line != "":
+            for word in line:
+                if re.fullmatch(NUMBER, word):
+                    break
+                else:
+                    name+=word
+
+            
+            line = line.replace("\n","")
+            ahk.key_press("Tab")
+            ahk.type('f')
+                
+            ahk.type(name)
+            time.sleep(3)
+            ahk.key_press("Enter")
+            ahk.type("0ca")
+            ahk.type("cc")
+            ahk.key_press("Tab")
+            ahk.type("Reminder for ")
+            size = 0
+            for word in line:
+                size+=1
+                if now:
+                    line = line[size-1:]
+                    now=False
+                    break
+                elif re.fullmatch(NUMBER, word):
+                    ahk.key_press("Space")
+                    ahk.type(word)
+                    now = True
+                
+            for word in line:
+                if re.fullmatch("M", word):
+                    ahk.type("M")
+                    break
+                else:
+                    ahk.type(word)
+            ahk.key_press("Tab")
+            ahk.key_press("Tab")
+            ahk.type(typeOfCom)
+            ahk.key_press("Tab")
+            ahk.type("pmojoNFD")
+            ahk.key_press("Tab")
+            ahk.type(m+"/"+d+"/"+y)
+            time.sleep(2)
+                
+            ahk.key_press("Enter")
+
+            ahk.type("l")
+            ahk.type("l")
+            ahk.type("n")
+
+    #chrome
+    chrome.set_focus()
 
 
 
