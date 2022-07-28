@@ -401,10 +401,10 @@ def begin(date):
                         if line[next6+1:next6+3]<="12" and line[next6+1:next6+3]>="7":
                             if line[next6+1:next6+3] > li[next6+1:next6+3]:
                                 single = single[0:len(single)-len(li)]
-                                alltext = alltext[0:len(alltext)-(len(li)-6)]
+                                alltext = alltext[0:len(alltext)-len(li)]
                         elif line[next6+1:next6+3] < li[next6+1:next6+3]:
                             single = single[0:len(single)-len(li)]
-                            alltext = alltext[0:len(alltext)-(len(li)-6)]    
+                            alltext = alltext[0:len(alltext)-len(li)]    
 
         if line[0:lastlength+3] not in single:
             single+=line
