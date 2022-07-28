@@ -4,3 +4,4 @@ Very early addition and major ways to improve code length as well as better ways
 
 To run: open the file through python and type in the date in the format requested (MM/DD/YYYY) and press the start button. Make sure softdent is open into the patient search window and make sure chrome is closed.
 
+Added a short version of the code that works the same.
