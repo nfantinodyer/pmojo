@@ -11,13 +11,9 @@ import tkinter as tk
 import re
 from ahk import AHK
 import time
-from selenium.webdriver.chrome.service import Service
 
 #auto hot key
 ahk = AHK()
-
-#to open a chrome instance
-service = Service(executable_path="C:\\chromedriver.exe")
 
 #to have a gui to type in date
 window = tk.Tk()
@@ -35,7 +31,7 @@ def begin(date):
     #open chrome with notifs disabled and with chrome driver linked
     chrome_options = webdriver.ChromeOptions()
     chrome_options.add_argument("--disable-notifications")
-    driver = webdriver.Chrome(options=chrome_options, service=service)
+    driver = webdriver.Chrome(options=chrome_options)
 
     #logs into practice mojo
     driver.get("http://www.practicemojo.com/login")
