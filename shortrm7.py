@@ -1,17 +1,12 @@
 from binhex import LINELEN
 from http.server import executable
 from selenium import webdriver
-import chromedriver_binary
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
-from datetime import date
 from pywinauto.application import Application
-import pywinauto.mouse as mouse
-import pywinauto.keyboard as keyboard
 from pywinauto.keyboard import send_keys
 import os
 import os.path
-import shutil
 import tkinter as tk
 import re
 from ahk import AHK
@@ -37,7 +32,6 @@ def begin(date):
     d = date[3:5]
     y = date[6:10]
 
-
     #open chrome with notifs disabled and with chrome driver linked
     chrome_options = webdriver.ChromeOptions()
     chrome_options.add_argument("--disable-notifications")
@@ -58,11 +52,6 @@ def begin(date):
     app.connect(title_re='.*- Google Chrome')
     chrome = app.window(title_re='.*- Google Chrome')
 
-    #to be able to set focus with softdent.set_focus()
-    soft = Application()
-    soft.connect(title_re='.*- S')
-    softdent = soft.window(title_re='.*- S')
-
     #initial focus set
     chrome.set_focus()
 
@@ -72,13 +61,11 @@ def begin(date):
         #130 and 23 have appt time and date included
         if(i != 23 and i != 130):
             for o in range(1,3):
-                driver.get("https://app.practicemojo.com/cgi-bin/WebObjects/PracticeMojo.woa/wa/gotoActivityDetail?td="+m+"%2F"+d+"%2F"+y+"&cdi="+i+"&cdn="+o)
-                time.sleep(1)
+                driver.get("https://app.practicemojo.com/cgi-bin/WebObjects/PracticeMojo.woa/wa/gotoActivityDetail?td="+m+"%2F"+d+"%2F"+y+"&cdi="+str(i)+"&cdn="+str(o))
                 justName(i,o,d,m,y)
         else:
             for o in range(1,3):
-                driver.get("https://app.practicemojo.com/cgi-bin/WebObjects/PracticeMojo.woa/wa/gotoActivityDetail?td="+m+"%2F"+d+"%2F"+y+"&cdi="+i+"&cdn="+o)
-                time.sleep(1)
+                driver.get("https://app.practicemojo.com/cgi-bin/WebObjects/PracticeMojo.woa/wa/gotoActivityDetail?td="+m+"%2F"+d+"%2F"+y+"&cdi="+str(i)+"&cdn="+str(o))
                 full(i,o,d,m,y)
             
 
