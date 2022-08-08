@@ -292,12 +292,12 @@ def full(cdi,cdn,d,m,y):
                         #since 12pm is earlier than 3pm but 12>3 so this corrects that and fixes 7am time just in case
                         if line[next6+1:next6+3]<="12" and line[next6+1:next6+3]>="7":
                             if line[next6+1:next6+3] > li[next6+1:next6+3]:
-                                single = single[0:len(single)-len(li)]
-                                alltext = alltext[0:len(alltext)-len(li)]
+                                single = single[0:len(single)-(len(li)-6)]
+                                alltext = alltext[0:len(alltext)-(len(li)-6)]
                         #since 3pm is before 4pm and 3<4 
                         elif line[next6+1:next6+3] < li[next6+1:next6+3]:
-                            single = single[0:len(single)-len(li)]
-                            alltext = alltext[0:len(alltext)-len(li)]    
+                            single = single[0:len(single)-(len(li)-6)]
+                            alltext = alltext[0:len(alltext)-(len(li)-6)]    
 
         #skips family and gets time and date after the @ sign.
         if line[0:lastlength+3] not in single:
