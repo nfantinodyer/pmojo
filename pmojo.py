@@ -305,6 +305,14 @@ def full(cdi,cdn,d,m,y):
             liststring.append(line)
             if re.search("Family", line):
                 continue
+            if re.search("Address",line):
+                lengthRemove = 0
+                for i in range(5, len(line)):
+                    if line[i] == "A" and line[i+1] == "d" and line[i+2] == "d" and line[i+3] == "r" and line[i+4] == "e" and line[i+5] == "s":
+                        lengthRemove = i
+                        break
+                line = line[0:lengthRemove]
+                line += "\n"
             if re.search("@", line):
                 count=0
                 for letter in line:
