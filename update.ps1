@@ -1,7 +1,7 @@
 #Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 [CmdletBinding()]
 param (
-    [string]$ChromeDir="C:\Program Files\Google\Chrome\Application\chrome.exe"
+    [string]$ChromeDir="C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"
 )
 
 if (-Not (Test-Path $ChromeDir -PathType Leaf)) {
@@ -9,7 +9,7 @@ if (-Not (Test-Path $ChromeDir -PathType Leaf)) {
   Exit 1
 }
 
-[string]$thisScriptRoot = "C:\Python310\"
+[string]$thisScriptRoot = "~\AppData\Local\Programs\Python\Python310"
 
 $chromeDriverRelativeDir = "Scripts"
 $chromeDriverDir = $(Join-Path $thisScriptRoot $chromeDriverRelativeDir)
