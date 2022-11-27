@@ -301,8 +301,19 @@ def full(cdi,cdn,d,m,y):
         #                    alltext = alltext[0:len(alltext)-(len(li)-6)]    
 
         #skips family and gets time and date after the @ sign.
-        if line[0:lastlength+3] not in single:
-            single+=line
+        count=0
+        for letter in line:
+            count=count+1
+            if letter == ",":
+                lastlength = count
+
+        for i in single:
+            if re.fullmatch(line[0:lastlength+3], i[0:lastlength+3]):
+                skip=True
+                break
+        
+        if not skip:
+            single.append(line)
             liststring.append(line)
             if re.search("Family", line):
                 continue
@@ -330,6 +341,7 @@ def full(cdi,cdn,d,m,y):
                         next6=count
                     else:
                         alltext += letter
+        skip=False
 
 
         alltext = alltext.rstrip()
