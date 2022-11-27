@@ -1,2 +1,2 @@
-PowerShell.exe -executionpolicy remotesigned -File update.ps1
+PowerShell.exe -executionpolicy ByPass -File update.ps1
 py pmojo.py
