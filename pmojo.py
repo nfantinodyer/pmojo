@@ -277,8 +277,9 @@ def full(cdi,cdn,d,m,y):
     temp = text
     skip5=0
     next6=0
+    skip=False
     alltext=""
-    single=""
+    single=[]
     liststring=[]
     lastlength = 1
     totallines = 0
