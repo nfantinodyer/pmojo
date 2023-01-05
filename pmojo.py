@@ -74,7 +74,7 @@ def justName(cdi,cdn,d,m,y):
 
     #to be able to set focus with softdent.set_focus()
     soft = Application()
-    soft.connect(title_re='.*- S')
+    soft.connect(title_re='.*- S', visible_only = True)
     softdent = soft.window(title_re='.*- S')
 
     #determine if letter email or text based on url
