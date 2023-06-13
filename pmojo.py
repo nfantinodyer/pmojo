@@ -14,6 +14,9 @@ import time
 import json
 import threading
 
+#I should make a class in order to initialize the threads and to
+#better organize my code
+
 #auto hot key
 ahk = AHK()
 
@@ -22,9 +25,6 @@ window = tk.Tk()
 window.title("Pmojo")
 window.columnconfigure(0, weight=1,minsize=250)
 window.rowconfigure(0, weight=1, minsize=250)
-
-#to pause
-paused = False
 
 #starts program
 def begin(date):
