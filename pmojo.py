@@ -12,7 +12,7 @@ import re
 from ahk import AHK
 import time
 import json
-
+import threading
 
 #auto hot key
 ahk = AHK()
@@ -23,8 +23,12 @@ window.title("Pmojo")
 window.columnconfigure(0, weight=1,minsize=250)
 window.rowconfigure(0, weight=1, minsize=250)
 
+#to pause
+paused = False
+
 #starts program
 def begin(date):
+
     #assign month day and year
     m = date[0:2]
     d = date[3:5]
