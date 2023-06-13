@@ -11,6 +11,7 @@ import tkinter as tk
 import re
 from ahk import AHK
 import time
+import json
 
 
 #auto hot key
@@ -34,14 +35,21 @@ def begin(date):
     chrome_options.add_argument("--disable-notifications")
     driver = webdriver.Chrome(options=chrome_options)
 
+
+    with open('config.json') as config_file:
+        config = json.load(config_file)
+
+    username = config.get('USERNAME')
+    password = config.get('PASSWORD')
+
     #logs into practice mojo
     driver.get("http://www.practicemojo.com/login")
     elem = driver.find_element(By.NAME, "loginId")
     elem.clear()
-    elem.send_keys("oakmeadowdental")
+    elem.send_keys(username)
     elem = driver.find_element(By.NAME, "password")
     elem.clear()
-    elem.send_keys("OMDC20162017!")
+    elem.send_keys(password)
     elem.send_keys(Keys.RETURN)
 
     #to be able to set focus with chrome.set_focus()
