@@ -1,4 +1,4 @@
-from binhex import LINELEN
+
 from http.server import executable
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
@@ -14,11 +14,12 @@ import time
 import json
 import threading
 
-#I should make a class in order to initialize the threads and to
-#better organize my code
+# Event for pausing/unpausing the thread
+pause_event = threading.Event()
+pause_event.set()  # Start in un-paused state
 
 #auto hot key
-ahk = AHK()
+ahk = AHK(executable_path = "C:/Users/nfantino/AppData/Local/Programs/AutoHotkey/UX/AutoHotkeyUX.exe")
 
 #to have a gui to type in date
 window = tk.Tk()
@@ -28,7 +29,6 @@ window.rowconfigure(0, weight=1, minsize=250)
 
 #starts program
 def begin(date):
-
     #assign month day and year
     m = date[0:2]
     d = date[3:5]
@@ -441,6 +441,16 @@ def full(cdi,cdn,d,m,y):
     #chrome
     chrome.set_focus()
 
+def pause():
+    pause_event.clear()  # Pause the thread
+
+def resume():
+    pause_event.set()  # Resume the thread
+
+def exit():
+    os._exit(0)
+
+
 
 #all for gui
 entrylabel = tk.Label(text="Enter the date MM/DD/YYYY: ")
@@ -452,10 +462,19 @@ frame1.pack(fill=tk.X)
 one = tk.Entry(frame1,width=50)
 one.pack(side = tk.LEFT,padx=2,pady=5)
 
+# Create thread
+thread = threading.Thread(target=begin, args=(one.get(),))
+
 button = tk.Button(text="Start", width=10, height=2, command=lambda: begin(one.get()))
 button.pack(anchor=tk.W,padx=2, pady=5)
 
-button = tk.Button(text="Exit", command=quit, width=10, height=2)
+pause_button = tk.Button(text="Pause", command=pause)
+pause_button.pack()
+
+resume_button = tk.Button(text="Resume", command=resume)
+resume_button.pack()
+
+button = tk.Button(text="Exit", command=exit, width=10, height=2)
 button.pack(anchor=tk.W,padx=2, pady=5)
 
 window.mainloop()
