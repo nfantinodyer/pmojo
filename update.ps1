@@ -11,7 +11,7 @@ if (-Not (Test-Path $ChromeDir -PathType Leaf)) {
 
 [string]$thisScriptRoot = "~\AppData\Local\Programs\Python\Python310"
 
-$chromeDriverRelativeDir = "Scripts"
+$chromeDriverRelativeDir = "Scripts\chromedriver-win32"
 $chromeDriverDir = $(Join-Path $thisScriptRoot $chromeDriverRelativeDir)
 $chromeDriverFileLocation = $(Join-Path $chromeDriverDir "chromedriver.exe")
 $chromeVersion = [System.Diagnostics.FileVersionInfo]::GetVersionInfo($ChromeDir).FileVersion
@@ -39,11 +39,11 @@ else {
 if ($chromeMajorVersion -lt 73) {
   # for chrome versions < 73 will use chromedriver v2.46 (which supports chrome v71-73)
   $chromeDriverExpectedVersion = "2.46"
-  $chromeDriverVersionUrl = "https://chromedriver.storage.googleapis.com/LATEST_RELEASE"
+  $chromeDriverVersionUrl = "https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE_STABLE"
 }
 else {
   $chromeDriverExpectedVersion = $chromeVersion.split(".")[0..2] -join "."
-  $chromeDriverVersionUrl = "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_" + $chromeDriverExpectedVersion
+  $chromeDriverVersionUrl = "https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE_STABLE_" + $chromeDriverExpectedVersion
 }
 
 $chromeDriverLatestVersion = Invoke-RestMethod -Uri $chromeDriverVersionUrl
@@ -55,10 +55,10 @@ Write-Output "chromedriver latest:  $chromeDriverLatestVersion"
 # will update chromedriver.exe if MAJOR.MINOR.PATCH
 $needUpdateChromeDriver = $chromeDriverCurrentVersion -ne $chromeDriverLatestVersion
 if ($needUpdateChromeDriver) {
-  $chromeDriverZipLink = "https://chromedriver.storage.googleapis.com/" + $chromeDriverLatestVersion + "/chromedriver_win32.zip"
+  $chromeDriverZipLink = "https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/" + $chromeDriverLatestVersion + "/win32/chromedriver-win32.zip"
   Write-Output "Will download $chromeDriverZipLink"
 
-  $chromeDriverZipFileLocation = $(Join-Path $chromeDriverDir "chromedriver_win32.zip")
+  $chromeDriverZipFileLocation = $(Join-Path $chromeDriverDir "chromedriver-win32.zip")
 
   Invoke-WebRequest -Uri $chromeDriverZipLink -OutFile $chromeDriverZipFileLocation
   Expand-Archive $chromeDriverZipFileLocation -DestinationPath $(Join-Path $thisScriptRoot $chromeDriverRelativeDir) -Force
