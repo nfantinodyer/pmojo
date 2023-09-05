@@ -86,8 +86,8 @@ def justName(cdi,cdn,d,m,y):
 
     #to be able to set focus with softdent.set_focus()
     soft = Application()
-    soft.connect(title_re='.*CS SoftDent Scheduler Software v.*- S', visible_only = True)
-    softdent = soft.window(title_re='.*CS SoftDent Scheduler Software v.*- S', visible_only = True)
+    soft.connect(title_re='.*- S')
+    softdent = soft.window(title_re='.*- S')
 
     #determine if letter email or text based on url
     typeOfCom = ""
@@ -249,8 +249,8 @@ def full(cdi,cdn,d,m,y):
 
     #to be able to set focus with softdent.set_focus()
     soft = Application()
-    soft.connect(title_re='.*CS SoftDent Scheduler Software v.*- S', visible_only = True)
-    softdent = soft.window(title_re='.*CS SoftDent Scheduler Software v.*- S', visible_only = True)
+    soft.connect(title_re='.*- S')
+    softdent = soft.window(title_re='.*- S')
 
     #determine if letter email or text based on url
     typeOfCom = ""
