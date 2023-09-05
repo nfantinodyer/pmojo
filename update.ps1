@@ -11,7 +11,7 @@ if (-Not (Test-Path $ChromeDir -PathType Leaf)) {
 
 [string]$thisScriptRoot = "~\AppData\Local\Programs\Python\Python310"
 
-$chromeDriverRelativeDir = "Scripts\chromedriver-win32"
+$chromeDriverRelativeDir = "Scripts"
 $chromeDriverDir = $(Join-Path $thisScriptRoot $chromeDriverRelativeDir)
 $chromeDriverFileLocation = $(Join-Path $chromeDriverDir "chromedriver.exe")
 $chromeVersion = [System.Diagnostics.FileVersionInfo]::GetVersionInfo($ChromeDir).FileVersion
@@ -64,6 +64,12 @@ if ($needUpdateChromeDriver) {
   Expand-Archive $chromeDriverZipFileLocation -DestinationPath $(Join-Path $thisScriptRoot $chromeDriverRelativeDir) -Force
   Remove-Item -Path $chromeDriverZipFileLocation -Force
   $chromeDriverFileVersion = (& $chromeDriverFileLocation --version)
+
+  Move-Item -Path $(Join-Path $thisScriptRoot "Scripts/chromedriver-win32/chromedriver.exe") -Destination $(Join-Path $thisScriptRoot "Scripts")
+  Move-Item -Path $(Join-Path $thisScriptRoot "Scripts/chromedriver-win32/LICENSE.chromedriver") -Destination $(Join-Path $thisScriptRoot "Scripts")
+  
+  Remove-Item -Path $(Join-Path $thisScriptRoot "Scripts/chromedriver-win32") -Force
+
   Write-Output "chromedriver updated to version $chromeDriverFileVersion"
 }
 else {
