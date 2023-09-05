@@ -92,8 +92,10 @@ def justName(cdi,cdn,d,m,y):
     #determine if letter email or text based on url
     typeOfCom = ""
     if cdn == 1:
-        if cdi == 1 or cdi == 8 or cdi == 21 or cdi == 22 or cdi == 30 or cdi == 33 or cdi == 35 or cdi == 36:
+        if cdi == 1 or cdi == 8 or cdi == 21 or cdi == 22 or cdi == 30 or cdi == 33 or cdi == 35:
             typeOfCom = "l"
+        elif cdi == 36:
+            typeOfCom = "e"
     elif cdn == 2:
         if cdi == 1 or cdi == 8 or cdi == 30 or cdi == 33:
             typeOfCom = "e"
