@@ -217,7 +217,7 @@ def justName(cdi,cdn,d,m,y):
             ahk.type('f')
                 
             ahk.type(line)
-            time.sleep(3)
+            time.sleep(1)
             ahk.key_press('Enter')
             ahk.type("0ca")
             #recare is r
@@ -400,7 +400,7 @@ def full(cdi,cdn,d,m,y):
             ahk.type('f')
                 
             ahk.type(name)
-            time.sleep(3)
+            time.sleep(1)
             ahk.key_press("Enter")
             ahk.type("0ca")
             #Confirm Appt is cc
