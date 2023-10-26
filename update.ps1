@@ -9,7 +9,7 @@ if (-Not (Test-Path $ChromeDir -PathType Leaf)) {
   Exit 1
 }
 
-[string]$thisScriptRoot = "~\AppData\Local\Programs\Python\Python310"
+[string]$thisScriptRoot = Join-Path $env:UserProfile "AppData\Local\Programs\Python\Python310"
 
 $chromeDriverRelativeDir = "Scripts"
 $chromeDriverDir = $(Join-Path $thisScriptRoot $chromeDriverRelativeDir)
@@ -63,7 +63,11 @@ if ($needUpdateChromeDriver) {
   Invoke-WebRequest -Uri $chromeDriverZipLink -OutFile $chromeDriverZipFileLocation
   Expand-Archive $chromeDriverZipFileLocation -DestinationPath $(Join-Path $thisScriptRoot $chromeDriverRelativeDir) -Force
   Remove-Item -Path $chromeDriverZipFileLocation -Force
-  $chromeDriverFileVersion = (& "~\AppData\Local\Programs\Python\Python310\Scripts" --version)
+
+  $chromeDriverPath = Join-Path $thisScriptRoot "chromedriver.exe"
+  if (Test-Path $chromeDriverPath -PathType Leaf) {
+    $chromeDriverFileVersion = & $chromeDriverPath --version
+  }
 
   Move-Item -Path $(Join-Path $thisScriptRoot "Scripts/chromedriver-win32/chromedriver.exe") -Destination $(Join-Path $thisScriptRoot "Scripts")
   Move-Item -Path $(Join-Path $thisScriptRoot "Scripts/chromedriver-win32/LICENSE.chromedriver") -Destination $(Join-Path $thisScriptRoot "Scripts")
