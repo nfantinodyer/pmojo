@@ -2,7 +2,7 @@
 [CmdletBinding()]
 param (
     [string]$ChromeDir="C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"
-)
+  )
 
 if (-Not (Test-Path $ChromeDir -PathType Leaf)) {
   Write-Output "Chrome not found in '$ChromeDir'. Please, install chrome or specify custom chrome location with -ChromeDir argument."
@@ -63,7 +63,7 @@ if ($needUpdateChromeDriver) {
   Invoke-WebRequest -Uri $chromeDriverZipLink -OutFile $chromeDriverZipFileLocation
   Expand-Archive $chromeDriverZipFileLocation -DestinationPath $(Join-Path $thisScriptRoot $chromeDriverRelativeDir) -Force
   Remove-Item -Path $chromeDriverZipFileLocation -Force
-  $chromeDriverFileVersion = (& $chromeDriverFileLocation --version)
+  $chromeDriverFileVersion = (& "~\AppData\Local\Programs\Python\Python310\Scripts" --version)
 
   Move-Item -Path $(Join-Path $thisScriptRoot "Scripts/chromedriver-win32/chromedriver.exe") -Destination $(Join-Path $thisScriptRoot "Scripts")
   Move-Item -Path $(Join-Path $thisScriptRoot "Scripts/chromedriver-win32/LICENSE.chromedriver") -Destination $(Join-Path $thisScriptRoot "Scripts")
