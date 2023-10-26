@@ -1,7 +1,7 @@
 #Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 [CmdletBinding()]
 param (
-    [string]$ChromeDir="C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"
+  [string]$ChromeDir="C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"
   )
 
 if (-Not (Test-Path $ChromeDir -PathType Leaf)) {
@@ -62,15 +62,18 @@ if ($needUpdateChromeDriver) {
 
   Invoke-WebRequest -Uri $chromeDriverZipLink -OutFile $chromeDriverZipFileLocation
   Expand-Archive $chromeDriverZipFileLocation -DestinationPath $(Join-Path $thisScriptRoot $chromeDriverRelativeDir) -Force
-  Remove-Item -Path $chromeDriverZipFileLocation -Force
+  
+  if (Test-Path $chromeDriverZipFileLocation -PathType Leaf) {
+      Remove-Item -Path $chromeDriverZipFileLocation -Force
+  }
 
   $chromeDriverPath = Join-Path $thisScriptRoot "chromedriver.exe"
   if (Test-Path $chromeDriverPath -PathType Leaf) {
     $chromeDriverFileVersion = & $chromeDriverPath --version
   }
 
-  Move-Item -Path $(Join-Path $thisScriptRoot "Scripts/chromedriver-win32/chromedriver.exe") -Destination $(Join-Path $thisScriptRoot "Scripts")
-  Move-Item -Path $(Join-Path $thisScriptRoot "Scripts/chromedriver-win32/LICENSE.chromedriver") -Destination $(Join-Path $thisScriptRoot "Scripts")
+  Move-Item -Path $(Join-Path $thisScriptRoot "Scripts/chromedriver-win32/chromedriver.exe") -Destination $(Join-Path $thisScriptRoot "Scripts") -Force
+  Move-Item -Path $(Join-Path $thisScriptRoot "Scripts/chromedriver-win32/LICENSE.chromedriver") -Destination $(Join-Path $thisScriptRoot "Scripts") -Force
   
   Remove-Item -Path $(Join-Path $thisScriptRoot "Scripts/chromedriver-win32") -Force
 
