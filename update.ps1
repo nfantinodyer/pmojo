@@ -1,7 +1,7 @@
 #Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 [CmdletBinding()]
 param (
-  [string]$ChromeDir="C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"
+    [string]$ChromeDir="C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"
   )
 
 if (-Not (Test-Path $ChromeDir -PathType Leaf)) {
@@ -77,7 +77,9 @@ if ($needUpdateChromeDriver) {
   
   Remove-Item -Path $(Join-Path $thisScriptRoot "Scripts/chromedriver-win32") -Force
 
-  Write-Output "chromedriver updated to version $chromeDriverFileVersion"
+  $chromeDriverPath = Join-Path $thisScriptRoot "Scripts/chromedriver.exe"
+
+  Write-Output "chromedriver updated to version $(& $chromeDriverPath --version)"
 }
 else {
   Write-Output "chromedriver is actual"
