@@ -2,6 +2,7 @@
 [CmdletBinding()]
 param (
     [string]$ChromeDir="C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"
+    #[string]$ChromeDir="C:\Program Files\Google\Chrome\Application\chrome.exe"
   )
 
 if (-Not (Test-Path $ChromeDir -PathType Leaf)) {
@@ -55,7 +56,7 @@ Write-Output "chromedriver latest:  $chromeDriverLatestVersion"
 # will update chromedriver.exe if MAJOR.MINOR.PATCH
 $needUpdateChromeDriver = $chromeDriverCurrentVersion -ne $chromeDriverLatestVersion
 if ($needUpdateChromeDriver) {
-  $chromeDriverZipLink = "https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/" + $chromeDriverLatestVersion + "/win32/chromedriver-win32.zip"
+  $chromeDriverZipLink = "https://storage.googleapis.com/chrome-for-testing-public/" + $chromeDriverLatestVersion + "/win32/chromedriver-win32.zip"
   Write-Output "Will download $chromeDriverZipLink"
 
   $chromeDriverZipFileLocation = $(Join-Path $chromeDriverDir "chromedriver-win32.zip")
