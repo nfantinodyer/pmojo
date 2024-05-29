@@ -1,4 +1,3 @@
-from binhex import LINELEN
 from http.server import executable
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
@@ -119,7 +118,7 @@ def justName(cdi,cdn,d,m,y):
         com = "Anniversary card"
 
     #to copy page text
-    time.sleep(1)
+    #time.sleep(1)
     send_keys("^a^c")
 
     #get clipboard
@@ -264,7 +263,7 @@ def full(cdi,cdn,d,m,y):
             typeOfCom = "t"
 
     #to copy page text
-    time.sleep(1)
+    #time.sleep(1)
     send_keys("^a^c")
 
     #get clipboard

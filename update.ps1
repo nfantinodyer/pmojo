@@ -10,7 +10,7 @@ if (-Not (Test-Path $ChromeDir -PathType Leaf)) {
   Exit 1
 }
 
-[string]$thisScriptRoot = Join-Path $env:UserProfile "AppData\Local\Programs\Python\Python310"
+[string]$thisScriptRoot = Join-Path $env:UserProfile "AppData\Local\Programs\Python\Python312"
 
 $chromeDriverRelativeDir = "Scripts"
 $chromeDriverDir = $(Join-Path $thisScriptRoot $chromeDriverRelativeDir)
