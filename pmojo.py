@@ -46,7 +46,7 @@ def begin(date):
     password = config.get('PASSWORD')
 
     #logs into practice mojo
-    driver.get("http://www.practicemojo.com/login")
+    driver.get("https://app.practicemojo.com/Pages/login")
     elem = driver.find_element(By.NAME, "loginId")
     elem.clear()
     elem.send_keys(username)
