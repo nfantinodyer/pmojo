@@ -12,6 +12,10 @@ from ahk import AHK
 import time
 import json
 import threading
+import warnings
+
+#to ignore pywinauto 32bit warning
+warnings.simplefilter('ignore', category=UserWarning)
 
 #I should make a class in order to initialize the threads and to
 #better organize my code
