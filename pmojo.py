@@ -129,70 +129,39 @@ def justName(cdi,cdn,d,m,y):
     go.write(clip_text)
     go.close()
 
-    #read lines of the file
-    text_file = open('practicemojo.txt', 'r')
-    text = text_file.readlines()
-    text_file.close()
+    with open('practicemojo.txt', 'r') as text_file:
+        text = text_file.readlines()
 
-    #remove extra parts on the page
-    del text[0:7+1]
+    # Remove header and footer lines
+    del text[0:8]
     del text[-5:]
 
-    #logic for getting pt names out of the file
-    new_file = open("practicemojo.txt", "w+")
-    temp = text
-    skip5=0
-    alltext=""
-    single=""
-    lastlength = 1
-    totallines = 0
+    unique_lines = set()
+    alltext = ""
 
-    for line in temp:
-        totallines += 1
+    for line in text:
+        # Normalize the line by removing extra spaces and unwanted tabs
+        line = re.sub(r"\s+", ' ', line.strip())
 
-        #remove address supressed at the end of the line as well as making sure that it doesnt repeat pts as pmojo sometimes prints families multiple times.
-        if line[0:lastlength+3] not in single:
-            single += line
-            if re.search("Family", line):
-                continue
-            if re.search("Address",line):
-                lengthRemove = 0
-                for i in range(5, len(line)):
-                    if line[i] == "A" and line[i+1] == "d" and line[i+2] == "d" and line[i+3] == "r" and line[i+4] == "e" and line[i+5] == "s":
-                        lengthRemove = i
-                        break
-                line = line[0:lengthRemove]
-                line += "\n"
+        # Remove any trailing 'Address suppressed' or similar unwanted text
+        address_index = line.find("Address")
+        if address_index != -1:
+            line = line[:address_index]  # Trim the line at the word "Address"
 
-            count=0
-            line = line.replace("\t","")
+        # Remove non-ASCII characters and specific unwanted phrases
+        line = re.sub(r"[^\x00-\x7F]+", '', line)  # Remove non-ASCII characters
+        line = line.replace("Bounced", "")  # Remove the word "Bounced"
+        line = line.replace("Opt Out", "")  # Remove the phrase "Opt Out"
+        line = line.replace("\t", "")  # Remove all tabs
 
-            #removes special chars after eat line of "Family" and adds line to alltext
-            for letter in line:
-                count=count+1
-                if skip5>0:
-                    skip5 -= 1
-                elif letter == " " and count==1:
-                    skip5 = 5
-                elif letter == ",":
-                    lastlength = count
-                    alltext += letter
-                else:
-                    alltext += letter
-       
-        alltext = alltext.rstrip()
-        alltext+="\n"
-    
-    #removes end of line text
-    alltext = alltext[:-1]
-    alltext = alltext.replace("\t","")
-    alltext = alltext.replace("Bounced","")
-    alltext = alltext.replace("Opt Out","")
-    alltext = alltext.strip()
+        # Check for duplicates
+        if line not in unique_lines:
+            unique_lines.add(line)
+            alltext += line + "\n"
 
-    #write to new_file
-    for line in alltext:
-        new_file.write(line)
+    # Write the processed lines to the same file, ensuring there's no extra newline at the end
+    with open("practicemojo.txt", "w") as new_file:
+        new_file.write(alltext.strip())
         
     new_file.close()
 
@@ -261,7 +230,6 @@ def full(cdi,cdn,d,m,y):
             typeOfCom = "t"
 
     #to copy page text
-    #time.sleep(1)
     send_keys("^a^c")
 
     #get clipboard
