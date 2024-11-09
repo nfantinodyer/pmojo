@@ -65,10 +65,10 @@ def begin(date):
 def pause():
     if pauseEvent.is_set():
         pauseEvent.clear()
-        print("Resumed")
+        print("Paused")
     else:
         pauseEvent.set()
-        print("Paused")
+        print("Resumed")
 
 def focus(app):
     app.set_focus()
@@ -203,7 +203,7 @@ def name(cdi, cdn, d, m, y, chrome, softdent):
             ahk.type('f')
             pauseEvent.wait()
             ahk.type(line)
-            sleep(1)
+            sleep(2)
             ahk.key_press('Enter')
             pauseEvent.wait()
             ahk.type("0ca")
@@ -221,7 +221,7 @@ def name(cdi, cdn, d, m, y, chrome, softdent):
             ahk.key_press("Tab")
             
             ahk.type(m+"/"+d+"/"+y)
-            sleep(2)
+            sleep(3)
             pauseEvent.wait()
             ahk.key_press("Enter")
             pauseEvent.wait()
@@ -286,9 +286,15 @@ def nameDateTime(cdi, cdn, d, m, y, chrome, softdent):
     for key, times in appointments.items():
         # Combine multiple times into one line
         times_str = ' & '.join(sorted(set(times)))  # Remove duplicates and sort times
-        name, date = key.rsplit('10', 1)
-        line_to_write = f"{name}10{date} @ {times_str}"
-        lines_to_write.append(line_to_write)
+        # Use regex to extract the date part
+        match = re.search(r"(\d{2}/\d{2})$", key)
+        if match:
+            date = match.group(1)
+            name = key[:match.start()].strip()
+            line_to_write = f"{name} {date} @ {times_str}"
+            lines_to_write.append(line_to_write)
+        else:
+            print(f"Unexpected key format: {key}")  # Debug output for unexpected key format
 
     # Write all lines to file, avoiding an extra newline on the last line
     with open("practicemojo.txt", "w+", encoding='utf-8') as new_file:
@@ -323,7 +329,7 @@ def nameDateTime(cdi, cdn, d, m, y, chrome, softdent):
             ahk.type('f')
             pauseEvent.wait()
             ahk.type(name)
-            sleep(1)
+            sleep(2)
             ahk.key_press("Enter")
             pauseEvent.wait()
             ahk.type("0ca")
@@ -354,7 +360,7 @@ def nameDateTime(cdi, cdn, d, m, y, chrome, softdent):
             ahk.type("pmojoNFD")
             ahk.key_press("Tab")
             ahk.type(m+"/"+d+"/"+y)
-            sleep(2)
+            sleep(3)
             pauseEvent.wait()
             ahk.key_press("Enter")
             pauseEvent.wait()
