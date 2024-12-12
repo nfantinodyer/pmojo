@@ -124,16 +124,17 @@ def processSite(driver, date, chrome, softdent):
         if(i != 23 and i != 130):
             for o in range(1,3):
                 driver.get("https://app.practicemojo.com/cgi-bin/WebObjects/PracticeMojo.woa/wa/gotoActivityDetail?td="+m+"%2F"+d+"%2F"+y+"&cdi="+str(i)+"&cdn="+str(o))
-                sleep(0.5)
+                #sleep(0.5)
                 name(i, o, d, m, y, chrome, softdent)
         else:
             for o in range(1,3):
                 driver.get("https://app.practicemojo.com/cgi-bin/WebObjects/PracticeMojo.woa/wa/gotoActivityDetail?td="+m+"%2F"+d+"%2F"+y+"&cdi="+str(i)+"&cdn="+str(o))
-                sleep(0.5)
+                #sleep(0.5)
                 nameDateTime(i, o, d, m, y, chrome, softdent)
 
 def name(cdi, cdn, d, m, y, chrome, softdent):
     #determine if letter email or text based on url
+    sleep(0.5)
     typeOfCom = ""
     if cdn == 1:
         if cdi in {1, 8, 21, 22, 30, 33, 35}:
@@ -236,6 +237,7 @@ def name(cdi, cdn, d, m, y, chrome, softdent):
 
 def nameDateTime(cdi, cdn, d, m, y, chrome, softdent):
     #determine if letter email or text based on url
+    sleep(0.5)
     typeOfCom = ""
     if cdn == 1:
         if cdi == 130 or cdi == 23:
