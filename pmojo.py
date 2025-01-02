@@ -340,7 +340,7 @@ def nameDateTime(cdi, cdn, d, m, y, chrome, softdent):
             #Confirm Appt is cc
             ahk.type("cc")
             ahk.key_press("Tab")
-            ahk.type("Reminder for ")
+            ahk.type("Reminder for")
             pauseEvent.wait()
             size = 0
             for word in line:
