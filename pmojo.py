@@ -13,6 +13,8 @@ import warnings
 import threading
 import keyboard
 import calendar
+import sqlite3
+import datetime
 
 warnings.simplefilter('ignore', category=UserWarning)  # Ignore 32bit warnings
 
@@ -108,6 +110,34 @@ def createGUI():
     days_frame = tk.Frame(window)
     days_frame.pack(side=tk.TOP, anchor="center", padx=2, pady=5)
 
+    # Frame for toggling status
+    status_frame = tk.Frame(window)
+    status_frame.pack(anchor='center', pady=5)
+
+    # A label to show the selected day from the Entry
+    selected_day_label = tk.Label(status_frame, text="Selected: ")
+    selected_day_label.pack(side=tk.LEFT, padx=5)
+
+    def mark_done():
+        """Toggle the selected date to 'done' or back to ''."""
+        date_str = entry.get().strip()
+        if date_str:
+            toggle_day_status(date_str, 'done')
+            update_calendar()  # refresh button colors
+
+    def mark_error():
+        """Toggle the selected date to 'error' or back to ''."""
+        date_str = entry.get().strip()
+        if date_str:
+            toggle_day_status(date_str, 'error')
+            update_calendar()  # refresh button colors
+
+    toggle_done_btn = tk.Button(status_frame, text="Toggle Done", command=mark_done)
+    toggle_done_btn.pack(side=tk.LEFT, padx=5)
+
+    toggle_error_btn = tk.Button(status_frame, text="Toggle Error", command=mark_error)
+    toggle_error_btn.pack(side=tk.LEFT, padx=5)
+
     def draw_calendar(month, year):
         """Rebuilds the day-buttons for the given month/year, centered under the label."""
         # Clear out old buttons
@@ -131,10 +161,21 @@ def createGUI():
                     lbl.grid(row=row_idx, column=col_idx)
                 else:
                     date_str = f"{month:02}/{day:02}/{year}"
+                    # Get the status for this date from the DB
+                    status = get_day_status(date_str)
+
+                    # Decide background color
+                    bg_color = "SystemButtonFace"  # default
+                    if status == "done":
+                        bg_color = "gray"
+                    elif status == "error":
+                        bg_color = "red"
+
                     btn = tk.Button(
                         days_frame,
                         text=str(day),
                         width=3,
+                        bg=bg_color,
                         command=lambda ds=date_str: (
                             entry.delete(0, tk.END),
                             entry.insert(0, ds)
@@ -191,6 +232,63 @@ def createGUI():
     window.bind_all("<Return>", lambda e: window.focus_get().invoke())
 
     window.mainloop()
+
+def init_db():
+    """Create or open a local days.db, build the 'days' table, and prefill up to 03/27/2025 as 'done'."""
+    conn = sqlite3.connect("days.db")
+    c = conn.cursor()
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS days(
+            date TEXT PRIMARY KEY,
+            status TEXT DEFAULT '',   -- 'done', 'error', or ''
+            error_msg TEXT DEFAULT ''
+        )
+    """)
+    # We'll fill from some earliest date up to 03/27/2025
+    # Adjust 'start_date' to whatever earliest date you want to store
+    start_date = datetime.date(2020, 1, 1)
+    end_date = datetime.date(2025, 3, 27)
+
+    one_day = datetime.timedelta(days=1)
+    cur_date = start_date
+
+    while cur_date <= end_date:
+        date_str = cur_date.strftime("%m/%d/%Y")
+        # Insert only if not existing
+        c.execute("""
+            INSERT OR IGNORE INTO days(date, status, error_msg)
+            VALUES (?, 'done', '')
+        """, (date_str,))
+        cur_date += one_day
+
+    conn.commit()
+    conn.close()
+
+def get_day_status(date_str):
+    """Return the status ('done', 'error', or '') for the given date_str from the DB."""
+    conn = sqlite3.connect("days.db")
+    c = conn.cursor()
+    c.execute("SELECT status FROM days WHERE date=?", (date_str,))
+    row = c.fetchone()
+    conn.close()
+    return row[0] if row else ''
+
+def toggle_day_status(date_str, new_status):
+    """
+    If the current status is already new_status, toggle it back to ''.
+    Otherwise, set it to new_status.
+    """
+    current = get_day_status(date_str)
+    if current == new_status:
+        new_status = ''  # revert back
+    conn = sqlite3.connect("days.db")
+    c = conn.cursor()
+    # Insert row if not already present
+    c.execute("INSERT OR IGNORE INTO days(date) VALUES(?)", (date_str,))
+    # Update status
+    c.execute("UPDATE days SET status=? WHERE date=?", (new_status, date_str))
+    conn.commit()
+    conn.close()
 
 def begin(date):
     threading.Thread(target=loginToSite, args=(date,)).start()
@@ -513,4 +611,5 @@ keyboard.add_hotkey('num lock', stopProgram)
 keyboard.add_hotkey('scroll lock', pause)
 
 if __name__ == "__main__":
+    init_db()
     createGUI()
