@@ -488,12 +488,14 @@ def loginToSite(date):
 
     #to be able to set focus with softdent.set_focus() and now focus(softdent)
     soft = Application()
-    soft.connect(title_re='.*CS SoftDent.*- S.*')
-    softdent = soft.window(title_re='.*CS SoftDent.*- S.*')
-    
-    #for testing
-    #soft.connect(title_re='.*WordPad.*')
-    #softdent = soft.window(title_re='.*WordPad.*')
+    try:
+        soft.connect(title_re=".*CS SoftDent.*- S.*")
+        softdent = soft.window(title_re=".*CS SoftDent.*- S.*")
+        print("Connected to SoftDent.")
+    except Exception as e:
+        print("SoftDent not found. Connecting to WordPad for testing.")
+        soft.connect(title_re=".*WordPad.*")
+        softdent = soft.window(title_re=".*WordPad.*")
 
     #initial focus set
     focus(chrome)

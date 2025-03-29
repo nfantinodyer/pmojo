@@ -3,12 +3,27 @@
 param (
     [string]$ChromeDir="C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"
     #[string]$ChromeDir="C:\Program Files\Google\Chrome\Application\chrome.exe"
-  )
+)
+
+#Hard coded 32-bit and 64-bit Chrome paths
+$chrome32 = "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"
+$chrome64 = "C:\Program Files\Google\Chrome\Application\chrome.exe"
+
+#if 32-bit Chrome path exists, use that:
+if (Test-Path $chrome32) {
+    $ChromeDir = $chrome32
+}
+#if 64-bit path exists, use that:
+elseif (Test-Path $chrome64) {
+    $ChromeDir = $chrome64
+}
 
 if (-Not (Test-Path $ChromeDir -PathType Leaf)) {
-  Write-Output "Chrome not found in '$ChromeDir'. Please, install chrome or specify custom chrome location with -ChromeDir argument."
-  Exit 1
+    Write-Output "Chrome not found at '$ChromeDir'. Install Chrome or specify a custom location with -ChromeDir."
+    Exit 1
 }
+
+Write-Host "Using Chrome path: $ChromeDir"
 
 [string]$thisScriptRoot = Join-Path $env:UserProfile "AppData\Local\Programs\Python\Python312"
 
