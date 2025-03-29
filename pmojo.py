@@ -85,15 +85,17 @@ def createGUI():
     entry.pack(side=tk.LEFT, padx=2, pady=5)
     entry.insert(0, calendar.datetime.date.today().strftime("%m/%d/%Y"))
     entry.focus_set()
+    # Pressing Enter on the Entry calls begin(...) in a new thread
     entry.bind("<Return>", lambda e: begin(entry.get()))
 
-    # BooleanVar for "Complete All"
+    # A BooleanVar to track the "Complete All" checkbox
     completeAllVar = tk.BooleanVar(value=False)
 
     def on_complete_all_toggle():
+        # Whenever the user checks/unchecks "Complete All," redraw the calendar
         update_calendar()
 
-    # The Checkbutton, with a command that triggers a redraw
+    # Checkbox that triggers a redraw each time it’s toggled
     completeAllCheck = tk.Checkbutton(
         window,
         text="Complete All",
@@ -117,7 +119,7 @@ def createGUI():
         if cur_month < 1:
             cur_month = 12
             cur_year -= 1
-        # Do NOT change entry text; only redraw
+        # Don't touch the Entry; just redraw
         draw_calendar(cur_month, cur_year)
 
     def next_month():
@@ -126,7 +128,7 @@ def createGUI():
         if cur_month > 12:
             cur_month = 1
             cur_year += 1
-        # Do NOT change entry text; only redraw
+        # Don't overwrite the Entry; just redraw
         draw_calendar(cur_month, cur_year)
 
     left_arrow_btn = tk.Button(month_frame, text="←", command=prev_month)
@@ -169,26 +171,40 @@ def createGUI():
 
     # ---------- DRAW CALENDAR FUNCTION -----------
     def draw_calendar(month, year):
-        """Rebuilds the day-buttons for the given month/year, centered under the label."""
-        # Clear old buttons
+        """
+        Redraws the day-buttons for the given month/year.
+        1) If "Complete All" is checked, find all undone dates <= the Entry date for green.
+        2) Also highlight the current date in the Entry as green (unless it's done/error).
+        3) 'done' => gray, 'error' => red take precedence over green.
+        """
+        # Clear existing day-buttons
         for widget in days_frame.winfo_children():
             widget.destroy()
 
+        # Update the month_label
         month_label.config(text=f"{calendar.month_name[month]} {year}")
         nonlocal cur_month, cur_year
         cur_month, cur_year = month, year
 
+        # We'll store which dates should appear green
         green_dates = set()
+
+        # Always highlight the single date typed in the Entry (unless done/error)
+        selected_str = entry.get().strip()
+        # Validate the typed date
+        if re.match(r"^\d{1,2}/\d{1,2}/\d{4}$", selected_str):
+            green_dates.add(selected_str)  # the user's single selection
+
+        # If "Complete All" is checked, gather undone up to that same date
         if completeAllVar.get():
-            end_str = entry.get().strip()
             try:
-                end_m, end_d, end_y = end_str.split('/')
+                end_m, end_d, end_y = selected_str.split('/')
                 end_date = datetime.date(int(end_y), int(end_m), int(end_d))
 
-                # 1) Ensure DB has all days up to 'end_date'
+                # 1) Expand DB up to end_date
                 expand_db_up_to(end_date)
 
-                # 2) Fetch undone dates <= end_date
+                # 2) Gather undone dates <= end_date
                 conn = sqlite3.connect("days.db")
                 c = conn.cursor()
                 c.execute("SELECT date FROM days WHERE status != 'done'")
@@ -204,8 +220,9 @@ def createGUI():
                     except:
                         pass
             except:
-                pass
+                pass  # user typed something invalid in the Entry
 
+        # Now build the clickable grid
         cal_iter = calendar.Calendar(firstweekday=calendar.SUNDAY)
         for row_idx, week in enumerate(cal_iter.monthdayscalendar(year, month)):
             for col_idx, day in enumerate(week):
@@ -221,25 +238,34 @@ def createGUI():
                         bg_color = "gray"
                     elif status == "error":
                         bg_color = "red"
+                    # If it's not done/error and is in green_dates => lightgreen
                     elif date_str in green_dates:
                         bg_color = "lightgreen"
+
+                    # Clicking a day sets the Entry to that date and re-draws
+                    def on_day_click(ds=date_str):
+                        entry.delete(0, tk.END)
+                        entry.insert(0, ds)
+                        update_calendar()  # so the newly selected date also becomes green
 
                     btn = tk.Button(
                         days_frame,
                         text=str(day),
                         width=3,
                         bg=bg_color,
-                        command=lambda ds=date_str: (
-                            entry.delete(0, tk.END),
-                            entry.insert(0, ds)
-                        )
+                        command=on_day_click
                     )
                     btn.grid(row=row_idx, column=col_idx)
 
     # ---------- UPDATE CALENDAR ON ENTRY CHANGE -----------
     def update_calendar(event=None):
+        """
+        Called whenever the user types in the Entry or 
+        we programmatically change the Entry (like on_day_click).
+        """
         import re
         text = entry.get().strip()
+        # If user typed a valid date => re-draw that month
         if re.match(r"^\d{1,2}/\d{1,2}/\d{4}$", text):
             try:
                 new_m, new_d, new_y = text.split('/')
@@ -247,12 +273,17 @@ def createGUI():
                 new_y = int(new_y)
                 if 1 <= new_m <= 12:
                     draw_calendar(new_m, new_y)
-            except ValueError:
-                pass
+                else:
+                    # If out of range (e.g. 13), just re-draw the current
+                    draw_calendar(cur_month, cur_year)
+            except:
+                draw_calendar(cur_month, cur_year)
         else:
+            # If invalid, re-draw the current month
             draw_calendar(cur_month, cur_year)
 
-    # Init
+    # Initialize
+    # So that if user types something, we automatically re-draw
     entry.bind("<KeyRelease>", update_calendar)
     draw_calendar(cur_month, cur_year)
 
