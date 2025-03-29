@@ -56,10 +56,10 @@ Write-Output "chromedriver latest:  $chromeDriverLatestVersion"
 # will update chromedriver.exe if MAJOR.MINOR.PATCH
 $needUpdateChromeDriver = $chromeDriverCurrentVersion -ne $chromeDriverLatestVersion
 if ($needUpdateChromeDriver) {
-  $chromeDriverZipLink = "https://storage.googleapis.com/chrome-for-testing-public/" + $chromeDriverLatestVersion + "/win32/chromedriver-win32.zip"
+  $chromeDriverZipLink = "https://storage.googleapis.com/chrome-for-testing-public/" + $chromeDriverLatestVersion + "/win64/chromedriver-win64.zip"
   Write-Output "Will download $chromeDriverZipLink"
 
-  $chromeDriverZipFileLocation = $(Join-Path $chromeDriverDir "chromedriver-win32.zip")
+  $chromeDriverZipFileLocation = $(Join-Path $chromeDriverDir "chromedriver-win64.zip")
 
   Invoke-WebRequest -Uri $chromeDriverZipLink -OutFile $chromeDriverZipFileLocation
   Expand-Archive $chromeDriverZipFileLocation -DestinationPath $(Join-Path $thisScriptRoot $chromeDriverRelativeDir) -Force
@@ -73,10 +73,10 @@ if ($needUpdateChromeDriver) {
     $chromeDriverFileVersion = & $chromeDriverPath --version
   }
 
-  Move-Item -Path $(Join-Path $thisScriptRoot "Scripts/chromedriver-win32/chromedriver.exe") -Destination $(Join-Path $thisScriptRoot "Scripts") -Force
-  Move-Item -Path $(Join-Path $thisScriptRoot "Scripts/chromedriver-win32/LICENSE.chromedriver") -Destination $(Join-Path $thisScriptRoot "Scripts") -Force
+  Move-Item -Path $(Join-Path $thisScriptRoot "Scripts/chromedriver-win64/chromedriver.exe") -Destination $(Join-Path $thisScriptRoot "Scripts") -Force
+  Move-Item -Path $(Join-Path $thisScriptRoot "Scripts/chromedriver-win64/LICENSE.chromedriver") -Destination $(Join-Path $thisScriptRoot "Scripts") -Force
   
-  Remove-Item -Path $(Join-Path $thisScriptRoot "Scripts/chromedriver-win32") -Force
+  Remove-Item -Path $(Join-Path $thisScriptRoot "Scripts/chromedriver-win64") -Force
 
   $chromeDriverPath = Join-Path $thisScriptRoot "Scripts/chromedriver.exe"
 

@@ -12,3 +12,5 @@ Username and password are not hardcoded and use a config.json file to store it i
 For ahk = AHK(), it only works if you already have auto hotkey installed on your computer. If you don't you have to pip install ahk_binary and use ahk = AHK(executable_path = "PATH").
 
 To run: open the file through python and type in the date in the format requested (MM/DD/YYYY) and press the start button. Make sure softdent is open into the patient search window and make sure chrome is closed.
+
+You can pause and resume by clicking scroll lock, and you can force exit the program with num lock.

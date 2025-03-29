@@ -1,135 +1,49 @@
 import re
+with open('practicemojo.txt', 'r', encoding='utf-8') as text_file:
+    text = text_file.readlines()
 
-
-text_file = open('practicemojo.txt', 'r')
-text = text_file.readlines()
-text_file.close()
-
-#remove extra parts on the page
-del text[0:7+1]
+# Remove header and footer lines if not part of the needed data
+del text[0:8]
 del text[-5:]
 
-#logic to get names dates and times from file
-new_file = open("practicemojo.txt", "w+")
-temp = text
-skip5=0
-next6=0
-skip=False
-alltext=""
-single=[]
-liststring=[]
-lastlength = 1
-totallines = 0
+print(text)
 
-for line in temp:
-    totallines += 1
-    #if line[0:lastlength+3] in single:
-    #    if re.search("@", line):
-            #puts first time first no matter the order in practice mojo. Removes second occurance.
-    #        for li in liststring:
-    #            if li[0:lastlength+3]==line[0:lastlength+3]:
-                    #since 12pm is earlier than 3pm but 12>3 so this corrects that and fixes 7am time just in case
-    #               if line[next6+1:next6+3]<="12" and line[next6+1:next6+3]>="7":
-    #                    if line[next6+1:next6+3] > li[next6+1:next6+3]:
-    #                        single = single[0:len(single)-(len(li)-6)]
-    #                        alltext = alltext[0:len(alltext)-(len(li)-6)]
-                    #since 3pm is before 4pm and 3<4 
-    #                elif line[next6+1:next6+3] < li[next6+1:next6+3]:
-    #                    single = single[0:len(single)-(len(li)-6)]
-    #                    alltext = alltext[0:len(alltext)-(len(li)-6)]    
+appointments = {}
 
-    #skips family and gets time and date after the @ sign.
-    count=0
-    for letter in line:
-        count=count+1
-        if letter == ",":
-            lastlength = count
+for line in text:
+    if re.search("Family",line):  # Skip the line containing "Family" as it's not needed
+        continue
+    # Normalize spaces and remove non-ASCII characters
+    line = re.sub(r"\s+", ' ', line.strip())
+    line = re.sub(r"[^\x00-\x7F]+", '', line)
 
-    for i in single:
-        if re.fullmatch(line[0:lastlength+3], i[0:lastlength+3]):
-            skip=True
-            break
-    
-    if not skip:
-        single.append(line)
-        liststring.append(line)
-        if re.search("Family", line):
-            continue
-        if re.search("Address",line):
-            lengthRemove = 0
-            for i in range(5, len(line)):
-                if line[i] == "A" and line[i+1] == "d" and line[i+2] == "d" and line[i+3] == "r" and line[i+4] == "e" and line[i+5] == "s":
-                    lengthRemove = i
-                    break
-            line = line[0:lengthRemove]
-            line += "\n"
-        if re.search("@", line):
-            count=0
-            for letter in line:
-                count=count+1
-                if skip5>0:
-                    skip5 -= 1
-                elif letter == " " and count==1:
-                    skip5 = 5
-                elif letter == ",":
-                    lastlength = count
-                    alltext += letter
-                elif letter == "@":
-                    alltext += "@"
-                    next6=count
-                else:
-                    alltext += letter
-    skip=False
+    # Match the expected line format with dates and times
+    match = re.search(r"([a-zA-Z, ]+)(\d{2}/\d{2} @ \d{2}:\d{2} [APM]+)", line)
+    if match:
+        name, datetime = match.groups()
+        date, time = datetime.split(' @ ')
+        # Construct a unique key for each person and date
+        key = f"{name.strip()}{date}"
+        if key not in appointments:
+            appointments[key] = []
+        appointments[key].append(time)
+    else:
+        print(f"No match for line: {line}")  # Debug output for unmatched lines
+
+# Prepare to write consolidated entries to file
+lines_to_write = []
+for key, times in appointments.items():
+    # Combine multiple times into one line
+    times_str = ' & '.join(sorted(set(times)))  # Remove duplicates and sort times
+    # Use regex to extract the date part
+    match = re.search(r"(\d{2}/\d{2})$", key)
+    if match:
+        date = match.group(1)
+        name = key[:match.start()].strip()
+        line_to_write = f"{name} {date} @ {times_str}"
+        lines_to_write.append(line_to_write)
+    else:
+        print(f"Unexpected key format: {key}")  # Debug output for unexpected key format
 
 
-    alltext = alltext.rstrip()
-    alltext+="\n"
-    
-#dont need to replace opt out and address supressed due to the next6 being the next 6 chars 00:00AM
-alltext = alltext[:-1]
-alltext = alltext.replace("\t","")
-alltext = alltext.strip()
-
-for line in alltext:
-    new_file.write(line)
-
-new_file.close()
-
-#to compare if char is num
-num = "[0-9]+"
-NUMBER = re.compile(num)
-
-file1 = open("practicemojo.txt", "r")
-lines = file1.readlines()
-file1.close()
-
-for line in lines:
-    now = False
-    name = ""
-    if line != "":
-        for word in line:
-            if re.fullmatch(NUMBER, word):
-                break
-            else:
-                name+=word
-    print(name,end=" ")
-    size = 0
-    for word in line:
-        size+=1
-        if now:
-            line = line[size-1:]
-            now=False
-            break
-        elif re.fullmatch(NUMBER, word):
-            print(word,end="")
-            now = True
-        
-    for word in line:
-        if re.fullmatch("M", word):
-            print("M",end="")
-            break
-        else:
-            print(word,end="")
-    print()
-
-
+print(lines_to_write)
