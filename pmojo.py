@@ -12,6 +12,7 @@ import json
 import warnings
 import threading
 import keyboard
+import calendar
 
 warnings.simplefilter('ignore', category=UserWarning)  # Ignore 32bit warnings
 
@@ -34,7 +35,7 @@ def createGUI():
     window.columnconfigure(0, weight=1, minsize=250)
     window.rowconfigure(0, weight=1, minsize=250)
 
-    entrylabel = tk.Label(window, text="Enter the date MM/DD/YYYY: ")
+    entrylabel = tk.Label(window, text="Enter the date (MM/DD/YYYY): ")
     entrylabel.pack(side=tk.TOP, anchor=tk.W)
 
     frame1 = tk.Frame(window, width=50, relief=tk.SUNKEN)
@@ -42,19 +43,151 @@ def createGUI():
 
     entry = tk.Entry(frame1, width=50)
     entry.pack(side=tk.LEFT, padx=2, pady=5)
+    entry.insert(0, calendar.datetime.date.today().strftime("%m/%d/%Y"))
+    entry.focus_set()
+    # Pressing Enter in this Entry will call begin(...) with the entry text
+    entry.bind("<Return>", lambda e: begin(entry.get()))
 
-    start_button = tk.Button(window, text="Start", width=10, height=2, command=lambda: begin(entry.get()))
-    start_button.pack(anchor=tk.W, padx=2, pady=5)
+    # We store the currently displayed month/year in a mutable list or dict
+    # so both arrow buttons and update_calendar can refer to them.
+    # Let's initialize from the entry's default date:
+    cur_date_str = entry.get()
+    m, d, y = cur_date_str.split('/')
+    cur_month = int(m)
+    cur_year = int(y)
+    
+    # -- Create a frame to hold the left arrow, month_label, and right arrow in a row --
+    month_frame = tk.Frame(window)
+    month_frame.pack(pady=(5, 0), anchor="center")
 
-    pause_button = tk.Button(window, text="Pause/Resume", width=15, height=2, command=pause)
-    pause_button.pack(anchor=tk.W, padx=2, pady=5)
+    # Left arrow button
+    def prev_month():
+        nonlocal cur_month, cur_year
+        cur_month -= 1
+        if cur_month < 1:
+            cur_month = 12
+            cur_year -= 1
+        # For simplicity, let's just set the day to "1"
+        new_date_str = f"{cur_month:02}/01/{cur_year}"
+        entry.delete(0, tk.END)
+        entry.insert(0, new_date_str)
+        draw_calendar(cur_month, cur_year)
 
-    exit_button = tk.Button(window, text="Exit", command=window.quit, width=10, height=2)
-    exit_button.pack(anchor=tk.W, padx=2, pady=5)
+    left_arrow_btn = tk.Button(
+        month_frame,
+        text="←",
+        command=prev_month
+    )
+    left_arrow_btn.pack(side=tk.LEFT, padx=5)
+
+    # Label that shows "March 2025", etc. -- center it in month_frame
+    month_label = tk.Label(month_frame, text="", font=("Helvetica", 12, "bold"))
+    month_label.pack(side=tk.LEFT)
+
+    # Right arrow button
+    def next_month():
+        nonlocal cur_month, cur_year
+        cur_month += 1
+        if cur_month > 12:
+            cur_month = 1
+            cur_year += 1
+        # For simplicity, let's set day to "1"
+        new_date_str = f"{cur_month:02}/01/{cur_year}"
+        entry.delete(0, tk.END)
+        entry.insert(0, new_date_str)
+        draw_calendar(cur_month, cur_year)
+
+    right_arrow_btn = tk.Button(
+        month_frame,
+        text="→",
+        command=next_month
+    )
+    right_arrow_btn.pack(side=tk.LEFT, padx=5)
+
+    # Frame that holds the clickable day-buttons
+    days_frame = tk.Frame(window)
+    days_frame.pack(side=tk.TOP, anchor="center", padx=2, pady=5)
+
+    def draw_calendar(month, year):
+        """Rebuilds the day-buttons for the given month/year, centered under the label."""
+        # Clear out old buttons
+        for widget in days_frame.winfo_children():
+            widget.destroy()
+
+        # Update the month_label to something like "March 2025"
+        month_label.config(text=f"{calendar.month_name[month]} {year}")
+
+        # Also update our stored month/year so arrows remain in sync
+        nonlocal cur_month, cur_year
+        cur_month, cur_year = month, year
+
+        cal_iter = calendar.Calendar(firstweekday=calendar.SUNDAY)
+        # Build the clickable grid of days
+        for row_idx, week in enumerate(cal_iter.monthdayscalendar(year, month)):
+            for col_idx, day in enumerate(week):
+                if day == 0:
+                    # 0 means day is from a previous/next month
+                    lbl = tk.Label(days_frame, text=" ", width=3)
+                    lbl.grid(row=row_idx, column=col_idx)
+                else:
+                    date_str = f"{month:02}/{day:02}/{year}"
+                    btn = tk.Button(
+                        days_frame,
+                        text=str(day),
+                        width=3,
+                        command=lambda ds=date_str: (
+                            entry.delete(0, tk.END),
+                            entry.insert(0, ds)
+                        )
+                    )
+                    btn.grid(row=row_idx, column=col_idx)
+
+    def update_calendar(event=None):
+        """Try to parse the entry as MM/DD/YYYY, redraw the days if valid."""
+        import re
+        text = entry.get().strip()
+        # Quick check: must match "MM/DD/YYYY"
+        if re.match(r"^\d{1,2}/\d{1,2}/\d{4}$", text):
+            try:
+                new_m, new_d, new_y = text.split('/')
+                new_m = int(new_m)
+                new_y = int(new_y)
+                if 1 <= new_m <= 12:
+                    draw_calendar(new_m, new_y)
+            except ValueError:
+                pass  # if anything fails, ignore
+
+    # Whenever the user types in the Entry, try to update the calendar
+    entry.bind("<KeyRelease>", update_calendar)
+
+    # Draw the initial calendar for today's date
+    draw_calendar(cur_month, cur_year)
+
+    # ---- Buttons at the bottom in a single row ----
+    buttons_frame = tk.Frame(window)
+    buttons_frame.pack(side=tk.BOTTOM, pady=10)
+
+    start_button = tk.Button(
+        buttons_frame, text="Start", width=10, height=2,
+        command=lambda: begin(entry.get())
+    )
+    start_button.pack(side=tk.LEFT, padx=5)
+
+    pause_button = tk.Button(
+        buttons_frame, text="Pause/Resume", width=15, height=2,
+        command=pause
+    )
+    pause_button.pack(side=tk.LEFT, padx=5)
+
+    exit_button = tk.Button(
+        buttons_frame, text="Exit", command=window.quit,
+        width=10, height=2
+    )
+    exit_button.pack(side=tk.LEFT, padx=5)
 
     # Bind Tab key to focus the next widget
     window.bind_all("<Tab>", lambda e: window.tk_focusNext().focus())
-    # Bind Enter key to activate the focused button
+    # Bind Enter key to invoke whichever widget is focused
     window.bind_all("<Return>", lambda e: window.focus_get().invoke())
 
     window.mainloop()
