@@ -31,6 +31,43 @@ def stopProgram():
 def get_clipboard():
     return root.clipboard_get()
 
+def expand_db_up_to(end_date):
+    """
+    Ensure the 'days' table has rows for every date from the last known entry 
+    up to (and including) 'end_date', if 'end_date' is beyond what's currently in the DB.
+    We'll insert them with status = '' (undone).
+    """
+    conn = sqlite3.connect("days.db")
+    c = conn.cursor()
+
+    # Find the latest date in the database (if any)
+    c.execute("SELECT MAX(date) FROM days")
+    row = c.fetchone()
+    latest_str = row[0] if row and row[0] else None
+
+    if latest_str:
+        # Convert the string to a date
+        m, d, y = latest_str.split('/')
+        latest_date = datetime.date(int(y), int(m), int(d))
+    else:
+        # If the DB is empty, let's start from 2020-01-01 or something
+        latest_date = datetime.date(2020, 1, 1)
+
+    # If end_date is after the current 'latest_date', fill in the missing days
+    if end_date > latest_date:
+        one_day = datetime.timedelta(days=1)
+        cur_date = latest_date + one_day
+        while cur_date <= end_date:
+            date_str = cur_date.strftime("%m/%d/%Y")
+            c.execute(
+                "INSERT OR IGNORE INTO days(date, status, error_msg) VALUES (?, '', '')",
+                (date_str,)
+            )
+            cur_date += one_day
+
+    conn.commit()
+    conn.close()
+
 def createGUI():
     window = tk.Toplevel(root)
     window.title("Pmojo")
@@ -43,94 +80,86 @@ def createGUI():
     frame1 = tk.Frame(window, width=50, relief=tk.SUNKEN)
     frame1.pack(fill=tk.X)
 
+    # ---------- ENTRY WIDGET -----------
     entry = tk.Entry(frame1, width=50)
     entry.pack(side=tk.LEFT, padx=2, pady=5)
     entry.insert(0, calendar.datetime.date.today().strftime("%m/%d/%Y"))
     entry.focus_set()
-    # Pressing Enter in this Entry will call begin(...) with the entry text
     entry.bind("<Return>", lambda e: begin(entry.get()))
 
-    # We store the currently displayed month/year in a mutable list or dict
-    # so both arrow buttons and update_calendar can refer to them.
-    # Let's initialize from the entry's default date:
+    # BooleanVar for "Complete All"
+    completeAllVar = tk.BooleanVar(value=False)
+
+    def on_complete_all_toggle():
+        update_calendar()
+
+    # The Checkbutton, with a command that triggers a redraw
+    completeAllCheck = tk.Checkbutton(
+        window,
+        text="Complete All",
+        variable=completeAllVar,
+        command=on_complete_all_toggle
+    )
+    completeAllCheck.pack(anchor=tk.W)
+
+    # ---------- MONTH/YEAR NAVIGATION -----------
     cur_date_str = entry.get()
     m, d, y = cur_date_str.split('/')
     cur_month = int(m)
     cur_year = int(y)
-    
-    # -- Create a frame to hold the left arrow, month_label, and right arrow in a row --
+
     month_frame = tk.Frame(window)
     month_frame.pack(pady=(5, 0), anchor="center")
 
-    # Left arrow button
     def prev_month():
         nonlocal cur_month, cur_year
         cur_month -= 1
         if cur_month < 1:
             cur_month = 12
             cur_year -= 1
-        # For simplicity, let's just set the day to "1"
-        new_date_str = f"{cur_month:02}/01/{cur_year}"
-        entry.delete(0, tk.END)
-        entry.insert(0, new_date_str)
+        # Do NOT change entry text; only redraw
         draw_calendar(cur_month, cur_year)
 
-    left_arrow_btn = tk.Button(
-        month_frame,
-        text="←",
-        command=prev_month
-    )
-    left_arrow_btn.pack(side=tk.LEFT, padx=5)
-
-    # Label that shows "March 2025", etc. -- center it in month_frame
-    month_label = tk.Label(month_frame, text="", font=("Helvetica", 12, "bold"))
-    month_label.pack(side=tk.LEFT)
-
-    # Right arrow button
     def next_month():
         nonlocal cur_month, cur_year
         cur_month += 1
         if cur_month > 12:
             cur_month = 1
             cur_year += 1
-        # For simplicity, let's set day to "1"
-        new_date_str = f"{cur_month:02}/01/{cur_year}"
-        entry.delete(0, tk.END)
-        entry.insert(0, new_date_str)
+        # Do NOT change entry text; only redraw
         draw_calendar(cur_month, cur_year)
 
-    right_arrow_btn = tk.Button(
-        month_frame,
-        text="→",
-        command=next_month
-    )
+    left_arrow_btn = tk.Button(month_frame, text="←", command=prev_month)
+    left_arrow_btn.pack(side=tk.LEFT, padx=5)
+
+    month_label = tk.Label(month_frame, text="", font=("Helvetica", 12, "bold"))
+    month_label.pack(side=tk.LEFT)
+
+    right_arrow_btn = tk.Button(month_frame, text="→", command=next_month)
     right_arrow_btn.pack(side=tk.LEFT, padx=5)
 
-    # Frame that holds the clickable day-buttons
+    # ---------- CALENDAR GRID -----------
     days_frame = tk.Frame(window)
     days_frame.pack(side=tk.TOP, anchor="center", padx=2, pady=5)
 
-    # Frame for toggling status
+    # ---------- TOGGLE STATUS BUTTONS -----------
     status_frame = tk.Frame(window)
     status_frame.pack(anchor='center', pady=5)
 
-    # A label to show the selected day from the Entry
-    selected_day_label = tk.Label(status_frame, text="Selected: ")
+    selected_day_label = tk.Label(status_frame, text="Status: ")
     selected_day_label.pack(side=tk.LEFT, padx=5)
 
     def mark_done():
-        """Toggle the selected date to 'done' or back to ''."""
         date_str = entry.get().strip()
         if date_str:
             toggle_day_status(date_str, 'done')
-            update_calendar()  # refresh button colors
+            update_calendar()
 
     def mark_error():
-        """Toggle the selected date to 'error' or back to ''."""
         date_str = entry.get().strip()
         if date_str:
             toggle_day_status(date_str, 'error')
-            update_calendar()  # refresh button colors
+            update_calendar()
 
     toggle_done_btn = tk.Button(status_frame, text="Toggle Done", command=mark_done)
     toggle_done_btn.pack(side=tk.LEFT, padx=5)
@@ -138,38 +167,62 @@ def createGUI():
     toggle_error_btn = tk.Button(status_frame, text="Toggle Error", command=mark_error)
     toggle_error_btn.pack(side=tk.LEFT, padx=5)
 
+    # ---------- DRAW CALENDAR FUNCTION -----------
     def draw_calendar(month, year):
         """Rebuilds the day-buttons for the given month/year, centered under the label."""
-        # Clear out old buttons
+        # Clear old buttons
         for widget in days_frame.winfo_children():
             widget.destroy()
 
-        # Update the month_label to something like "March 2025"
         month_label.config(text=f"{calendar.month_name[month]} {year}")
-
-        # Also update our stored month/year so arrows remain in sync
         nonlocal cur_month, cur_year
         cur_month, cur_year = month, year
 
+        green_dates = set()
+        if completeAllVar.get():
+            end_str = entry.get().strip()
+            try:
+                end_m, end_d, end_y = end_str.split('/')
+                end_date = datetime.date(int(end_y), int(end_m), int(end_d))
+
+                # 1) Ensure DB has all days up to 'end_date'
+                expand_db_up_to(end_date)
+
+                # 2) Fetch undone dates <= end_date
+                conn = sqlite3.connect("days.db")
+                c = conn.cursor()
+                c.execute("SELECT date FROM days WHERE status != 'done'")
+                rows = c.fetchall()
+                conn.close()
+
+                for (db_date_str,) in rows:
+                    try:
+                        mm, dd, yy = db_date_str.split('/')
+                        dt = datetime.date(int(yy), int(mm), int(dd))
+                        if dt <= end_date:
+                            green_dates.add(db_date_str)
+                    except:
+                        pass
+            except:
+                pass
+
         cal_iter = calendar.Calendar(firstweekday=calendar.SUNDAY)
-        # Build the clickable grid of days
         for row_idx, week in enumerate(cal_iter.monthdayscalendar(year, month)):
             for col_idx, day in enumerate(week):
                 if day == 0:
-                    # 0 means day is from a previous/next month
                     lbl = tk.Label(days_frame, text=" ", width=3)
                     lbl.grid(row=row_idx, column=col_idx)
                 else:
                     date_str = f"{month:02}/{day:02}/{year}"
-                    # Get the status for this date from the DB
                     status = get_day_status(date_str)
 
-                    # Decide background color
-                    bg_color = "SystemButtonFace"  # default
+                    bg_color = "SystemButtonFace"
                     if status == "done":
                         bg_color = "gray"
                     elif status == "error":
                         bg_color = "red"
+                    elif date_str in green_dates:
+                        bg_color = "lightgreen"
 
                     btn = tk.Button(
                         days_frame,
@@ -183,11 +236,10 @@ def createGUI():
                     )
                     btn.grid(row=row_idx, column=col_idx)
 
+    # ---------- UPDATE CALENDAR ON ENTRY CHANGE -----------
     def update_calendar(event=None):
-        """Try to parse the entry as MM/DD/YYYY, redraw the days if valid."""
         import re
         text = entry.get().strip()
-        # Quick check: must match "MM/DD/YYYY"
         if re.match(r"^\d{1,2}/\d{1,2}/\d{4}$", text):
             try:
                 new_m, new_d, new_y = text.split('/')
@@ -196,21 +248,27 @@ def createGUI():
                 if 1 <= new_m <= 12:
                     draw_calendar(new_m, new_y)
             except ValueError:
-                pass  # if anything fails, ignore
+                pass
+        else:
+            draw_calendar(cur_month, cur_year)
 
-    # Whenever the user types in the Entry, try to update the calendar
+    # Init
     entry.bind("<KeyRelease>", update_calendar)
-
-    # Draw the initial calendar for today's date
     draw_calendar(cur_month, cur_year)
 
-    # ---- Buttons at the bottom in a single row ----
+    # ---------- BOTTOM BUTTONS -----------
     buttons_frame = tk.Frame(window)
     buttons_frame.pack(side=tk.BOTTOM, pady=10)
 
+    def start_button_action():
+        if completeAllVar.get():
+            threading.Thread(target=complete_range).start()
+        else:
+            begin(entry.get())
+
     start_button = tk.Button(
         buttons_frame, text="Start", width=10, height=2,
-        command=lambda: begin(entry.get())
+        command=start_button_action
     )
     start_button.pack(side=tk.LEFT, padx=5)
 
@@ -226,12 +284,79 @@ def createGUI():
     )
     exit_button.pack(side=tk.LEFT, padx=5)
 
-    # Bind Tab key to focus the next widget
+    # Keyboard shortcuts
     window.bind_all("<Tab>", lambda e: window.tk_focusNext().focus())
-    # Bind Enter key to invoke whichever widget is focused
     window.bind_all("<Return>", lambda e: window.focus_get().invoke())
 
     window.mainloop()
+
+def complete_range():
+    """
+    Find all dates not marked 'done' up to (and including) the date in the Entry.
+    For each undone date, run our normal logic and mark it done if successful.
+    """
+    # Parse the target (end) date from the Entry
+    end_str = root.nametowidget(".!toplevel.!frame.!entry").get().strip()  
+    # ^ The simplest approach is to retrieve the same 'entry' text. If you renamed your Entry widget,
+    #   or stored it in a variable, you can just do end_str = entry.get()
+
+    try:
+        # Convert end_str ("MM/DD/YYYY") -> Python date
+        end_m, end_d, end_y = end_str.split('/')
+        end_date = datetime.date(int(end_y), int(end_m), int(end_d))
+    except ValueError:
+        print("Invalid date in Entry, cannot complete range.")
+        return
+
+    # Open DB and find all undone dates that are <= end_date
+    conn = sqlite3.connect("days.db")
+    c = conn.cursor()
+    c.execute("""
+        SELECT date
+        FROM days
+        WHERE status != 'done'
+    """)
+    rows = c.fetchall()
+    conn.close()
+
+    # Convert "MM/DD/YYYY" -> date objects, filter to <= end_date
+    undone_dates = []
+    for (date_str,) in rows:
+        try:
+            m, d, y = date_str.split('/')
+            dt = datetime.date(int(y), int(m), int(d))
+            if dt <= end_date:
+                undone_dates.append((dt, date_str))
+        except:
+            pass
+
+    # Sort ascending
+    undone_dates.sort(key=lambda x: x[0])
+
+    print(f"Completing {len(undone_dates)} dates up to {end_str}...")
+
+    # For each undone date, run normal logic:
+    for (dt_obj, d_str) in undone_dates:
+        if not pauseEvent.is_set():
+            # If user clicked Pause, we wait
+            pauseEvent.wait()
+
+        print(f"Processing date {d_str} ...")
+        try:
+            # We reuse your 'loginToSite(...)' logic
+            # or do `begin(d_str)` but that spawns a new thread each time;
+            # better to just call the loginToSite directly here:
+            loginToSite(d_str)
+
+            # If successful, mark as 'done'
+            toggle_day_status(d_str, 'done')
+            print(f"Marked {d_str} as 'done'.")
+        except Exception as e:
+            # If there's an error, optionally mark as 'error'
+            toggle_day_status(d_str, 'error')
+            print(f"Error on {d_str}: {str(e)}")
+
+    print("Complete range finished.")
 
 def init_db():
     """Create or open a local days.db, build the 'days' table, and prefill up to 03/27/2025 as 'done'."""
