@@ -13,7 +13,9 @@ For ahk = AHK(), it only works if you already have auto hotkey installed on your
 
 To run: open the file through python and type in the date in the format requested (MM/DD/YYYY) and press the start button. Make sure softdent is open into the patient search window and make sure chrome is closed.
 
-You can pause and resume by clicking scroll lock, and you can force exit the program with num lock.
+You can pause and resume by clicking scroll lock, and you can force exit the program with num lock. It will mark it on the calendar as an error.
+
+You can now both type the date as well as select it on the calendar. Days will be marked 'Done' or as 'Error' if there is an error. 
 
 Requried packages:
 pip install ahk_binary
