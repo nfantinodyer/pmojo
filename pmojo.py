@@ -560,7 +560,16 @@ def loginToSite(date):
             else:
                 type_normal(data_rows, i, o, m, d, y, softdent, date)
 
-    return True
+    if not stopNow.is_set():
+        toggle_day_status(date, 'done')
+        print(f"Marked {date} as 'done' after processing.")
+        return True
+    else:
+        toggle_day_status(date, 'error')
+        print(f"Marked {date} as 'error' after processing.")
+        return False
+    
+
 
 def merge_and_type_appointments(data_rows, cdi, cdn, m, d, y, softdent, date):
     """
@@ -582,8 +591,20 @@ def merge_and_type_appointments(data_rows, cdi, cdn, m, d, y, softdent, date):
         pauseEvent.wait()
         if stopNow.is_set():
             return
-        # Remove duplicates, sort
-        times_str = ' & '.join(sorted(set(times_list)))
+        # Remove duplicates, sort and format appointment times
+        unique_appts = sorted(set(times_list))
+        formatted_appts = []
+        for idx, appt in enumerate(unique_appts):
+            if idx == 0:
+                formatted_appts.append(appt)
+            else:
+                parts = appt.split('@')
+                # If appointment contains '@', use only the time portion.
+                if len(parts) > 1:
+                    formatted_appts.append(parts[1].strip())
+                else:
+                    formatted_appts.append(appt)
+        times_str = ' & '.join(formatted_appts)
 
         # 1) Tab, 'f', patient, Enter
         ahk.key_press("Tab")
