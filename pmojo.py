@@ -15,18 +15,19 @@ import keyboard
 import calendar
 import sqlite3
 import datetime
+import sys
 
 warnings.simplefilter('ignore', category=UserWarning)  # Ignore 32bit warnings
 
 ahk = AHK()
 pauseEvent = threading.Event()
 pauseEvent.set()
+stopNow = threading.Event() 
 root = tk.Tk()
 root.withdraw()
 
 def stopProgram():
-    print("Stop key pressed. Exiting program...")
-    root.quit()
+    stopNow.set()
 
 def get_clipboard():
     return root.clipboard_get()
@@ -40,29 +41,25 @@ def expand_db_up_to(end_date):
     conn = sqlite3.connect("days.db")
     c = conn.cursor()
 
-    # Find the latest date in the database (if any)
     c.execute("SELECT MAX(date) FROM days")
     row = c.fetchone()
     latest_str = row[0] if row and row[0] else None
 
     if latest_str:
-        # Convert the string to a date
         m, d, y = latest_str.split('/')
         latest_date = datetime.date(int(y), int(m), int(d))
     else:
-        # If the DB is empty, let's start from 2020-01-01 or something
         latest_date = datetime.date(2020, 1, 1)
 
-    # If end_date is after the current 'latest_date', fill in the missing days
     if end_date > latest_date:
         one_day = datetime.timedelta(days=1)
         cur_date = latest_date + one_day
         while cur_date <= end_date:
             date_str = cur_date.strftime("%m/%d/%Y")
-            c.execute(
-                "INSERT OR IGNORE INTO days(date, status, error_msg) VALUES (?, '', '')",
-                (date_str,)
-            )
+            c.execute("""
+                INSERT OR IGNORE INTO days(date, status, error_msg)
+                VALUES (?, '', '')
+            """, (date_str,))
             cur_date += one_day
 
     conn.commit()
@@ -80,22 +77,16 @@ def createGUI():
     frame1 = tk.Frame(window, width=50, relief=tk.SUNKEN)
     frame1.pack(fill=tk.X)
 
-    # ---------- ENTRY WIDGET -----------
     entry = tk.Entry(frame1, width=50)
     entry.pack(side=tk.LEFT, padx=2, pady=5)
     entry.insert(0, calendar.datetime.date.today().strftime("%m/%d/%Y"))
     entry.focus_set()
-    # Pressing Enter on the Entry calls begin(...) in a new thread
     entry.bind("<Return>", lambda e: begin(entry.get()))
 
-    # A BooleanVar to track the "Complete All" checkbox
     completeAllVar = tk.BooleanVar(value=False)
-
     def on_complete_all_toggle():
-        # Whenever the user checks/unchecks "Complete All," redraw the calendar
         update_calendar()
 
-    # Checkbox that triggers a redraw each time it’s toggled
     completeAllCheck = tk.Checkbutton(
         window,
         text="Complete All",
@@ -104,7 +95,6 @@ def createGUI():
     )
     completeAllCheck.pack(anchor=tk.W)
 
-    # ---------- MONTH/YEAR NAVIGATION -----------
     cur_date_str = entry.get()
     m, d, y = cur_date_str.split('/')
     cur_month = int(m)
@@ -119,7 +109,6 @@ def createGUI():
         if cur_month < 1:
             cur_month = 12
             cur_year -= 1
-        # Don't touch the Entry; just redraw
         draw_calendar(cur_month, cur_year)
 
     def next_month():
@@ -128,7 +117,6 @@ def createGUI():
         if cur_month > 12:
             cur_month = 1
             cur_year += 1
-        # Don't overwrite the Entry; just redraw
         draw_calendar(cur_month, cur_year)
 
     left_arrow_btn = tk.Button(month_frame, text="←", command=prev_month)
@@ -140,11 +128,9 @@ def createGUI():
     right_arrow_btn = tk.Button(month_frame, text="→", command=next_month)
     right_arrow_btn.pack(side=tk.LEFT, padx=5)
 
-    # ---------- CALENDAR GRID -----------
     days_frame = tk.Frame(window)
     days_frame.pack(side=tk.TOP, anchor="center", padx=2, pady=5)
 
-    # ---------- TOGGLE STATUS BUTTONS -----------
     status_frame = tk.Frame(window)
     status_frame.pack(anchor='center', pady=5)
 
@@ -153,13 +139,19 @@ def createGUI():
 
     def mark_done():
         date_str = entry.get().strip()
-        if date_str:
+        if get_day_status(date_str) == 'done':
+            toggle_day_status(date_str, '')
+            update_calendar()
+        else:
             toggle_day_status(date_str, 'done')
             update_calendar()
 
     def mark_error():
         date_str = entry.get().strip()
-        if date_str:
+        if get_day_status(date_str) == 'error':
+            toggle_day_status(date_str, '')
+            update_calendar()
+        else:
             toggle_day_status(date_str, 'error')
             update_calendar()
 
@@ -169,42 +161,26 @@ def createGUI():
     toggle_error_btn = tk.Button(status_frame, text="Toggle Error", command=mark_error)
     toggle_error_btn.pack(side=tk.LEFT, padx=5)
 
-    # ---------- DRAW CALENDAR FUNCTION -----------
     def draw_calendar(month, year):
-        """
-        Redraws the day-buttons for the given month/year.
-        1) If "Complete All" is checked, find all undone dates <= the Entry date for green.
-        2) Also highlight the current date in the Entry as green (unless it's done/error).
-        3) 'done' => gray, 'error' => red take precedence over green.
-        """
-        # Clear existing day-buttons
         for widget in days_frame.winfo_children():
             widget.destroy()
 
-        # Update the month_label
         month_label.config(text=f"{calendar.month_name[month]} {year}")
         nonlocal cur_month, cur_year
         cur_month, cur_year = month, year
 
-        # We'll store which dates should appear green
         green_dates = set()
 
-        # Always highlight the single date typed in the Entry (unless done/error)
         selected_str = entry.get().strip()
-        # Validate the typed date
         if re.match(r"^\d{1,2}/\d{1,2}/\d{4}$", selected_str):
-            green_dates.add(selected_str)  # the user's single selection
+            green_dates.add(selected_str)
 
-        # If "Complete All" is checked, gather undone up to that same date
         if completeAllVar.get():
             try:
                 end_m, end_d, end_y = selected_str.split('/')
                 end_date = datetime.date(int(end_y), int(end_m), int(end_d))
-
-                # 1) Expand DB up to end_date
                 expand_db_up_to(end_date)
 
-                # 2) Gather undone dates <= end_date
                 conn = sqlite3.connect("days.db")
                 c = conn.cursor()
                 c.execute("SELECT date FROM days WHERE status != 'done'")
@@ -220,9 +196,8 @@ def createGUI():
                     except:
                         pass
             except:
-                pass  # user typed something invalid in the Entry
+                pass
 
-        # Now build the clickable grid
         cal_iter = calendar.Calendar(firstweekday=calendar.SUNDAY)
         for row_idx, week in enumerate(cal_iter.monthdayscalendar(year, month)):
             for col_idx, day in enumerate(week):
@@ -232,40 +207,33 @@ def createGUI():
                 else:
                     date_str = f"{month:02}/{day:02}/{year}"
                     status = get_day_status(date_str)
+                    btn_kwargs = {"text": str(day), "width": 3}
 
-                    bg_color = "SystemButtonFace"
                     if status == "done":
-                        bg_color = "gray"
+                        btn_kwargs["bg"] = "gray"
+                    elif status == "error" and date_str in green_dates:
+                        # We have an error date that is also in "green" => "retrying" scenario
+                        btn_kwargs["bg"] = "green"
+                        btn_kwargs["highlightbackground"] = "red"
                     elif status == "error":
-                        bg_color = "red"
-                    # If it's not done/error and is in green_dates => lightgreen
-                    elif date_str in green_dates:
-                        bg_color = "lightgreen"
+                        btn_kwargs["bg"] = "red"
+                    else:
+                        if date_str in green_dates:
+                            btn_kwargs["bg"] = "lightgreen"
+                        else:
+                            btn_kwargs["bg"] = "SystemButtonFace"
 
-                    # Clicking a day sets the Entry to that date and re-draws
                     def on_day_click(ds=date_str):
                         entry.delete(0, tk.END)
                         entry.insert(0, ds)
-                        update_calendar()  # so the newly selected date also becomes green
+                        update_calendar()
 
-                    btn = tk.Button(
-                        days_frame,
-                        text=str(day),
-                        width=3,
-                        bg=bg_color,
-                        command=on_day_click
-                    )
+                    btn = tk.Button(days_frame, command=on_day_click, **btn_kwargs)
                     btn.grid(row=row_idx, column=col_idx)
 
-    # ---------- UPDATE CALENDAR ON ENTRY CHANGE -----------
     def update_calendar(event=None):
-        """
-        Called whenever the user types in the Entry or 
-        we programmatically change the Entry (like on_day_click).
-        """
         import re
         text = entry.get().strip()
-        # If user typed a valid date => re-draw that month
         if re.match(r"^\d{1,2}/\d{1,2}/\d{4}$", text):
             try:
                 new_m, new_d, new_y = text.split('/')
@@ -274,20 +242,15 @@ def createGUI():
                 if 1 <= new_m <= 12:
                     draw_calendar(new_m, new_y)
                 else:
-                    # If out of range (e.g. 13), just re-draw the current
                     draw_calendar(cur_month, cur_year)
             except:
                 draw_calendar(cur_month, cur_year)
         else:
-            # If invalid, re-draw the current month
             draw_calendar(cur_month, cur_year)
 
-    # Initialize
-    # So that if user types something, we automatically re-draw
     entry.bind("<KeyRelease>", update_calendar)
     draw_calendar(cur_month, cur_year)
 
-    # ---------- BOTTOM BUTTONS -----------
     buttons_frame = tk.Frame(window)
     buttons_frame.pack(side=tk.BOTTOM, pady=10)
 
@@ -315,7 +278,6 @@ def createGUI():
     )
     exit_button.pack(side=tk.LEFT, padx=5)
 
-    # Keyboard shortcuts
     window.bind_all("<Tab>", lambda e: window.tk_focusNext().focus())
     window.bind_all("<Return>", lambda e: window.focus_get().invoke())
 
@@ -324,33 +286,22 @@ def createGUI():
 def complete_range():
     """
     Find all dates not marked 'done' up to (and including) the date in the Entry.
-    For each undone date, run our normal logic and mark it done if successful.
+    For each undone date, run normal logic and mark it done if successful.
     """
-    # Parse the target (end) date from the Entry
-    end_str = root.nametowidget(".!toplevel.!frame.!entry").get().strip()  
-    # ^ The simplest approach is to retrieve the same 'entry' text. If you renamed your Entry widget,
-    #   or stored it in a variable, you can just do end_str = entry.get()
-
+    end_str = root.nametowidget(".!toplevel.!frame.!entry").get().strip()
     try:
-        # Convert end_str ("MM/DD/YYYY") -> Python date
         end_m, end_d, end_y = end_str.split('/')
         end_date = datetime.date(int(end_y), int(end_m), int(end_d))
     except ValueError:
         print("Invalid date in Entry, cannot complete range.")
         return
 
-    # Open DB and find all undone dates that are <= end_date
     conn = sqlite3.connect("days.db")
     c = conn.cursor()
-    c.execute("""
-        SELECT date
-        FROM days
-        WHERE status != 'done'
-    """)
+    c.execute("SELECT date FROM days WHERE status != 'done'")
     rows = c.fetchall()
     conn.close()
 
-    # Convert "MM/DD/YYYY" -> date objects, filter to <= end_date
     undone_dates = []
     for (date_str,) in rows:
         try:
@@ -361,56 +312,47 @@ def complete_range():
         except:
             pass
 
-    # Sort ascending
     undone_dates.sort(key=lambda x: x[0])
-
     print(f"Completing {len(undone_dates)} dates up to {end_str}...")
 
-    # For each undone date, run normal logic:
     for (dt_obj, d_str) in undone_dates:
-        if not pauseEvent.is_set():
-            # If user clicked Pause, we wait
-            pauseEvent.wait()
+        if stopNow.is_set():
+            toggle_day_status(d_str, 'error')
+            print(f"Stop pressed before processing {d_str}, marking error.")
+            continue
 
         print(f"Processing date {d_str} ...")
         try:
-            # We reuse your 'loginToSite(...)' logic
-            # or do `begin(d_str)` but that spawns a new thread each time;
-            # better to just call the loginToSite directly here:
-            loginToSite(d_str)
-
-            # If successful, mark as 'done'
-            toggle_day_status(d_str, 'done')
-            print(f"Marked {d_str} as 'done'.")
+            success = loginToSite(d_str)
+            if not success or stopNow.is_set():
+                toggle_day_status(d_str, 'error')
+                print(f"Marked {d_str} as 'error' (canceled).")
+                break
+            else:
+                toggle_day_status(d_str, 'done')
+                print(f"Marked {d_str} as 'done'.")
         except Exception as e:
-            # If there's an error, optionally mark as 'error'
             toggle_day_status(d_str, 'error')
             print(f"Error on {d_str}: {str(e)}")
-
+    stopNow.clear()
     print("Complete range finished.")
 
 def init_db():
-    """Create or open a local days.db, build the 'days' table, and prefill up to 03/27/2025 as 'done'."""
     conn = sqlite3.connect("days.db")
     c = conn.cursor()
     c.execute("""
         CREATE TABLE IF NOT EXISTS days(
             date TEXT PRIMARY KEY,
-            status TEXT DEFAULT '',   -- 'done', 'error', or ''
+            status TEXT DEFAULT '',
             error_msg TEXT DEFAULT ''
         )
     """)
-    # We'll fill from some earliest date up to 03/27/2025
-    # Adjust 'start_date' to whatever earliest date you want to store
     start_date = datetime.date(2020, 1, 1)
     end_date = datetime.date(2025, 3, 27)
-
     one_day = datetime.timedelta(days=1)
     cur_date = start_date
-
     while cur_date <= end_date:
         date_str = cur_date.strftime("%m/%d/%Y")
-        # Insert only if not existing
         c.execute("""
             INSERT OR IGNORE INTO days(date, status, error_msg)
             VALUES (?, 'done', '')
@@ -421,7 +363,6 @@ def init_db():
     conn.close()
 
 def get_day_status(date_str):
-    """Return the status ('done', 'error', or '') for the given date_str from the DB."""
     conn = sqlite3.connect("days.db")
     c = conn.cursor()
     c.execute("SELECT status FROM days WHERE date=?", (date_str,))
@@ -430,23 +371,18 @@ def get_day_status(date_str):
     return row[0] if row else ''
 
 def toggle_day_status(date_str, new_status):
-    """
-    If the current status is already new_status, toggle it back to ''.
-    Otherwise, set it to new_status.
-    """
     current = get_day_status(date_str)
     if current == new_status:
-        new_status = ''  # revert back
+        return
     conn = sqlite3.connect("days.db")
     c = conn.cursor()
-    # Insert row if not already present
     c.execute("INSERT OR IGNORE INTO days(date) VALUES(?)", (date_str,))
-    # Update status
     c.execute("UPDATE days SET status=? WHERE date=?", (new_status, date_str))
     conn.commit()
     conn.close()
 
 def begin(date):
+    stopNow.clear()
     threading.Thread(target=loginToSite, args=(date,)).start()
 
 def pause():
@@ -503,6 +439,7 @@ def loginToSite(date):
     # Navigate through the site
     processSite(driver, date, chrome, softdent)
     driver.quit()
+    return True
 
 def processSite(driver, date, chrome, softdent):
     m, d, y = date.split('/')
@@ -514,11 +451,17 @@ def processSite(driver, date, chrome, softdent):
             for o in range(1,3):
                 driver.get("https://app.practicemojo.com/cgi-bin/WebObjects/PracticeMojo.woa/wa/gotoActivityDetail?td="+m+"%2F"+d+"%2F"+y+"&cdi="+str(i)+"&cdn="+str(o))
                 #sleep(0.5)
+                if stopNow.is_set():
+                    toggle_day_status(date, 'error')
+                    return
                 name(i, o, d, m, y, chrome, softdent)
         else:
             for o in range(1,3):
                 driver.get("https://app.practicemojo.com/cgi-bin/WebObjects/PracticeMojo.woa/wa/gotoActivityDetail?td="+m+"%2F"+d+"%2F"+y+"&cdi="+str(i)+"&cdn="+str(o))
                 #sleep(0.5)
+                if stopNow.is_set():
+                    toggle_day_status(date, 'error')
+                    return
                 nameDateTime(i, o, d, m, y, chrome, softdent)
 
 def name(cdi, cdn, d, m, y, chrome, softdent):
@@ -594,10 +537,14 @@ def name(cdi, cdn, d, m, y, chrome, softdent):
             ahk.key_press("Tab")
             ahk.type('f')
             pauseEvent.wait()
+            if stopNow.is_set():
+                return
             ahk.type(line)
             sleep(2)
             ahk.key_press('Enter')
             pauseEvent.wait()
+            if stopNow.is_set():
+                return
             ahk.type("0ca")
             #recare is r
             if cdi == 1 or cdi == 8 or cdi == 33:
@@ -605,6 +552,8 @@ def name(cdi, cdn, d, m, y, chrome, softdent):
             ahk.key_press("Tab")
             ahk.type(com)
             pauseEvent.wait()
+            if stopNow.is_set():
+                return
             ahk.key_press("Tab")
             ahk.key_press("Tab")
             ahk.type(typeOfCom)
@@ -615,8 +564,12 @@ def name(cdi, cdn, d, m, y, chrome, softdent):
             ahk.type(m+"/"+d+"/"+y)
             sleep(3)
             pauseEvent.wait()
+            if stopNow.is_set():
+                return
             ahk.key_press("Enter")
             pauseEvent.wait()
+            if stopNow.is_set():
+                return
             ahk.type("l")
             ahk.type("l")
             ahk.type("n")
@@ -721,16 +674,22 @@ def nameDateTime(cdi, cdn, d, m, y, chrome, softdent):
             ahk.key_press("Tab")
             ahk.type('f')
             pauseEvent.wait()
+            if stopNow.is_set():
+                return
             ahk.type(name)
             sleep(2)
             ahk.key_press("Enter")
             pauseEvent.wait()
+            if stopNow.is_set():
+                return
             ahk.type("0ca")
             #Confirm Appt is cc
             ahk.type("cc")
             ahk.key_press("Tab")
             ahk.type("Reminder for")
             pauseEvent.wait()
+            if stopNow.is_set():
+                return
             size = 0
             for word in line:
                 size+=1
@@ -746,6 +705,8 @@ def nameDateTime(cdi, cdn, d, m, y, chrome, softdent):
             ahk.type(line)
 
             pauseEvent.wait()
+            if stopNow.is_set():
+                return
             ahk.key_press("Tab")
             ahk.key_press("Tab")
             ahk.type(typeOfCom)
@@ -755,8 +716,12 @@ def nameDateTime(cdi, cdn, d, m, y, chrome, softdent):
             ahk.type(m+"/"+d+"/"+y)
             sleep(3)
             pauseEvent.wait()
+            if stopNow.is_set():
+                return
             ahk.key_press("Enter")
             pauseEvent.wait()
+            if stopNow.is_set():
+                return
             ahk.type("l")
             ahk.type("l")
             ahk.type("n")
