@@ -110,6 +110,6 @@ Originally built for **Oak Meadow Dental Center**, but it can be adapted by anyo
 ---
 
 ## Images
-![Calendar GUI](images/programImage.png)
+![Calendar GUI](images/ProgramImage.png)
 
 Enjoy automated data entry from **PracticeMojo** to **SoftDent**!
