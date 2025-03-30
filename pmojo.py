@@ -278,8 +278,13 @@ def createGUI():
     )
     pause_button.pack(side=tk.LEFT, padx=5)
 
+    def on_exit():
+        stopNow.set()
+        keyboard.unhook_all_hotkeys()
+        window.quit()
+        
     exit_button = tk.Button(
-        buttons_frame, text="Exit", command=window.quit,
+        buttons_frame, text="Exit", command=on_exit,
         width=10, height=2
     )
     exit_button.pack(side=tk.LEFT, padx=5)
