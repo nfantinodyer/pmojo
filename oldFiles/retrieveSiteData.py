@@ -1,4 +1,5 @@
 from http.server import executable
+# Removed selenium imports
 from pywinauto.application import Application
 from pywinauto.keyboard import send_keys
 import tkinter as tk
@@ -12,6 +13,8 @@ import keyboard
 import calendar
 import sqlite3
 import datetime
+import sys
+
 import requests
 from bs4 import BeautifulSoup
 
@@ -406,6 +409,10 @@ def pause():
 def focus(app):
     app.set_focus()
 
+#######################################################
+#               NEW REQUESTS-BASED LOGIC              #
+#######################################################
+
 def login_to_practice_mojo(username, password):
     """
     Logs into PracticeMojo and returns an authenticated requests.Session.
@@ -730,6 +737,10 @@ def determine_type_of_com(cdi, cdn):
         elif cdn == 3 and cdi == 1:
             return "t"
     return ""
+
+#######################################################
+#                 HOTKEYS AND MAIN                    #
+#######################################################
 
 keyboard.add_hotkey('num lock', stopProgram)
 keyboard.add_hotkey('scroll lock', pause)

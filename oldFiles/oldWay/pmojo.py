@@ -1,4 +1,7 @@
 from http.server import executable
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.by import By
 from pywinauto.application import Application
 from pywinauto.keyboard import send_keys
 import tkinter as tk
@@ -12,18 +15,16 @@ import keyboard
 import calendar
 import sqlite3
 import datetime
-import requests
-from bs4 import BeautifulSoup
+import sys
 
 warnings.simplefilter('ignore', category=UserWarning)  # Ignore 32bit warnings
 
 ahk = AHK()
 pauseEvent = threading.Event()
 pauseEvent.set()
-stopNow = threading.Event()
+stopNow = threading.Event() 
 root = tk.Tk()
 root.withdraw()
-MAIN_UPDATE_CALENDAR = None
 
 def stopProgram():
     stopNow.set()
@@ -33,7 +34,7 @@ def get_clipboard():
 
 def expand_db_up_to(end_date):
     """
-    Ensure the 'days' table has rows for every date from the last known entry
+    Ensure the 'days' table has rows for every date from the last known entry 
     up to (and including) 'end_date', if 'end_date' is beyond what's currently in the DB.
     We'll insert them with status = '' (undone).
     """
@@ -196,9 +197,10 @@ def createGUI():
                         pass
             except:
                 pass
-
+        
         days_of_the_week = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
         for col_idx, dow in enumerate(days_of_the_week):
+            # You can tweak width/padding as desired
             dow_label = tk.Label(days_frame, text=dow, width=3, font=("Helvetica", 10, "bold"))
             dow_label.grid(row=0, column=col_idx, padx=2, pady=2)
 
@@ -209,24 +211,25 @@ def createGUI():
                     lbl = tk.Label(days_frame, text=" ", width=3)
                     lbl.grid(row=row_idx, column=col_idx)
                 else:
-                    ds = f"{month:02}/{day:02}/{year}"
-                    status = get_day_status(ds)
+                    date_str = f"{month:02}/{day:02}/{year}"
+                    status = get_day_status(date_str)
                     btn_kwargs = {"text": str(day), "width": 3}
 
                     if status == "done":
                         btn_kwargs["bg"] = "gray"
-                    elif status == "error" and ds in green_dates:
+                    elif status == "error" and date_str in green_dates:
+                        # We have an error date that is also in "green" => "retrying" scenario
                         btn_kwargs["bg"] = "green"
                         btn_kwargs["highlightbackground"] = "red"
                     elif status == "error":
                         btn_kwargs["bg"] = "red"
                     else:
-                        if ds in green_dates:
+                        if date_str in green_dates:
                             btn_kwargs["bg"] = "lightgreen"
                         else:
                             btn_kwargs["bg"] = "SystemButtonFace"
 
-                    def on_day_click(ds=ds):
+                    def on_day_click(ds=date_str):
                         entry.delete(0, tk.END)
                         entry.insert(0, ds)
                         update_calendar()
@@ -235,6 +238,7 @@ def createGUI():
                     btn.grid(row=row_idx, column=col_idx)
 
     def update_calendar(event=None):
+        import re
         text = entry.get().strip()
         if re.match(r"^\d{1,2}/\d{1,2}/\d{4}$", text):
             try:
@@ -253,9 +257,6 @@ def createGUI():
     entry.bind("<KeyRelease>", update_calendar)
     draw_calendar(cur_month, cur_year)
 
-    global MAIN_UPDATE_CALENDAR
-    MAIN_UPDATE_CALENDAR = update_calendar
-
     buttons_frame = tk.Frame(window)
     buttons_frame.pack(side=tk.BOTTOM, pady=10)
 
@@ -265,31 +266,33 @@ def createGUI():
         else:
             begin(entry.get())
 
-    start_button = tk.Button(buttons_frame, text="Start", width=10, height=2,
-                             command=start_button_action)
+    start_button = tk.Button(
+        buttons_frame, text="Start", width=10, height=2,
+        command=start_button_action
+    )
     start_button.pack(side=tk.LEFT, padx=5)
 
-    pause_button = tk.Button(buttons_frame, text="Pause/Resume", width=15, height=2,
-                             command=pause)
+    pause_button = tk.Button(
+        buttons_frame, text="Pause/Resume", width=15, height=2,
+        command=pause
+    )
     pause_button.pack(side=tk.LEFT, padx=5)
 
     def on_exit():
         stopNow.set()
         keyboard.unhook_all_hotkeys()
         window.quit()
-
-    exit_button = tk.Button(buttons_frame, text="Exit", command=on_exit,
-                            width=10, height=2)
+        
+    exit_button = tk.Button(
+        buttons_frame, text="Exit", command=on_exit,
+        width=10, height=2
+    )
     exit_button.pack(side=tk.LEFT, padx=5)
 
     window.bind_all("<Tab>", lambda e: window.tk_focusNext().focus())
     window.bind_all("<Return>", lambda e: window.focus_get().invoke())
 
     window.mainloop()
-
-def safe_update_calendar():
-    if root and root.winfo_exists() and MAIN_UPDATE_CALENDAR is not None:
-        root.after(1, MAIN_UPDATE_CALENDAR)
 
 def complete_range():
     """
@@ -389,8 +392,6 @@ def toggle_day_status(date_str, new_status):
     conn.commit()
     conn.close()
 
-    safe_update_calendar()
-
 def begin(date):
     stopNow.clear()
     threading.Thread(target=loginToSite, args=(date,)).start()
@@ -406,331 +407,340 @@ def pause():
 def focus(app):
     app.set_focus()
 
-def login_to_practice_mojo(username, password):
-    """
-    Logs into PracticeMojo and returns an authenticated requests.Session.
-    """
-    session = requests.Session()
-    login_page_url = "https://app.practicemojo.com/Pages/login"
-    session.get(login_page_url)
-
-    login_url = "https://app.practicemojo.com/cgi-bin/WebObjects/PracticeMojo.woa/wa/userLogin"
-    form_data = {
-        "loginId": username,
-        "password": password,
-        "slug": "login"
-    }
-    headers = {
-        "Referer": login_page_url,
-        "Content-Type": "application/x-www-form-urlencoded"
-    }
-    resp = session.post(login_url, data=form_data, headers=headers)
-    if resp.status_code != 200:
-        raise Exception(f"Login failed with status code {resp.status_code}.")
-
-    if "Invalid login" in resp.text or "Incorrect password" in resp.text:
-        raise Exception("Login failed: invalid credentials or site error.")
-
-    return session
-
-def fetch_activity_detail(session, date_str, cdi, cdn):
-    """
-    Fetch the detail page for a given date/cdi/cdn, return a list of row dicts
-    in the exact DOM order (top to bottom).
-    """
-    base_url = "https://app.practicemojo.com/cgi-bin/WebObjects/PracticeMojo.woa/wa/"
-    detail_url = f"{base_url}gotoActivityDetail?td={date_str}&cdi={cdi}&cdn={cdn}"
-    resp = session.get(detail_url)
-    if resp.status_code != 200:
-        raise Exception(f"Failed to fetch detail page: status={resp.status_code}")
-
-    soup = BeautifulSoup(resp.text, "html.parser")
-    return parse_activity_detail(soup)
-
-def parse_activity_detail(soup):
-    """
-    Returns list of dicts: {
-      "campaign": ...,
-      "method": ...,
-      "patient_name": ...,
-      "appointment": ...,
-      "confirmations": ...,
-      "status": ...
-    }, preserving table row order.
-    """
-    results = []
-    table = soup.select_one("div.activity_detail_table table")
-    if not table:
-        return results
-
-    rows = table.find_all("tr", recursive=False)  # top-level <tr> children first
-    if not rows:
-        # fallback if <tbody> is used
-        rows = table.find_all("tr")
-
-    i = 0
-    while i < len(rows):
-        tds = rows[i].find_all("td", recursive=False)
-        if len(tds) >= 3 and tds[0].has_attr("rowspan") and tds[1].has_attr("rowspan"):
-            campaign_name = tds[0].get_text(strip=True)
-            method_name   = tds[1].get_text(strip=True)
-            sub_count     = int(tds[0]["rowspan"])
-            i += 1
-            block_end = i + (sub_count - 1)
-
-            while i < block_end and i < len(rows):
-                data_row = rows[i]
-                data_tds = data_row.find_all("td", recursive=False)
-                if len(data_tds) == 4:
-                    patient_name  = data_tds[0].get_text().rstrip()  # remove trailing space
-                    appointment   = data_tds[1].get_text(strip=True)
-                    confirmations = data_tds[2].get_text(strip=True)
-                    row_status    = data_tds[3].get_text(strip=True)
-
-                    # remove arrow, skip "Family"
-                    patient_name = patient_name.replace("↳", "").rstrip()
-                    if "Family" not in patient_name:
-                        results.append({
-                            "campaign": campaign_name,
-                            "method": method_name,
-                            "patient_name": patient_name,
-                            "appointment": appointment,
-                            "confirmations": confirmations,
-                            "status": row_status
-                        })
-                i += 1
-        else:
-            i += 1
-
-    return results
-
 def loginToSite(date):
-    """
-    Replaces the old Selenium-based logic with direct requests + AHK typing.
-    1) Log in to PracticeMojo
-    2) For each cdi/cdn, fetch + parse
-    3) Type into SoftDent via AHK
-    """
-    with open('config.json') as cfg:
-        config = json.load(cfg)
+    chrome_options = webdriver.ChromeOptions()
+    chrome_options.add_argument("--disable-notifications")
+    driver = webdriver.Chrome(options=chrome_options)
+
+    with open('config.json') as config_file:
+        config = json.load(config_file)
+
     username = config.get('USERNAME')
     password = config.get('PASSWORD')
 
-    try:
-        session = login_to_practice_mojo(username, password)
-    except Exception as e:
-        print("PracticeMojo login failed:", e)
-        return False
+    #logs into practice mojo
+    driver.get("https://app.practicemojo.com/Pages/login")
+    elem = driver.find_element(By.NAME, "loginId")
+    elem.clear()
+    elem.send_keys(username)
+    elem = driver.find_element(By.NAME, "password")
+    elem.clear()
+    elem.send_keys(password)
+    elem.send_keys(Keys.RETURN)
 
-    # Attempt to connect to SoftDent or WordPad
+    #to be able to set focus with chrome.set_focus() and now focus(chrome)
     app = Application()
+    app.connect(title_re='.*- Google Chrome')
+    chrome = app.window(title_re='.*- Google Chrome')
+
+    #to be able to set focus with softdent.set_focus() and now focus(softdent)
     soft = Application()
     try:
         soft.connect(title_re=".*CS SoftDent.*- S.*")
         softdent = soft.window(title_re=".*CS SoftDent.*- S.*")
         print("Connected to SoftDent.")
-    except Exception:
+    except Exception as e:
         print("SoftDent not found. Connecting to WordPad for testing.")
         soft.connect(title_re=".*WordPad.*")
         softdent = soft.window(title_re=".*WordPad.*")
 
-    cdi_list = [1, 8, 13, 21, 22, 23, 30, 33, 35, 36, 130]
-    m, d, y = date.split('/')
+    #initial focus set
+    focus(chrome)
 
-    for i in cdi_list:
-        for o in range(1, 3):
-            if stopNow.is_set():
-                toggle_day_status(date, 'error')
-                return False
-
-            try:
-                data_rows = fetch_activity_detail(session, f"{m}/{d}/{y}", i, o)
-            except Exception as exc:
-                print(f"Error fetching data for cdi={i}, cdn={o}: {exc}")
-                continue
-
-            if not data_rows:
-                print(f"No data for cdi={i}, cdn={o}.")
-            else:
-                print(f"Found {len(data_rows)} row(s) for cdi={i}, cdn={o}.")
-
-            # If cdi in {23, 130}, use nameDateTime logic
-            if i in [23, 130]:
-                merge_and_type_appointments(data_rows, i, o, m, d, y, softdent, date)
-            else:
-                type_normal(data_rows, i, o, m, d, y, softdent, date)
-
+    # Navigate through the site
+    processSite(driver, date, chrome, softdent)
+    driver.quit()
     return True
 
-def merge_and_type_appointments(data_rows, cdi, cdn, m, d, y, softdent, date):
-    """
-    Matches pmojo.py's nameDateTime logic:
-    Group all rows by patient, combine times, type 0ca + cc + 'Reminder for' + times, etc.
-    """
-    # Group times by patient
-    grouped = {}
-    for row in data_rows:
-        patient = row['patient_name'].strip()
-        appt = row['appointment']
-        if appt:
-            grouped.setdefault(patient, []).append(appt)
+def processSite(driver, date, chrome, softdent):
+    m, d, y = date.split('/')
+    #url
+    cdi = [1,8,13,21,22,23,30,33,35,36,130]
+    for i in cdi:
+        #130 and 23 have appt time and date included
+        if(i != 23 and i != 130):
+            for o in range(1,3):
+                driver.get("https://app.practicemojo.com/cgi-bin/WebObjects/PracticeMojo.woa/wa/gotoActivityDetail?td="+m+"%2F"+d+"%2F"+y+"&cdi="+str(i)+"&cdn="+str(o))
+                #sleep(0.5)
+                if stopNow.is_set():
+                    toggle_day_status(date, 'error')
+                    return
+                name(i, o, d, m, y, chrome, softdent)
+        else:
+            for o in range(1,3):
+                driver.get("https://app.practicemojo.com/cgi-bin/WebObjects/PracticeMojo.woa/wa/gotoActivityDetail?td="+m+"%2F"+d+"%2F"+y+"&cdi="+str(i)+"&cdn="+str(o))
+                #sleep(0.5)
+                if stopNow.is_set():
+                    toggle_day_status(date, 'error')
+                    return
+                nameDateTime(i, o, d, m, y, chrome, softdent)
 
-    typeOfCom = determine_type_of_com(cdi, cdn)
+def name(cdi, cdn, d, m, y, chrome, softdent):
+    #determine if letter email or text based on url
+    sleep(0.5)
+    typeOfCom = ""
+    if cdn == 1:
+        if cdi in {1, 8, 21, 22, 30, 33, 35}:
+            typeOfCom = "l"
+        elif cdi == 36:
+            typeOfCom = "e"
+    elif cdn == 2:
+        if cdi in {1, 8, 30, 33}:
+            typeOfCom = "e"
+    elif cdn == 3 and cdi == 1:
+        typeOfCom = "t"
+
+    # determine communication sent based on url
+    com = {1: "Recare: Due", 8: "Recare: Really Past Due", 21: "bday card", 22: "bday card",
+           30: "Reactivate: 1 year ago", 33: "Recare: Past Due", 35: "Anniversary card", 36: "bday card"}.get(cdi, "")
+
+    # to copy page text
+    send_keys("^a^c")
+    clip_text = get_clipboard()
+
+    # create/open txt file to hold copied page contents and paste it in
+    with open('practicemojo.txt', "w", encoding="utf-8") as file:
+        file.write(clip_text)
+
+    # read the copied text
+    with open('practicemojo.txt', 'r') as file:
+        text = file.readlines()
+
+    # Remove header and footer lines
+    text = text[8:-5]
+    unique_lines = set()
+    alltext = ""
+
+    for line in text:
+        if "Family" in line:  # Skip the line containing "Family" as it's not needed
+            continue
+        line = re.sub(r"[^\x00-\x7F]+", '', line)  # Remove non-ASCII characters
+        line = re.sub(r"\s+", ' ', line).strip()  # Normalize spaces and remove unwanted tabs
+
+        if "Address" in line:
+            line = line[:line.find("Address")]  # Trim the line at the word "Address"
+
+        line = line.replace("Bounced", "").replace("Opt Out", "")
+
+        if line not in unique_lines:
+            unique_lines.add(line)
+            alltext += line + "\n"
+
+    # Write the processed lines to the same file, ensuring there's no extra newline at the end
+    with open("practicemojo.txt", "w") as file:
+        file.write(alltext.strip())
+        
+    file.close()
+
+    #softdent
+
+    file1 = open("practicemojo.txt", "r")
+    lines = file1.readlines()
+    file1.close()
+
+    #brings softdent to the front
     focus(softdent)
+    #auto hot key types in softdent and program sleeps after every major input for human to double check
+    for line in lines:
+        if line != "":
+            line = line.strip()
 
-    for patient, times_list in grouped.items():
-        pauseEvent.wait()
-        if stopNow.is_set():
-            return
-        # Remove duplicates, sort
-        times_str = ' & '.join(sorted(set(times_list)))
+            ahk.key_press("Tab")
+            ahk.type('f')
+            pauseEvent.wait()
+            if stopNow.is_set():
+                return
+            ahk.type(line)
+            sleep(2)
+            ahk.key_press('Enter')
+            pauseEvent.wait()
+            if stopNow.is_set():
+                return
+            ahk.type("0ca")
+            #recare is r
+            if cdi == 1 or cdi == 8 or cdi == 33:
+                ahk.type("r")
+            ahk.key_press("Tab")
+            ahk.type(com)
+            pauseEvent.wait()
+            if stopNow.is_set():
+                return
+            ahk.key_press("Tab")
+            ahk.key_press("Tab")
+            ahk.type(typeOfCom)
+            ahk.key_press("Tab")
+            ahk.type("pmojoNFD")
+            ahk.key_press("Tab")
+            
+            ahk.type(m+"/"+d+"/"+y)
+            sleep(3)
+            pauseEvent.wait()
+            if stopNow.is_set():
+                return
+            ahk.key_press("Enter")
+            pauseEvent.wait()
+            if stopNow.is_set():
+                return
+            ahk.type("l")
+            ahk.type("l")
+            ahk.type("n")
 
-        # 1) Tab, 'f', patient, Enter
-        ahk.key_press("Tab")
-        ahk.type('f')
-        pauseEvent.wait()
-        if stopNow.is_set():
-            return
-        ahk.type(patient)
-        sleep(2)
-        ahk.key_press("Enter")
-        pauseEvent.wait()
-        if stopNow.is_set():
-            return
+    #chrome
+    focus(chrome)
 
-        # 2) '0ca' + 'cc' => '0cacc', Tab, 'Reminder for ', times_str
-        ahk.type("0ca")
-        ahk.type("cc")
-        ahk.key_press("Tab")
-        ahk.type("Reminder for")
-        pauseEvent.wait()
-        if stopNow.is_set():
-            return
-        ahk.type(" " + times_str)  # space + merged times
+def nameDateTime(cdi, cdn, d, m, y, chrome, softdent):
+    #determine if letter email or text based on url
+    sleep(0.5)
+    typeOfCom = ""
+    if cdn == 1:
+        if cdi == 130 or cdi == 23:
+            typeOfCom = "e"
+    elif cdn == 2:
+        if cdi == 130 or cdi == 23:
+            typeOfCom = "t"
 
-        ahk.key_press("Tab")
-        ahk.key_press("Tab")
-        ahk.type(typeOfCom)
-        ahk.key_press("Tab")
-        ahk.type("pmojoNFD")
-        ahk.key_press("Tab")
-        ahk.type(f"{m}/{d}/{y}")
-        sleep(3)
-        pauseEvent.wait()
-        if stopNow.is_set():
-            return
-        ahk.key_press("Enter")
-        pauseEvent.wait()
-        if stopNow.is_set():
-            return
-        ahk.type("l")
-        ahk.type("l")
-        ahk.type("n")
+    #to copy page text
+    send_keys("^a^c")
 
-def type_normal(data_rows, cdi, cdn, m, d, y, softdent, date):
-    """
-    Matches pmojo.py's name(...) logic for normal campaigns.
-    0ca + optional 'r' + com => typeOfCom => pmojoNFD => date => etc.
-    """
-    # Determine the 'com' string
-    com_map = {
-        1: "Recare: Due",
-        8: "Recare: Really Past Due",
-        13: "SomeCampaign13",
-        21: "bday card",
-        22: "bday card",
-        23: "Some Appt Reminder",
-        30: "Reactivate: 1 year ago",
-        33: "Recare: Past Due",
-        35: "Anniversary card",
-        36: "bday card",
-        130: "Another Appt Reminder"
-    }
-    com = com_map.get(cdi, "")
+    clip_text = get_clipboard()
 
-    typeOfCom = determine_type_of_com(cdi, cdn)
-    recare_flag = "r" if cdi in [1, 8, 33] else ""
+    #create/open txt file to hold copied page contents and paste it in
+    go = open('practicemojo.txt' ,"w",encoding="utf-8")
+    go.write(clip_text)
+    go.close()
+
+    with open('practicemojo.txt', 'r', encoding='utf-8') as text_file:
+        text = text_file.readlines()
+
+    # Remove header and footer lines if not part of the needed data
+    del text[0:8]
+    del text[-5:]
+
+    appointments = {}
+
+    for line in text:
+        if re.search("Family",line):  # Skip the line containing "Family" as it's not needed
+            continue
+        # Normalize spaces and remove non-ASCII characters
+        line = re.sub(r"\s+", ' ', line.strip())
+        line = re.sub(r"[^\x00-\x7F]+", '', line)
+
+        # Match the expected line format with dates and times
+        match = re.search(r"([a-zA-Z, ]+)(\d{2}/\d{2} @ \d{2}:\d{2} [APM]+)", line)
+        if match:
+            name, datetime = match.groups()
+            date, time = datetime.split(' @ ')
+            # Construct a unique key for each person and date
+            key = f"{name.strip()}{date}"
+            if key not in appointments:
+                appointments[key] = []
+            appointments[key].append(time)
+        else:
+            print(f"No match for line: {line}")  # Debug output for unmatched lines
+
+    # Prepare to write consolidated entries to file
+    lines_to_write = []
+    for key, times in appointments.items():
+        # Combine multiple times into one line
+        times_str = ' & '.join(sorted(set(times)))  # Remove duplicates and sort times
+        # Use regex to extract the date part
+        match = re.search(r"(\d{2}/\d{2})$", key)
+        if match:
+            date = match.group(1)
+            name = key[:match.start()].strip()
+            line_to_write = f"{name} {date} @ {times_str}"
+            lines_to_write.append(line_to_write)
+        else:
+            print(f"Unexpected key format: {key}")  # Debug output for unexpected key format
+
+    # Write all lines to file, avoiding an extra newline on the last line
+    with open("practicemojo.txt", "w+", encoding='utf-8') as new_file:
+        new_file.write("\n".join(lines_to_write))
+
+    new_file.close()
+
+    #softdent
+
+    #to compare if char is num
+    num = "[0-9]+"
+    NUMBER = re.compile(num)
+
+    file1 = open("practicemojo.txt", "r")
+    lines = file1.readlines()
+    file1.close()
 
     focus(softdent)
-    for row in data_rows:
-        pauseEvent.wait()
-        if stopNow.is_set():
-            toggle_day_status(date, 'error')
-            return
+    for line in lines:
+        now = False
+        name = ""
+        if line != "":
+            for word in line:
+                if re.fullmatch(NUMBER, word):
+                    break
+                else:
+                    name+=word
 
-        patient = row['patient_name'].strip()
+            
+            line = line.replace("\n","")
+            ahk.key_press("Tab")
+            ahk.type('f')
+            pauseEvent.wait()
+            if stopNow.is_set():
+                return
+            ahk.type(name)
+            sleep(2)
+            ahk.key_press("Enter")
+            pauseEvent.wait()
+            if stopNow.is_set():
+                return
+            ahk.type("0ca")
+            #Confirm Appt is cc
+            ahk.type("cc")
+            ahk.key_press("Tab")
+            ahk.type("Reminder for")
+            pauseEvent.wait()
+            if stopNow.is_set():
+                return
+            size = 0
+            for word in line:
+                size+=1
+                if now:
+                    line = line[size-1:]
+                    now=False
+                    break
+                elif re.fullmatch(NUMBER, word):
+                    ahk.key_press("Space")
+                    ahk.type(word)
+                    now = True
+            
+            ahk.type(line)
 
-        # 1) Tab, 'f', patient, Enter
-        ahk.key_press("Tab")
-        ahk.type('f')
-        pauseEvent.wait()
-        if stopNow.is_set():
-            return
-        ahk.type(patient)
-        sleep(2)
-        ahk.key_press("Enter")
-        pauseEvent.wait()
-        if stopNow.is_set():
-            return
+            pauseEvent.wait()
+            if stopNow.is_set():
+                return
+            ahk.key_press("Tab")
+            ahk.key_press("Tab")
+            ahk.type(typeOfCom)
+            ahk.key_press("Tab")
+            ahk.type("pmojoNFD")
+            ahk.key_press("Tab")
+            ahk.type(m+"/"+d+"/"+y)
+            sleep(3)
+            pauseEvent.wait()
+            if stopNow.is_set():
+                return
+            ahk.key_press("Enter")
+            pauseEvent.wait()
+            if stopNow.is_set():
+                return
+            ahk.type("l")
+            ahk.type("l")
+            ahk.type("n")
 
-        # 2) "0ca" + recare_flag, Tab, com, Tab, Tab, typeOfCom, ...
-        ahk.type("0ca")
-        ahk.type(recare_flag)
-        ahk.key_press("Tab")
-        ahk.type(com)
-        pauseEvent.wait()
-        if stopNow.is_set():
-            return
+    #chrome
+    focus(chrome)
 
-        ahk.key_press("Tab")
-        ahk.key_press("Tab")
-        ahk.type(typeOfCom)
-        ahk.key_press("Tab")
-        ahk.type("pmojoNFD")
-        ahk.key_press("Tab")
-        ahk.type(f"{m}/{d}/{y}")
-        sleep(3)
-        pauseEvent.wait()
-        if stopNow.is_set():
-            return
-
-        ahk.key_press("Enter")
-        pauseEvent.wait()
-        if stopNow.is_set():
-            return
-
-        ahk.type("l")
-        ahk.type("l")
-        ahk.type("n")
-
-def determine_type_of_com(cdi, cdn):
-    """
-    Recreates old logic:
-      if cdi in [23, 130], cdn=1 => 'e', cdn=2 => 't'
-      else name approach:
-        cdn=1 => cdi in {1,8,21,22,30,33,35} => 'l', cdi=36 => 'e'
-        cdn=2 => cdi in {1,8,30,33} => 'e'
-        cdn=3 => cdi=1 => 't'
-    """
-    if cdi in [23, 130]:
-        if cdn == 1:
-            return "e"
-        elif cdn == 2:
-            return "t"
-        return ""
-    else:
-        if cdn == 1:
-            if cdi in {1, 8, 21, 22, 30, 33, 35}:
-                return "l"
-            elif cdi == 36:
-                return "e"
-        elif cdn == 2:
-            if cdi in {1, 8, 30, 33}:
-                return "e"
-        elif cdn == 3 and cdi == 1:
-            return "t"
-    return ""
-
+# Register hotkeys
 keyboard.add_hotkey('num lock', stopProgram)
 keyboard.add_hotkey('scroll lock', pause)
 
