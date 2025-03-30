@@ -197,9 +197,15 @@ def createGUI():
                         pass
             except:
                 pass
+        
+        days_of_the_week = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+        for col_idx, dow in enumerate(days_of_the_week):
+            # You can tweak width/padding as desired
+            dow_label = tk.Label(days_frame, text=dow, width=3, font=("Helvetica", 10, "bold"))
+            dow_label.grid(row=0, column=col_idx, padx=2, pady=2)
 
         cal_iter = calendar.Calendar(firstweekday=calendar.SUNDAY)
-        for row_idx, week in enumerate(cal_iter.monthdayscalendar(year, month)):
+        for row_idx, week in enumerate(cal_iter.monthdayscalendar(year, month), start=1):
             for col_idx, day in enumerate(week):
                 if day == 0:
                     lbl = tk.Label(days_frame, text=" ", width=3)
