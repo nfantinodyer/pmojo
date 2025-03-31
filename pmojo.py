@@ -32,11 +32,6 @@ def get_clipboard():
     return root.clipboard_get()
 
 def expand_db_up_to(end_date):
-    """
-    Ensure the 'days' table has rows for every date from the last known entry
-    up to (and including) 'end_date', if 'end_date' is beyond what's currently in the DB.
-    We'll insert them with status = '' (undone).
-    """
     conn = sqlite3.connect("days.db")
     c = conn.cursor()
 
@@ -51,18 +46,22 @@ def expand_db_up_to(end_date):
         latest_date = datetime.date(2020, 1, 1)
 
     if end_date > latest_date:
-        one_day = datetime.timedelta(days=1)
-        cur_date = latest_date + one_day
-        while cur_date <= end_date:
-            date_str = cur_date.strftime("%m/%d/%Y")
-            c.execute("""
-                INSERT OR IGNORE INTO days(date, status, error_msg)
-                VALUES (?, '', '')
-            """, (date_str,))
-            cur_date += one_day
+        dates_to_insert = []
+        for single_date in daterange(latest_date + datetime.timedelta(days=1), end_date):
+            date_str = single_date.strftime("%m/%d/%Y")
+            dates_to_insert.append((date_str, '', ''))
+
+        c.executemany("""
+            INSERT OR IGNORE INTO days(date, status, error_msg)
+            VALUES (?, ?, ?)
+        """, dates_to_insert)
 
     conn.commit()
     conn.close()
+
+def daterange(start_date, end_date):
+    for n in range(int((end_date - start_date).days + 1)):
+        yield start_date + datetime.timedelta(n)
 
 def createGUI():
     window = tk.Toplevel(root)
@@ -292,10 +291,6 @@ def safe_update_calendar():
         root.after(1, MAIN_UPDATE_CALENDAR)
 
 def complete_range():
-    """
-    Find all dates not marked 'done' up to (and including) the date in the Entry.
-    For each undone date, run normal logic and mark it done if successful.
-    """
     end_str = root.nametowidget(".!toplevel.!frame.!entry").get().strip()
     try:
         end_m, end_d, end_y = end_str.split('/')
@@ -323,6 +318,8 @@ def complete_range():
     undone_dates.sort(key=lambda x: x[0])
     print(f"Completing {len(undone_dates)} dates up to {end_str}...")
 
+    session = getSession()
+
     for (dt_obj, d_str) in undone_dates:
         if stopNow.is_set():
             toggle_day_status(d_str, 'error')
@@ -331,7 +328,7 @@ def complete_range():
 
         print(f"Processing date {d_str} ...")
         try:
-            success = loginToSite(d_str)
+            success = loginToSite(d_str, session)
             if not success or stopNow.is_set():
                 toggle_day_status(d_str, 'error')
                 print(f"Marked {d_str} as 'error' (canceled).")
@@ -344,6 +341,18 @@ def complete_range():
             print(f"Error on {d_str}: {str(e)}")
     stopNow.clear()
     print("Complete range finished.")
+
+def getSession():
+    with open('config.json') as cfg:
+        config = json.load(cfg)
+    username = config.get('USERNAME')
+    password = config.get('PASSWORD')
+
+    try:
+        return login_to_practice_mojo(username, password)
+    except Exception as e:
+        print("PracticeMojo login failed:", e)
+        return False
 
 def init_db():
     conn = sqlite3.connect("days.db")
@@ -393,7 +402,13 @@ def toggle_day_status(date_str, new_status):
 
 def begin(date):
     stopNow.clear()
-    threading.Thread(target=loginToSite, args=(date,)).start()
+    session = getSession()
+    if not session:
+        print("Failed to login, exiting.")
+        toggle_day_status(date, 'error')
+        return False
+    
+    threading.Thread(target=loginToSite, args=(date,session)).start()
 
 def pause():
     if pauseEvent.is_set():
@@ -407,9 +422,6 @@ def focus(app):
     app.set_focus()
 
 def login_to_practice_mojo(username, password):
-    """
-    Logs into PracticeMojo and returns an authenticated requests.Session.
-    """
     session = requests.Session()
     login_page_url = "https://app.practicemojo.com/Pages/login"
     session.get(login_page_url)
@@ -434,10 +446,6 @@ def login_to_practice_mojo(username, password):
     return session
 
 def fetch_activity_detail(session, date_str, cdi, cdn):
-    """
-    Fetch the detail page for a given date/cdi/cdn, return a list of row dicts
-    in the exact DOM order (top to bottom).
-    """
     base_url = "https://app.practicemojo.com/cgi-bin/WebObjects/PracticeMojo.woa/wa/"
     detail_url = f"{base_url}gotoActivityDetail?td={date_str}&cdi={cdi}&cdn={cdn}"
     resp = session.get(detail_url)
@@ -504,26 +512,7 @@ def parse_activity_detail(soup):
 
     return results
 
-def loginToSite(date):
-    """
-    Replaces the old Selenium-based logic with direct requests + AHK typing.
-    1) Log in to PracticeMojo
-    2) For each cdi/cdn, fetch + parse
-    3) Type into SoftDent via AHK
-    """
-    with open('config.json') as cfg:
-        config = json.load(cfg)
-    username = config.get('USERNAME')
-    password = config.get('PASSWORD')
-
-    try:
-        session = login_to_practice_mojo(username, password)
-    except Exception as e:
-        print("PracticeMojo login failed:", e)
-        return False
-
-    # Attempt to connect to SoftDent or WordPad
-    app = Application()
+def loginToSite(date, session):
     soft = Application()
     try:
         soft.connect(title_re=".*CS SoftDent.*- S.*")
@@ -606,12 +595,12 @@ def merge_and_type_appointments(data_rows, cdi, cdn, m, d, y, softdent, date):
                     formatted_appts.append(appt)
         times_str = ' & '.join(formatted_appts)
 
-        # 1) Tab, 'f', patient, Enter
         ahk.key_press("Tab")
         ahk.type('f')
         pauseEvent.wait()
         if stopNow.is_set():
             return
+        
         ahk.type(patient)
         sleep(2)
         ahk.key_press("Enter")
@@ -619,7 +608,6 @@ def merge_and_type_appointments(data_rows, cdi, cdn, m, d, y, softdent, date):
         if stopNow.is_set():
             return
 
-        # 2) '0ca' + 'cc' => '0cacc', Tab, 'Reminder for ', times_str
         ahk.type("0ca")
         ahk.type("cc")
         ahk.key_press("Tab")
@@ -627,8 +615,8 @@ def merge_and_type_appointments(data_rows, cdi, cdn, m, d, y, softdent, date):
         pauseEvent.wait()
         if stopNow.is_set():
             return
-        ahk.type(" " + times_str)  # space + merged times
-
+        
+        ahk.type(" " + times_str)
         ahk.key_press("Tab")
         ahk.key_press("Tab")
         ahk.type(typeOfCom)
@@ -640,10 +628,12 @@ def merge_and_type_appointments(data_rows, cdi, cdn, m, d, y, softdent, date):
         pauseEvent.wait()
         if stopNow.is_set():
             return
+        
         ahk.key_press("Enter")
         pauseEvent.wait()
         if stopNow.is_set():
             return
+        
         ahk.type("l")
         ahk.type("l")
         ahk.type("n")
@@ -681,20 +671,19 @@ def type_normal(data_rows, cdi, cdn, m, d, y, softdent, date):
 
         patient = row['patient_name'].strip()
 
-        # 1) Tab, 'f', patient, Enter
         ahk.key_press("Tab")
         ahk.type('f')
         pauseEvent.wait()
         if stopNow.is_set():
             return
+        
         ahk.type(patient)
         sleep(2)
         ahk.key_press("Enter")
         pauseEvent.wait()
         if stopNow.is_set():
             return
-
-        # 2) "0ca" + recare_flag, Tab, com, Tab, Tab, typeOfCom, ...
+        
         ahk.type("0ca")
         ahk.type(recare_flag)
         ahk.key_press("Tab")
@@ -725,14 +714,6 @@ def type_normal(data_rows, cdi, cdn, m, d, y, softdent, date):
         ahk.type("n")
 
 def determine_type_of_com(cdi, cdn):
-    """
-    Recreates old logic:
-      if cdi in [23, 130], cdn=1 => 'e', cdn=2 => 't'
-      else name approach:
-        cdn=1 => cdi in {1,8,21,22,30,33,35} => 'l', cdi=36 => 'e'
-        cdn=2 => cdi in {1,8,30,33} => 'e'
-        cdn=3 => cdi=1 => 't'
-    """
     if cdi in [23, 130]:
         if cdn == 1:
             return "e"
