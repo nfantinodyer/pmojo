@@ -96,19 +96,6 @@ Originally built for **Oak Meadow Dental Center**, but it can be adapted by anyo
 
 ---
 
-## Potential Future Improvements
-
-- **Optimized Performance**:  
-  The script currently does a **step-by-step** approach for each date. Some logic can be batched.
-
-- **Error Handling**:  
-  More robust checks around **network calls** or SoftDent readiness could help avoid partial entries.
-
-- **PracticeMojo API**:  
-  If an official API becomes available, replace the **HTML/JS scraping** with direct endpoints.
-
----
-
 ## Images
 ![Calendar GUI](images/ProgramImage.png)
 
