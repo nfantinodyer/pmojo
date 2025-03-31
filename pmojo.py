@@ -605,6 +605,17 @@ class PmojoGUI:
         btns_frame = tk.Frame(self.window)
         btns_frame.pack(side=tk.BOTTOM, pady=10)
 
+        # Tips label on the left
+        tips_frame = tk.LabelFrame(btns_frame, text="Keybinds", bd=2, relief=tk.GROOVE, font=("Helvetica", 9, "bold")) 
+        tips_frame.pack(side=tk.LEFT, padx=5, pady=5)
+        tips_label = tk.Label(
+            tips_frame,
+            text="Scroll Lock = Pause/Resume\nNum Lock = Quit",
+            anchor="w",
+            justify="left",
+        )
+        tips_label.pack(side=tk.LEFT, padx=5)
+
         self.btn_start = tk.Button(btns_frame, text="Start", width=10, height=2, command=self.start_button_action)
         self.btn_start.pack(side=tk.LEFT, padx=5)
 
