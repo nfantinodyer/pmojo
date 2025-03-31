@@ -17,7 +17,7 @@ Originally built for **Oak Meadow Dental Center**, but it can be adapted by anyo
     }
     ```
 - **AHK Integration**:  
-  - Uses Python’s [ahk library](https://github.com/spyoungtech/ahk) for sending keystrokes (simulating a user) in SoftDent.  
+  - Uses AHK [AutoHotkey](https://www.autohotkey.com/) for sending keystrokes (simulating a user) in SoftDent.  
   - If you don’t already have AutoHotkey installed: pip install ahk_binary and use ahk = AHK(executable_path = "PATH").
 - **Multiple Date Selection**:
   - Enter a single date and click **Start**, or check **Complete All** to fill every undone date up to that date.
@@ -36,13 +36,11 @@ Originally built for **Oak Meadow Dental Center**, but it can be adapted by anyo
 1. **Install Python 3.7+**  
 2. **Install required packages**:
    ```bash
-   pip install pywinauto keyboard requests beautifulsoup4
-   pip install ahk_binary
+   pip install pywinauto keyboard requests beautifulsoup4 ahk
    install git
    ```
-3. **Install AutoHotkey**:  
-   - Download from [AutoHotkey](https://www.autohotkey.com/).  
-   - Install it and add it to your system PATH.
+3. **Install AutoHotkey**: 
+   - Install it with pip and add it to your system PATH through the environment variables.
 4. **Create a `config.json` file**:  
    - Create a file named `config.json` in the same directory as the script.  
    - Add your PracticeMojo credentials in the format shown above.
@@ -52,7 +50,7 @@ Originally built for **Oak Meadow Dental Center**, but it can be adapted by anyo
    - Open the SoftDent application and ensure it is the patient window.
 2. **Run the script**:
    ```bash
-   py pmojo.py
+   pmojo.bat
    ```
 3. **GUI**:
    - Click on the calendar to select a date.  
