@@ -38,6 +38,7 @@ Originally built for **Oak Meadow Dental Center**, but it can be adapted by anyo
    ```bash
    pip install pywinauto keyboard requests beautifulsoup4
    pip install ahk_binary
+   install git
    ```
 3. **Install AutoHotkey**:  
    - Download from [AutoHotkey](https://www.autohotkey.com/).  
