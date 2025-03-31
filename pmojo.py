@@ -327,6 +327,8 @@ class PmojoAutomation:
                     print(f"[{date_str}] No data for cdi={cdi}, cdn={cdn}.")
                 else:
                     print(f"[{date_str}] Found {len(rows)} rows for cdi={cdi}, cdn={cdn}.")
+                    print(f"[{date_str}] Campaign: {rows[0]['campaign']}, Method: {rows[0]['method']}")
+                    print(f"[{date_str}] Patients: {[row['patient_name'] for row in rows]}")
 
                 # route to merge or normal
                 if cdi in [23, 130]:
