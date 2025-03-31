@@ -2,6 +2,8 @@
 
 git pull
 
+python.exe -m pip install --upgrade pip
+pip install keyboard requests bs4 pywinauto ahk
 py pmojo.py
 
 git add .
