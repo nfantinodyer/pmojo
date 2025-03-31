@@ -805,6 +805,7 @@ class PmojoGUI:
     def begin(self, date_str: str):
         STOP_EVENT.clear()
         def background():
+            print("Logging into PracticeMojo...")
             try:
                 with open("config.json") as cfg:
                     conf = json.load(cfg)
@@ -814,7 +815,7 @@ class PmojoGUI:
                 print(f"PracticeMojo login failed: {e}")
                 self.db.toggle_day_status(date_str, "error")
                 return
-
+            print(f"Logged into PracticeMojo.")
             automator = PywinAuto()
             pm = PmojoAutomation(self.db, pm_api, automator)
             pm.process_date(date_str)
@@ -857,6 +858,7 @@ class PmojoGUI:
         def background():
             STOP_EVENT.clear()
             # login
+            print("Logging into PracticeMojo...")
             try:
                 with open("config.json") as cfg:
                     conf = json.load(cfg)
@@ -865,7 +867,7 @@ class PmojoGUI:
             except Exception as e:
                 print(f"PracticeMojo login failed: {e}")
                 return
-
+            print(f"Logged into PracticeMojo.")
             automator = PywinAuto()
             pm = PmojoAutomation(self.db, pm_api, automator)
 
