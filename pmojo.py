@@ -608,7 +608,7 @@ class PmojoGUI:
         tips_frame.pack(side=tk.LEFT, padx=5, pady=5)
         tips_label = tk.Label(
             tips_frame,
-            text="Scroll Lock = Pause/Resume\nNum Lock = Quit",
+            text="Scroll Lock = Pause/Resume\nNum Lock = Stop Program",
             anchor="w",
             justify="left",
         )
