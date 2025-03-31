@@ -284,8 +284,6 @@ class PywinAuto:
         for _ in range(times):
             self.ahk.key_press("Tab")
 
-    # You can add more convenience methods as needed, e.g. press_enter, etc.
-
 class PmojoAutomation:
     """
     Orchestrates fetching data from PM and typing it into SoftDent for each date/cdi/cdn.
