@@ -526,6 +526,17 @@ class PmojoGUI:
         self.window.mainloop()
 
     def create_gui(self):
+        self.is_running = False
+
+        #references to widgets
+        self.btn_done = None
+        self.btn_error = None
+        self.btn_left = None
+        self.btn_right = None
+        self.chk_complete_all = None
+        self.btn_start = None
+        self.btn_exit = None
+
         self.window.columnconfigure(0, weight=1, minsize=250)
         self.window.rowconfigure(0, weight=1, minsize=250)
 
@@ -544,13 +555,13 @@ class PmojoGUI:
         self.entry.bind("<Return>", lambda e: self.begin(self.entry.get()))
 
         # completeAll checkbox
-        chk = tk.Checkbutton(
+        self.chk_complete_all = tk.Checkbutton(
             self.window,
             text="Complete All",
             variable=self.completeAllVar,
             command=self.update_calendar
         )
-        chk.pack(anchor=tk.W)
+        self.chk_complete_all.pack(anchor=tk.W)
 
         # Parse month/year from default
         m, d, y = default_date.split('/')
@@ -561,14 +572,14 @@ class PmojoGUI:
         month_frame = tk.Frame(self.window)
         month_frame.pack(pady=(5, 0), anchor="center")
 
-        btn_left = tk.Button(month_frame, text="←", command=self.prev_month)
-        btn_left.pack(side=tk.LEFT, padx=5)
+        self.btn_left = tk.Button(month_frame, text="←", command=self.prev_month)
+        self.btn_left.pack(side=tk.LEFT, padx=5)
 
         self.month_label = tk.Label(month_frame, text="", font=("Helvetica", 12, "bold"))
         self.month_label.pack(side=tk.LEFT)
 
-        btn_right = tk.Button(month_frame, text="→", command=self.next_month)
-        btn_right.pack(side=tk.LEFT, padx=5)
+        self.btn_right = tk.Button(month_frame, text="→", command=self.next_month)
+        self.btn_right.pack(side=tk.LEFT, padx=5)
 
         self.days_frame = tk.Frame(self.window)
         self.days_frame.pack(side=tk.TOP, anchor="center", padx=2, pady=5)
@@ -580,11 +591,11 @@ class PmojoGUI:
         lbl_status = tk.Label(status_frame, text="Status: ")
         lbl_status.pack(side=tk.LEFT, padx=5)
 
-        btn_done = tk.Button(status_frame, text="Toggle Done", command=self.mark_done)
-        btn_done.pack(side=tk.LEFT, padx=5)
+        self.btn_done = tk.Button(status_frame, text="Toggle Done", command=self.mark_done)
+        self.btn_done.pack(side=tk.LEFT, padx=5)
 
-        btn_error = tk.Button(status_frame, text="Toggle Error", command=self.mark_error)
-        btn_error.pack(side=tk.LEFT, padx=5)
+        self.btn_error = tk.Button(status_frame, text="Toggle Error", command=self.mark_error)
+        self.btn_error.pack(side=tk.LEFT, padx=5)
 
         # bind event
         self.entry.bind("<KeyRelease>", self.update_calendar)
@@ -594,11 +605,11 @@ class PmojoGUI:
         btns_frame = tk.Frame(self.window)
         btns_frame.pack(side=tk.BOTTOM, pady=10)
 
-        btn_start = tk.Button(btns_frame, text="Start", width=10, height=2, command=self.start_button_action)
-        btn_start.pack(side=tk.LEFT, padx=5)
+        self.btn_start = tk.Button(btns_frame, text="Start", width=10, height=2, command=self.start_button_action)
+        self.btn_start.pack(side=tk.LEFT, padx=5)
 
-        btn_exit = tk.Button(btns_frame, text="Exit", width=10, height=2, command=self.on_exit)
-        btn_exit.pack(side=tk.LEFT, padx=5)
+        self.btn_exit = tk.Button(btns_frame, text="Exit", width=10, height=2, command=self.on_exit)
+        self.btn_exit.pack(side=tk.LEFT, padx=5)
 
         # Global key bindings
         self.window.bind_all("<Tab>", lambda e: self.window.tk_focusNext().focus())
@@ -606,6 +617,44 @@ class PmojoGUI:
 
         # finalize
         self.update_calendar()
+
+    def set_running(self, running: bool):
+        """
+        If running is True, disable all buttons except 'Exit'.
+        If running is False, enable them again.
+        """
+        self.is_running = running
+        
+        new_state = "disabled" if running else "normal"
+        
+        # disable/enable the Start button
+        if self.btn_start:
+            self.btn_start.config(state=new_state)
+
+        # disable/enable Toggle Done / Error
+        if self.btn_done:
+            self.btn_done.config(state=new_state)
+        if self.btn_error:
+            self.btn_error.config(state=new_state)
+
+        # disable/enable month nav
+        if self.btn_left:
+            self.btn_left.config(state=new_state)
+        if self.btn_right:
+            self.btn_right.config(state=new_state)
+
+        # disable/enable the "Complete All" checkbox
+        if self.chk_complete_all:
+            if running:
+                self.chk_complete_all.config(state="disabled")
+            else:
+                # For a checkbutton, 'normal' is the correct enable state
+                self.chk_complete_all.config(state="normal")
+
+        # disable/enable day buttons for the current month
+        if hasattr(self, "day_buttons"):
+            for btn in self.day_buttons:
+                btn.config(state=new_state)
 
     def prev_month(self):
         self.cur_month -= 1
@@ -741,6 +790,8 @@ class PmojoGUI:
         self.update_calendar()
 
     def start_button_action(self):
+        self.set_running(True)
+
         if self.completeAllVar.get():
             threading.Thread(target=self.complete_range).start()
         else:
@@ -767,6 +818,7 @@ class PmojoGUI:
             automator = PywinAuto()
             pm = PmojoAutomation(self.db, pm_api, automator)
             pm.process_date(date_str)
+            self.window.after(0, lambda: self.set_running(False))
 
         threading.Thread(target=background).start()
 
@@ -836,6 +888,7 @@ class PmojoGUI:
                     self.db.toggle_day_status(ds_ui, "error")
                     print(f"Error on {ds_ui}: {ex}")
             STOP_EVENT.clear()
+            self.window.after(0, lambda: self.set_running(False))
             print("Complete range finished.")
 
         threading.Thread(target=background).start()
