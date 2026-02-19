@@ -3,10 +3,10 @@
 git pull
 
 python.exe -m pip install --upgrade pip
-pip install keyboard requests bs4 pywinauto ahk
+pip install keyboard pywinctl ahk requests beautifulsoup4 lxml
+
 py pmojo.py
 
-git pull
-git add .
+git add days.db
 git commit -m "Auto-update database"
 git push

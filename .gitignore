@@ -3,4 +3,9 @@ __pycache__
 practicemojo.txt
 testing.py
 Testing.txt
-practicemojo.txt
+verify_output/
+verify_parsing.py
+fetch_samples.py
+venv14/
+*.pyc
+.pytest_cache/

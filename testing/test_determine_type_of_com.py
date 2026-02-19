@@ -95,8 +95,58 @@ def parse_activity_detail(soup):
       "confirmations": ...,
       "status": ...
     }, preserving table row order.
+
+    Supports both the 2026+ structure (div.table-responsive) and the
+    legacy structure (div.activity_detail_table with rowspan).
     """
     results = []
+
+    # Try new structure first (2026+ UI)
+    table = soup.select_one("div.table-responsive table")
+    if table:
+        tbody = table.find("tbody")
+        if not tbody:
+            return results
+        rows = tbody.find_all("tr")
+        campaign_name = ""
+        method_name = ""
+        for row in rows:
+            cls = row.get("class", [])
+            if "table-secondary" in cls:
+                camp_div = row.find("div", class_="fw-bold text-primary")
+                if camp_div:
+                    raw_campaign = camp_div.get_text(strip=True)
+                    idx = raw_campaign.rfind(" - (")
+                    campaign_name = raw_campaign[:idx] if idx != -1 else raw_campaign
+                bold_divs = row.find_all("div", class_="fw-bold")
+                for div in bold_divs:
+                    if "text-primary" not in (div.get("class") or []):
+                        method_name = div.get_text(strip=True)
+                        break
+                continue
+            if "table-light" in cls:
+                continue
+            link = row.find("a", href=lambda h: h and "gotoPatientDetail" in h)
+            if not link:
+                continue
+            patient_name = link.get_text(strip=True)
+            if "Family" in patient_name:
+                continue
+            tds = row.find_all("td")
+            appointment = tds[3].get_text(strip=True) if len(tds) > 3 else ""
+            confirmations = tds[4].get_text(strip=True) if len(tds) > 4 else ""
+            row_status = tds[5].get_text(strip=True) if len(tds) > 5 else ""
+            results.append({
+                "campaign": campaign_name,
+                "method": method_name,
+                "patient_name": patient_name,
+                "appointment": appointment,
+                "confirmations": confirmations,
+                "status": row_status
+            })
+        return results
+
+    # Legacy fallback (pre-2026 UI with rowspan)
     table = soup.select_one("div.activity_detail_table table")
     if not table:
         return results
