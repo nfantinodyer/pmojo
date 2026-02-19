@@ -3,6 +3,11 @@ import requests
 from bs4 import BeautifulSoup
 
 
+class SessionExpiredError(Exception):
+    """Raised when PracticeMojo session has expired and re-login is needed."""
+    pass
+
+
 class PracticeMojoAPI:
     """Handles PracticeMojo login and fetching campaign activity data."""
 
@@ -40,11 +45,18 @@ class PracticeMojoAPI:
     def fetch_activity_detail(self, date_str: str, cdi: int, cdn: int):
         """Fetch the detail page for (date_str, cdi, cdn), parse and return row dicts."""
         if not self.session:
-            raise Exception("Not logged in to PracticeMojo.")
+            raise SessionExpiredError("Not logged in to PracticeMojo.")
         detail_url = f"{self.BASE_URL}gotoActivityDetail?td={date_str}&cdi={cdi}&cdn={cdn}"
         resp = self.session.get(detail_url)
         if resp.status_code != 200:
             raise Exception(f"Failed to fetch detail page (cdi={cdi}, cdn={cdn}): status={resp.status_code}")
+
+        # Detect session expiry: PM redirects to login page or returns login form
+        if "userLogin" in resp.url or "Pages/login" in resp.url:
+            raise SessionExpiredError("Session expired (redirected to login page).")
+        if "loginId" in resp.text and "password" in resp.text and "slug" in resp.text:
+            raise SessionExpiredError("Session expired (login form in response).")
+
         soup = BeautifulSoup(resp.text, "lxml")
         return self.parse_activity_detail(soup)
 

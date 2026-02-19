@@ -1,11 +1,12 @@
 """Core automation: fetches data from PracticeMojo and types it into SoftDent."""
 import re
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from datetime import datetime as _dt
 from time import sleep
 
 from pmojo_lib.events import STOP_EVENT, PAUSE_EVENT
 from pmojo_lib.database import Database
-from pmojo_lib.practicemojo_api import PracticeMojoAPI
+from pmojo_lib.practicemojo_api import PracticeMojoAPI, SessionExpiredError
 from pmojo_lib.softdent import SoftDentConnection
 
 
@@ -39,6 +40,17 @@ RECARE_CDIS = [1, 8, 33]
 
 
 _HTML_ARTIFACTS = re.compile(r'<[^>]+>|&[a-zA-Z]+;|&\#\d+;')
+
+
+def _appt_sort_key(appt_str):
+    """Sort key for appointment strings like '03/05 @ 01:10 PM' — chronological order."""
+    try:
+        parts = appt_str.split('@')
+        time_part = parts[1].strip() if len(parts) > 1 else appt_str.strip()
+        return _dt.strptime(time_part, "%I:%M %p")
+    except (ValueError, IndexError):
+        # Fallback: sort to end if format is unexpected
+        return _dt.max
 
 
 def validate_row(row, cdi):
@@ -111,9 +123,14 @@ class PmojoAutomation:
         self.softdent = softdent
 
     def _prefetch_all(self, date_str: str):
-        """Fetch all CDI/CDN pages concurrently. Returns dict of (cdi, cdn) -> rows."""
+        """Fetch all CDI/CDN pages concurrently. Returns dict of (cdi, cdn) -> rows.
+
+        Raises SessionExpiredError immediately if any fetch detects an expired session.
+        Other fetch errors are tracked; raises Exception if too many fail.
+        """
         prefetched = {}
         combos = [(cdi, cdn) for cdi in CDI_LIST for cdn in CDN_LIST]
+        fetch_errors = 0
 
         def fetch_one(cdi, cdn):
             return (cdi, cdn, self.pm_api.fetch_activity_detail(date_str, cdi, cdn))
@@ -125,9 +142,24 @@ class PmojoAutomation:
                 try:
                     _, _, rows = future.result()
                     prefetched[(cdi, cdn)] = rows
+                except SessionExpiredError:
+                    # Cancel remaining futures and bubble up immediately
+                    for f in futures:
+                        f.cancel()
+                    raise
                 except Exception as e:
+                    fetch_errors += 1
                     print(f"[{date_str}] Error fetching cdi={cdi}, cdn={cdn}: {e}")
                     prefetched[(cdi, cdn)] = []
+
+        if fetch_errors > 0:
+            print(f"[{date_str}] WARNING: {fetch_errors}/{len(combos)} fetches failed.")
+            # If most fetches failed, something is wrong (network issue, etc.)
+            if fetch_errors > len(combos) // 2:
+                raise Exception(
+                    f"Too many fetch failures ({fetch_errors}/{len(combos)}) for {date_str}. "
+                    f"Possible network issue."
+                )
 
         return prefetched
 
@@ -204,7 +236,11 @@ class PmojoAutomation:
         """Group times by patient, combine times, type into SoftDent."""
         grouped = {}
         for row in rows:
-            validate_row(row, cdi)
+            try:
+                validate_row(row, cdi)
+            except ParseError as e:
+                print(f"[{date_str}] Skipping invalid row: {e}")
+                continue
             patient = row["patient_name"].strip()
             appt = row["appointment"]
             if appt:
@@ -216,7 +252,7 @@ class PmojoAutomation:
             PAUSE_EVENT.wait()
             if STOP_EVENT.is_set():
                 return
-            unique_appts = sorted(set(appts))
+            unique_appts = sorted(set(appts), key=_appt_sort_key)
             formatted = []
             for idx, a in enumerate(unique_appts):
                 if idx == 0:
@@ -282,7 +318,11 @@ class PmojoAutomation:
             PAUSE_EVENT.wait()
             if STOP_EVENT.is_set():
                 return
-            validate_row(row, cdi)
+            try:
+                validate_row(row, cdi)
+            except ParseError as e:
+                print(f"[{date_str}] Skipping invalid row: {e}")
+                continue
             patient = row["patient_name"].strip()
 
             self.softdent.ahk.key_press("Tab")

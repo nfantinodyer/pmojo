@@ -716,7 +716,8 @@ class TestAppointmentMerging:
     @staticmethod
     def merge_appointments(appts):
         """Reproduce the merging logic from PmojoAutomation.merge_and_type_appointments."""
-        unique_appts = sorted(set(appts))
+        from pmojo_lib.automation import _appt_sort_key
+        unique_appts = sorted(set(appts), key=_appt_sort_key)
         formatted = []
         for idx, a in enumerate(unique_appts):
             if idx == 0:
@@ -733,24 +734,24 @@ class TestAppointmentMerging:
         assert self.merge_appointments(["03/04 @ 10:00 AM"]) == "03/04 @ 10:00 AM"
 
     def test_two_appointments(self):
-        # sorted() is lexicographic: "02:00 PM" < "10:00 AM"
+        # Chronological: 10:00 AM before 02:00 PM
         result = self.merge_appointments(["03/04 @ 10:00 AM", "03/04 @ 02:00 PM"])
-        assert result == "03/04 @ 02:00 PM & 10:00 AM"
+        assert result == "03/04 @ 10:00 AM & 02:00 PM"
 
     def test_duplicate_appointments_removed(self):
         result = self.merge_appointments(["03/04 @ 10:00 AM", "03/04 @ 10:00 AM"])
         assert result == "03/04 @ 10:00 AM"
 
     def test_three_appointments(self):
-        # sorted() is lexicographic: "02:00 PM" < "08:00 AM" < "10:00 AM"
+        # Chronological: 08:00 AM, 10:00 AM, 02:00 PM
         result = self.merge_appointments(
             ["03/04 @ 08:00 AM", "03/04 @ 10:00 AM", "03/04 @ 02:00 PM"]
         )
-        assert result == "03/04 @ 02:00 PM & 08:00 AM & 10:00 AM"
+        assert result == "03/04 @ 08:00 AM & 10:00 AM & 02:00 PM"
 
     def test_unsorted_input(self):
         result = self.merge_appointments(["03/04 @ 02:00 PM", "03/04 @ 08:00 AM"])
-        assert result == "03/04 @ 02:00 PM & 08:00 AM"
+        assert result == "03/04 @ 08:00 AM & 02:00 PM"
 
 
 # ===========================================================================
@@ -856,6 +857,170 @@ class TestEndToEndParsing:
             for a in appts:
                 assert "@" in a, f"{patient}: invalid appointment format {a!r}"
 
+    def test_appointment_campaign_with_empty_appointments_skipped(self):
+        """CDI=23/CDN=2 has some patients with empty appointments.
+
+        These should fail validate_row but the merge logic should skip them
+        instead of crashing (the pre-validation only crashes if ALL rows fail).
+        """
+        soup = load_fixture("cdi23_cdn2.html")
+        results = parse_activity_detail(soup)
+
+        # Some rows should have empty appointments
+        empty_appt_rows = [r for r in results if not r["appointment"].strip()]
+        valid_appt_rows = [r for r in results if r["appointment"].strip()]
+        assert len(empty_appt_rows) > 0, "Fixture should have patients with empty appointments"
+        assert len(valid_appt_rows) > 0, "Fixture should have patients with valid appointments"
+
+        # validate_row should raise for empty appointment rows
+        for row in empty_appt_rows:
+            with pytest.raises(ParseError, match="Empty appointment"):
+                validate_row(row, 23)
+
+        # validate_row should pass for valid rows
+        for row in valid_appt_rows:
+            validate_row(row, 23)
+
+        # The skip logic: group only valid rows (as merge_and_type_appointments now does)
+        grouped = {}
+        for row in results:
+            try:
+                validate_row(row, 23)
+            except ParseError:
+                continue
+            patient = row["patient_name"].strip()
+            appt = row["appointment"]
+            if appt:
+                grouped.setdefault(patient, []).append(appt)
+
+        assert len(grouped) > 0, "Should still have valid patients after skipping"
+        for patient, appts in grouped.items():
+            for a in appts:
+                assert "@" in a, f"{patient}: invalid appointment format {a!r}"
+
+    def test_merge_with_families_duplicates_and_empty_appts(self):
+        """Full merge scenario: families, multi-slot patients, duplicates, empty appts.
+
+        Based on real 02/19/2026 CDI=23/CDN=1 data. Tests:
+        - Family header rows are skipped
+        - Sub-family members (↳) are parsed correctly without the arrow
+        - Same patient with multiple times gets merged (e.g. "01:10 PM & 01:20 PM")
+        - Duplicate patient+time rows (PracticeMojo bug) are deduplicated
+        - Patients with empty appointment (moved appt) are skipped
+        """
+        html = """
+        <div class="table-responsive">
+        <table class="table table-bordered">
+        <thead class="thead sticky-top"><tr>
+            <th>Campaign</th><th>Method</th><th>Patients</th>
+            <th>Appointment Date</th><th>Confirmations</th><th>Status</th>
+        </tr></thead>
+        <tbody class="tbody">
+        <tr class="table-secondary">
+            <td><div class="fw-bold text-primary">Courtesy Reminder - (9)</div></td>
+            <td><div class="fw-bold">Email</div></td>
+            <td></td><td></td><td></td><td></td>
+        </tr>
+        <!-- Family header for Pruitt -->
+        <tr class="table-light">
+            <td></td><td></td>
+            <td><div class="text-muted fw-semibold">Pruitt Family</div></td>
+            <td></td><td></td><td></td>
+        </tr>
+        <!-- Pruitt, Ashlee: two different times -->
+        <tr><td></td><td></td>
+            <td><div class="d-flex align-items-center">
+                <span class="text-muted me-2">↳</span>
+                <a href="/cgi-bin/WebObjects/PracticeMojo.woa/wa/gotoPatientDetail?pid=1">Pruitt, Ashlee</a>
+            </div></td>
+            <td>03/05 @ 01:10 PM</td><td></td><td></td>
+        </tr>
+        <tr><td></td><td></td>
+            <td><div class="d-flex align-items-center">
+                <span class="text-muted me-2">↳</span>
+                <a href="/cgi-bin/WebObjects/PracticeMojo.woa/wa/gotoPatientDetail?pid=1">Pruitt, Ashlee</a>
+            </div></td>
+            <td>03/05 @ 01:20 PM</td><td></td><td></td>
+        </tr>
+        <!-- Brusa: single appointment -->
+        <tr><td></td><td></td>
+            <td><div class="d-flex align-items-center">
+                <a href="/cgi-bin/WebObjects/PracticeMojo.woa/wa/gotoPatientDetail?pid=2">Brusa, Brianna</a>
+            </div></td>
+            <td>03/05 @ 01:20 PM</td><td></td><td></td>
+        </tr>
+        <!-- Robinson: single, NO appointment (moved) -->
+        <tr><td></td><td></td>
+            <td><div class="d-flex align-items-center">
+                <a href="/cgi-bin/WebObjects/PracticeMojo.woa/wa/gotoPatientDetail?pid=3">Robinson, Mark</a>
+            </div></td>
+            <td></td><td></td><td></td>
+        </tr>
+        <!-- Duplicate row for Brusa (PracticeMojo bug) -->
+        <tr><td></td><td></td>
+            <td><div class="d-flex align-items-center">
+                <a href="/cgi-bin/WebObjects/PracticeMojo.woa/wa/gotoPatientDetail?pid=2">Brusa, Brianna</a>
+            </div></td>
+            <td>03/05 @ 01:20 PM</td><td></td><td></td>
+        </tr>
+        </tbody></table></div>
+        """
+        soup = BeautifulSoup(html, "html.parser")
+        results = parse_activity_detail(soup)
+
+        # Family header row should be skipped
+        names = [r["patient_name"] for r in results]
+        assert "Pruitt Family" not in names
+
+        # Should have: Pruitt x2, Brusa x2 (dup), Robinson (no appt)
+        assert len(results) == 5
+
+        # Now run the merge logic (same as merge_and_type_appointments)
+        grouped = {}
+        for row in results:
+            try:
+                validate_row(row, 23)
+            except ParseError:
+                continue
+            patient = row["patient_name"].strip()
+            appt = row["appointment"]
+            if appt:
+                grouped.setdefault(patient, []).append(appt)
+
+        # Robinson has no appointment (moved) → skipped
+        assert "Robinson, Mark" not in grouped
+
+        # Pruitt has 2 different times → both present
+        assert "Pruitt, Ashlee" in grouped
+        assert len(grouped["Pruitt, Ashlee"]) == 2
+
+        # Brusa appeared twice with same time (dup bug) → both in list before dedup
+        assert "Brusa, Brianna" in grouped
+        assert len(grouped["Brusa, Brianna"]) == 2  # both dupes in raw list
+
+        # Now apply the dedup + format logic (chronological sort)
+        from pmojo_lib.automation import _appt_sort_key
+        for patient, appts in grouped.items():
+            unique_appts = sorted(set(appts), key=_appt_sort_key)
+            formatted = []
+            for idx, a in enumerate(unique_appts):
+                if idx == 0:
+                    formatted.append(a)
+                else:
+                    parts = a.split('@')
+                    formatted.append(parts[1].strip() if len(parts) > 1 else a)
+            times_str = ' & '.join(formatted)
+
+            if patient == "Pruitt, Ashlee":
+                # Two different times merged
+                assert "01:10 PM" in times_str
+                assert "01:20 PM" in times_str
+                assert "&" in times_str
+            elif patient == "Brusa, Brianna":
+                # Duplicate removed by set()
+                assert times_str == "03/05 @ 01:20 PM"
+                assert "&" not in times_str
+
     def test_normal_campaign_no_appointment_needed(self):
         """For non-appointment CDIs, appointment field should be empty."""
         soup = load_fixture("cdi1_cdn1.html")
@@ -880,7 +1045,9 @@ class TestEndToEndParsing:
 # ---------------------------------------------------------------------------
 # Import validate_row and ParseError directly (no Windows deps)
 # ---------------------------------------------------------------------------
-from pmojo_lib.automation import validate_row, ParseError, APPOINTMENT_CDIS, COM_MAP
+from unittest.mock import MagicMock, patch
+from pmojo_lib.automation import validate_row, ParseError, APPOINTMENT_CDIS, COM_MAP, CDI_LIST, CDN_LIST
+from pmojo_lib.practicemojo_api import SessionExpiredError
 
 
 class TestValidateRow:
@@ -954,6 +1121,184 @@ class TestValidateRow:
                 continue  # CDI 13 — known placeholder, tested above
             row = {"patient_name": "Test Patient", "campaign": com, "appointment": "", "method": "Email"}
             validate_row(row, cdi)  # Should not raise
+
+
+# ===========================================================================
+# TEST: Session expiry detection
+# ===========================================================================
+
+class TestSessionExpiry:
+    """Test PracticeMojoAPI session expiry detection."""
+
+    def test_redirect_to_login_page_raises(self):
+        """If PM redirects to the login URL, SessionExpiredError should be raised."""
+        from pmojo_lib.practicemojo_api import PracticeMojoAPI
+
+        api = PracticeMojoAPI("user", "pass")
+        api.session = MagicMock()
+
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.url = "https://app.practicemojo.com/Pages/login?redirect=something"
+        mock_resp.text = "<html>Login page</html>"
+        api.session.get.return_value = mock_resp
+
+        with pytest.raises(SessionExpiredError, match="redirected to login"):
+            api.fetch_activity_detail("02/19/2026", 23, 1)
+
+    def test_login_form_in_response_raises(self):
+        """If the response body contains the login form fields, session expired."""
+        from pmojo_lib.practicemojo_api import PracticeMojoAPI
+
+        api = PracticeMojoAPI("user", "pass")
+        api.session = MagicMock()
+
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.url = "https://app.practicemojo.com/cgi-bin/WebObjects/PracticeMojo.woa/wa/gotoActivityDetail"
+        mock_resp.text = '<form><input name="loginId"/><input name="password"/><input name="slug"/></form>'
+        api.session.get.return_value = mock_resp
+
+        with pytest.raises(SessionExpiredError, match="login form in response"):
+            api.fetch_activity_detail("02/19/2026", 23, 1)
+
+    def test_no_session_raises(self):
+        """If session is None, should raise SessionExpiredError."""
+        from pmojo_lib.practicemojo_api import PracticeMojoAPI
+
+        api = PracticeMojoAPI("user", "pass")
+        api.session = None
+
+        with pytest.raises(SessionExpiredError, match="Not logged in"):
+            api.fetch_activity_detail("02/19/2026", 23, 1)
+
+    def test_userlogin_in_redirect_url_raises(self):
+        """If PM redirects to userLogin endpoint, session expired."""
+        from pmojo_lib.practicemojo_api import PracticeMojoAPI
+
+        api = PracticeMojoAPI("user", "pass")
+        api.session = MagicMock()
+
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.url = "https://app.practicemojo.com/cgi-bin/WebObjects/PracticeMojo.woa/wa/userLogin"
+        mock_resp.text = "<html>Please log in</html>"
+        api.session.get.return_value = mock_resp
+
+        with pytest.raises(SessionExpiredError, match="redirected to login"):
+            api.fetch_activity_detail("02/19/2026", 23, 1)
+
+    def test_valid_response_no_false_positive(self):
+        """A normal activity detail page should NOT trigger session expiry."""
+        from pmojo_lib.practicemojo_api import PracticeMojoAPI
+
+        api = PracticeMojoAPI("user", "pass")
+        api.session = MagicMock()
+
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.url = "https://app.practicemojo.com/cgi-bin/WebObjects/PracticeMojo.woa/wa/gotoActivityDetail?td=02/19/2026&cdi=23&cdn=1"
+        mock_resp.text = '<div class="table-responsive"><table><thead></thead><tbody></tbody></table></div>'
+        api.session.get.return_value = mock_resp
+
+        # Should not raise — returns empty list since no patient rows
+        result = api.fetch_activity_detail("02/19/2026", 23, 1)
+        assert result == []
+
+    def test_non_200_status_raises_exception(self):
+        """Non-200 HTTP status should raise a generic Exception (not SessionExpiredError)."""
+        from pmojo_lib.practicemojo_api import PracticeMojoAPI
+
+        api = PracticeMojoAPI("user", "pass")
+        api.session = MagicMock()
+
+        mock_resp = MagicMock()
+        mock_resp.status_code = 500
+        api.session.get.return_value = mock_resp
+
+        with pytest.raises(Exception, match="status=500"):
+            api.fetch_activity_detail("02/19/2026", 23, 1)
+
+
+# ===========================================================================
+# TEST: Prefetch error handling
+# ===========================================================================
+
+class TestPrefetchErrors:
+    """Test _prefetch_all error handling and thresholds."""
+
+    def _make_automation(self, mock_api):
+        """Create a PmojoAutomation with a mocked API and dummy SoftDent."""
+        from pmojo_lib.automation import PmojoAutomation
+        mock_db = MagicMock()
+        mock_softdent = MagicMock()
+        pm = PmojoAutomation(mock_db, mock_api, mock_softdent)
+        return pm
+
+    def test_session_expired_bubbles_up(self):
+        """SessionExpiredError during prefetch should propagate, not be swallowed."""
+        mock_api = MagicMock()
+        mock_api.fetch_activity_detail.side_effect = SessionExpiredError("expired")
+        pm = self._make_automation(mock_api)
+
+        with pytest.raises(SessionExpiredError):
+            pm._prefetch_all("02/19/2026")
+
+    def test_too_many_failures_raises(self):
+        """If more than half of fetches fail, should raise Exception."""
+        call_count = 0
+        total_combos = len(CDI_LIST) * len(CDN_LIST)
+
+        def flaky_fetch(date_str, cdi, cdn):
+            nonlocal call_count
+            call_count += 1
+            # Fail all but one
+            if call_count == 1:
+                return []
+            raise Exception("network error")
+
+        mock_api = MagicMock()
+        mock_api.fetch_activity_detail.side_effect = flaky_fetch
+        pm = self._make_automation(mock_api)
+
+        with pytest.raises(Exception, match="Too many fetch failures"):
+            pm._prefetch_all("02/19/2026")
+
+    def test_few_failures_tolerated(self):
+        """A small number of fetch failures should be tolerated (returns empty for those)."""
+        call_count = 0
+
+        def mostly_ok_fetch(date_str, cdi, cdn):
+            nonlocal call_count
+            call_count += 1
+            # Fail just the first 2
+            if call_count <= 2:
+                raise Exception("transient error")
+            return []
+
+        mock_api = MagicMock()
+        mock_api.fetch_activity_detail.side_effect = mostly_ok_fetch
+        pm = self._make_automation(mock_api)
+
+        result = pm._prefetch_all("02/19/2026")
+        # Should succeed and return a dict for all combos
+        assert len(result) == len(CDI_LIST) * len(CDN_LIST)
+
+    def test_all_ok_returns_full_dict(self):
+        """Normal operation: all fetches succeed."""
+        mock_api = MagicMock()
+        mock_api.fetch_activity_detail.return_value = [
+            {"patient_name": "Smith, John", "campaign": "Test", "method": "Email",
+             "appointment": "", "confirmations": "", "status": ""}
+        ]
+        pm = self._make_automation(mock_api)
+
+        result = pm._prefetch_all("02/19/2026")
+        assert len(result) == len(CDI_LIST) * len(CDN_LIST)
+        # Each combo should have the row
+        for key, rows in result.items():
+            assert len(rows) == 1
+            assert rows[0]["patient_name"] == "Smith, John"
 
 
 class TestSourceConsistency:

@@ -14,7 +14,7 @@ if platform.system() == "Windows":
 
 from pmojo_lib.events import STOP_EVENT, PAUSE_EVENT
 from pmojo_lib.database import Database
-from pmojo_lib.practicemojo_api import PracticeMojoAPI
+from pmojo_lib.practicemojo_api import PracticeMojoAPI, SessionExpiredError
 from pmojo_lib.softdent import SoftDentConnection
 from pmojo_lib.automation import PmojoAutomation, ParseError
 
@@ -314,9 +314,9 @@ class PmojoGUI:
             keyboard.unhook_all_hotkeys()
         self.window.quit()
 
-    def _get_pm_api(self):
-        """Return cached PM API session, or login fresh if needed."""
-        if self.pm_api and self.pm_api.session:
+    def _get_pm_api(self, force_relogin=False):
+        """Return cached PM API session, or login fresh if needed/forced."""
+        if not force_relogin and self.pm_api and self.pm_api.session:
             return self.pm_api
         print("Logging into PracticeMojo...")
         with open("config.json") as cfg:
@@ -337,24 +337,60 @@ class PmojoGUI:
                 except Exception as e:
                     print(f"PracticeMojo login failed: {e}")
                     self.db.toggle_day_status(date_str, "error")
+                    err_msg = str(e)
+                    self.window.after(0, lambda msg=err_msg: messagebox.showerror(
+                        "Login Failed", f"Could not log into PracticeMojo:\n\n{msg}"
+                    ))
                     return
                 automator = SoftDentConnection()
                 pm = PmojoAutomation(self.db, pm_api, automator)
-                pm.process_date(date_str)
+                try:
+                    pm.process_date(date_str)
+                except SessionExpiredError:
+                    print(f"Session expired during {date_str}, re-logging in...")
+                    try:
+                        pm_api = self._get_pm_api(force_relogin=True)
+                        pm.pm_api = pm_api
+                        print(f"Re-login successful, retrying {date_str}...")
+                        pm.process_date(date_str)
+                    except SessionExpiredError:
+                        STOP_EVENT.set()
+                        self.db.toggle_day_status(date_str, "error")
+                        self.window.after(0, lambda: messagebox.showerror(
+                            "Session Error - Stopped",
+                            "PracticeMojo session keeps expiring even after re-login.\n\n"
+                            "Their site may be down. Please try again later."
+                        ))
+                        return
+                    except Exception as login_err:
+                        STOP_EVENT.set()
+                        self.db.toggle_day_status(date_str, "error")
+                        err_msg = str(login_err)
+                        self.window.after(0, lambda msg=err_msg: messagebox.showerror(
+                            "Re-login Failed",
+                            f"Session expired and re-login failed:\n\n{msg}"
+                        ))
+                        return
             except ParseError as e:
                 STOP_EVENT.set()
                 self.db.toggle_day_status(date_str, "error")
                 print(f"PARSE ERROR on {date_str}: {e}")
-                self.window.after(0, lambda: messagebox.showerror(
+                err_msg = str(e)
+                self.window.after(0, lambda msg=err_msg: messagebox.showerror(
                     "Parse Error - Stopped",
-                    f"Automation stopped due to a parse error on {date_str}:\n\n{e}\n\n"
+                    f"Automation stopped due to a parse error on {date_str}:\n\n{msg}\n\n"
                     "No data was typed for this row. Please check PracticeMojo's HTML format."
                 ))
             except Exception as e:
                 self.db.toggle_day_status(date_str, "error")
+                err_msg = str(e)
                 print(f"Unexpected error on {date_str}: {e}")
+                self.window.after(0, lambda msg=err_msg: messagebox.showerror(
+                    "Error", f"Unexpected error on {date_str}:\n\n{msg}"
+                ))
             finally:
                 self.window.after(0, lambda: self.set_running(False))
+                self.window.after(0, self.update_calendar)
 
         threading.Thread(target=background).start()
 
@@ -393,6 +429,10 @@ class PmojoGUI:
                     pm_api = self._get_pm_api()
                 except Exception as e:
                     print(f"PracticeMojo login failed: {e}")
+                    err_msg = str(e)
+                    self.window.after(0, lambda msg=err_msg: messagebox.showerror(
+                        "Login Failed", f"Could not log into PracticeMojo:\n\n{msg}"
+                    ))
                     return
                 automator = SoftDentConnection()
                 pm = PmojoAutomation(self.db, pm_api, automator)
@@ -412,21 +452,65 @@ class PmojoGUI:
                         else:
                             self.db.toggle_day_status(ds_ui, "done")
                             print(f"Marked {ds_ui} as 'done'.")
+                    except SessionExpiredError:
+                        print(f"Session expired during {ds_ui}, re-logging in...")
+                        try:
+                            pm_api = self._get_pm_api(force_relogin=True)
+                            pm.pm_api = pm_api
+                            print(f"Re-login successful, retrying {ds_ui}...")
+                            try:
+                                success = pm.process_date(ds_ui)
+                                if not success or STOP_EVENT.is_set():
+                                    self.db.toggle_day_status(ds_ui, "error")
+                                    print(f"Marked {ds_ui} as 'error' (canceled after re-login).")
+                                    break
+                                else:
+                                    self.db.toggle_day_status(ds_ui, "done")
+                                    print(f"Marked {ds_ui} as 'done' (after re-login).")
+                            except SessionExpiredError:
+                                STOP_EVENT.set()
+                                self.db.toggle_day_status(ds_ui, "error")
+                                print(f"Session expired again on {ds_ui} after re-login.")
+                                self.window.after(0, lambda: messagebox.showerror(
+                                    "Session Error - Stopped",
+                                    "PracticeMojo session keeps expiring even after re-login.\n\n"
+                                    "Their site may be down. Please try again later."
+                                ))
+                                return
+                        except Exception as login_err:
+                            STOP_EVENT.set()
+                            self.db.toggle_day_status(ds_ui, "error")
+                            print(f"Re-login failed: {login_err}")
+                            err_msg = str(login_err)
+                            self.window.after(0, lambda msg=err_msg: messagebox.showerror(
+                                "Re-login Failed - Stopped",
+                                f"Session expired and re-login failed:\n\n{msg}"
+                            ))
+                            return
                     except ParseError as e:
                         STOP_EVENT.set()
                         self.db.toggle_day_status(ds_ui, "error")
                         print(f"PARSE ERROR on {ds_ui}: {e}")
-                        self.window.after(0, lambda: messagebox.showerror(
+                        err_msg = str(e)
+                        err_date = ds_ui
+                        self.window.after(0, lambda msg=err_msg, dt=err_date: messagebox.showerror(
                             "Parse Error - Stopped",
-                            f"Automation stopped due to a parse error on {ds_ui}:\n\n{e}\n\n"
+                            f"Automation stopped due to a parse error on {dt}:\n\n{msg}\n\n"
                             "No data was typed for this row. Please check PracticeMojo's HTML format."
                         ))
                         return
                     except Exception as ex:
                         self.db.toggle_day_status(ds_ui, "error")
+                        err_msg = str(ex)
+                        err_date = ds_ui
                         print(f"Error on {ds_ui}: {ex}")
+                        self.window.after(0, lambda msg=err_msg, dt=err_date: messagebox.showwarning(
+                            "Error on Date",
+                            f"Error processing {dt}:\n\n{msg}\n\nSkipping to next date."
+                        ))
                 STOP_EVENT.clear()
                 print("Complete range finished.")
+                self.window.after(0, self.update_calendar)
             finally:
                 self.window.after(0, lambda: self.set_running(False))
 
