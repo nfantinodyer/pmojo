@@ -54,13 +54,11 @@ def _appt_sort_key(appt_str):
 
 
 def validate_row(row, cdi):
-    """Validate a parsed row before AHK types it. Raises ParseError if invalid.
+    """Validate a parsed row before AHK types it.
 
-    Checks:
-    - patient_name is non-empty after stripping
-    - patient_name doesn't contain HTML artifacts (indicates broken parse)
-    - Appointment CDIs must have a non-empty appointment field
-    - COM_MAP must have a real campaign name for non-appointment CDIs
+    Returns True if valid, False if the row should be silently skipped
+    (e.g. blank appointment = moved/rescheduled).
+    Raises ParseError for structural problems (broken HTML, missing name).
     """
     name = row.get("patient_name", "").strip()
     if not name:
@@ -78,10 +76,11 @@ def validate_row(row, cdi):
     if cdi in APPOINTMENT_CDIS:
         appt = row.get("appointment", "").strip()
         if not appt:
-            raise ParseError(
-                f"Empty appointment for patient '{name}' (cdi={cdi}). "
-                f"Row data: {row}"
+            print(
+                f"  Skipping patient '{name}' (cdi={cdi}): blank appointment "
+                f"(likely moved/rescheduled)."
             )
+            return False
 
     com = COM_MAP.get(cdi, "")
     if not com or com.startswith("SomeCampaign"):
@@ -90,6 +89,8 @@ def validate_row(row, cdi):
                 f"No valid campaign mapping for cdi={cdi} (got '{com}'). "
                 f"Patient '{name}' would receive incorrect data."
             )
+
+    return True
 
 
 def determine_type_of_com(cdi, cdn):
@@ -179,18 +180,20 @@ class PmojoAutomation:
                 if not rows:
                     continue
 
-                # Structural validation: if ALL rows fail, the HTML format likely changed
-                all_invalid = True
+                # Structural validation: if ALL rows raise ParseError, the HTML format likely changed
+                # (rows that return False are just skipped patients, not errors)
+                error_count = 0
                 first_error = None
                 for row in rows:
                     try:
-                        validate_row(row, cdi)
-                        all_invalid = False
-                        break
+                        result = validate_row(row, cdi)
+                        if result is True:
+                            break  # at least one valid row — structure is fine
                     except ParseError as e:
+                        error_count += 1
                         if first_error is None:
                             first_error = e
-                if all_invalid and first_error is not None:
+                if error_count == len(rows) and first_error is not None:
                     STOP_EVENT.set()
                     self.db.toggle_day_status(date_str, 'error')
                     raise ParseError(
@@ -237,14 +240,14 @@ class PmojoAutomation:
         grouped = {}
         for row in rows:
             try:
-                validate_row(row, cdi)
+                if not validate_row(row, cdi):
+                    continue  # blank appointment — patient was moved/rescheduled
             except ParseError as e:
                 print(f"[{date_str}] Skipping invalid row: {e}")
                 continue
             patient = row["patient_name"].strip()
             appt = row["appointment"]
-            if appt:
-                grouped.setdefault(patient, []).append(appt)
+            grouped.setdefault(patient, []).append(appt)
 
         type_of_com = determine_type_of_com(cdi, cdn)
 
@@ -319,7 +322,8 @@ class PmojoAutomation:
             if STOP_EVENT.is_set():
                 return
             try:
-                validate_row(row, cdi)
+                if not validate_row(row, cdi):
+                    continue
             except ParseError as e:
                 print(f"[{date_str}] Skipping invalid row: {e}")
                 continue

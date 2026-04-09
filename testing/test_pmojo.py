@@ -860,8 +860,8 @@ class TestEndToEndParsing:
     def test_appointment_campaign_with_empty_appointments_skipped(self):
         """CDI=23/CDN=2 has some patients with empty appointments.
 
-        These should fail validate_row but the merge logic should skip them
-        instead of crashing (the pre-validation only crashes if ALL rows fail).
+        Blank appointment = moved/rescheduled. validate_row returns False
+        so the merge logic skips them instead of crashing.
         """
         soup = load_fixture("cdi23_cdn2.html")
         results = parse_activity_detail(soup)
@@ -872,26 +872,25 @@ class TestEndToEndParsing:
         assert len(empty_appt_rows) > 0, "Fixture should have patients with empty appointments"
         assert len(valid_appt_rows) > 0, "Fixture should have patients with valid appointments"
 
-        # validate_row should raise for empty appointment rows
+        # validate_row should return False for empty appointment rows (skip, not error)
         for row in empty_appt_rows:
-            with pytest.raises(ParseError, match="Empty appointment"):
-                validate_row(row, 23)
+            assert validate_row(row, 23) is False
 
-        # validate_row should pass for valid rows
+        # validate_row should return True for valid rows
         for row in valid_appt_rows:
-            validate_row(row, 23)
+            assert validate_row(row, 23) is True
 
-        # The skip logic: group only valid rows (as merge_and_type_appointments now does)
+        # The skip logic: group only rows where validate_row returns True
         grouped = {}
         for row in results:
             try:
-                validate_row(row, 23)
+                if not validate_row(row, 23):
+                    continue
             except ParseError:
                 continue
             patient = row["patient_name"].strip()
             appt = row["appointment"]
-            if appt:
-                grouped.setdefault(patient, []).append(appt)
+            grouped.setdefault(patient, []).append(appt)
 
         assert len(grouped) > 0, "Should still have valid patients after skipping"
         for patient, appts in grouped.items():
@@ -979,13 +978,13 @@ class TestEndToEndParsing:
         grouped = {}
         for row in results:
             try:
-                validate_row(row, 23)
+                if not validate_row(row, 23):
+                    continue  # blank appointment — patient moved
             except ParseError:
                 continue
             patient = row["patient_name"].strip()
             appt = row["appointment"]
-            if appt:
-                grouped.setdefault(patient, []).append(appt)
+            grouped.setdefault(patient, []).append(appt)
 
         # Robinson has no appointment (moved) → skipped
         assert "Robinson, Mark" not in grouped
@@ -1081,15 +1080,15 @@ class TestValidateRow:
         with pytest.raises(ParseError, match="HTML artifacts"):
             validate_row(row, 1)
 
-    def test_missing_appointment_for_appt_cdi_raises(self):
+    def test_blank_appointment_for_appt_cdi_returns_false(self):
+        """Blank appointment = patient moved/rescheduled, should skip (not error)."""
         row = {"patient_name": "Doe, Jane", "campaign": "Some Appt Reminder", "appointment": "", "method": "Email"}
-        with pytest.raises(ParseError, match="Empty appointment"):
-            validate_row(row, 23)
+        assert validate_row(row, 23) is False
 
-    def test_missing_appointment_for_cdi_130_raises(self):
+    def test_blank_appointment_for_cdi_130_returns_false(self):
+        """Blank appointment = patient moved/rescheduled, should skip (not error)."""
         row = {"patient_name": "Doe, Jane", "campaign": "Another Appt Reminder", "appointment": "", "method": "Email"}
-        with pytest.raises(ParseError, match="Empty appointment"):
-            validate_row(row, 130)
+        assert validate_row(row, 130) is False
 
     def test_placeholder_campaign_raises(self):
         """CDI 13 has placeholder 'SomeCampaign13' — should be caught."""
